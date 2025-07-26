@@ -1,0 +1,210 @@
+---
+alwaysApply: false
+---
+# Infera — Cursor Rules (SEO + Modular + Brand‑tight)
+
+> Build Infera (Next.js App Router + TypeScript + Tailwind + Radix/shadcn).
+> 
+> 
+> Tone: crisp, enterprise‑grade (Linear/Raycast vibe). Default to **Server Components**; use client only for interactivity.
+> 
+> Goal: **discover AI use‑cases, quantify ROI (low/base/high), recommend tools/consultants, export/report**.
+> 
+
+---
+
+## 1: Architecture & Modularity
+
+- **Organize by feature** (vertical slices):
+    - `/features/intake`, `/features/opportunity-map`, `/features/roi`, `/features/recommendations`, `/features/roadmap`, `/features/tracker`
+    - Each feature owns: UI, hooks, schemas, fetchers, local state.
+- **Break big files early.** Split view, hooks, schemas, fetchers when >200–300 LOC.
+- **Project shape**
+
+```
+/app # routes, layouts, generateMetadata, robots.txt, sitemap.ts
+/features # vertical slices (see above)
+/components # truly shared, token-driven UI
+/lib # cross-feature helpers (api client, analytics, csp, jsonld)
+/styles # tokens.css + globals.css (Tailwind)
+/public # static assets (favicons, OG fallbacks)
+
+```
+
+- Prefer server actions/data in RSC; keep mutations in thin client components.
+
+---
+
+## 2: SEO Defaults (baked in)
+
+- Every route defines **`title`/`description`/OG/Twitter** via Next **Metadata**/`generateMetadata`.
+- Root provides **`robots.txt`** and **`sitemap.ts`**.
+- Add **JSON‑LD** where relevant:
+    - Marketing: `Organization`, `SoftwareApplication`.
+    - App/library pages: `BreadcrumbList` (visible breadcrumbs must match).
+- Internal links form a narrative: **Intake → ROI → Recommendations → Roadmap → Tracker**.
+- One H1 per page; scannable H2/H3; lead paragraph states value + quantified outcome.
+
+---
+
+## 3: Performance (Core Web Vitals)
+
+- Budgets: **LCP ≤ 2.5s**, **INP < 200ms**, **CLS < 0.1**.
+- Use `next/image` with `sizes`; serve **AVIF/WebP**; lazy‑load below‑the‑fold.
+- Use `next/font` (self‑host) to avoid CLS. Reserve space for media.
+- Animations subtle; honor `prefers-reduced-motion`.
+
+---
+
+## 4: UI System (brand consistency)
+
+- **Tailwind + Tokens**: CSS variables are the source of truth; Tailwind maps to them.
+- **Primitives**: Radix for accessible behavior; **shadcn/ui** so components live in‑repo and theme with our tokens.
+- **Typography/Spacing**: Fluid type via `clamp()`; **8‑pt spacing** grid; visible focus states; AA contrast or better.
+- **Hero/marketing assets**: crisp UI mock images (AVIF/WebP), stable layout (no CLS), dynamic OG images per route.
+
+**Authoritative tokens**
+
+```css
+/* styles/tokens.css */
+:root{
+--bg:#0b0c0f; --surface:#111317; --text:#e7e9ee; --muted:#a6adbb;
+--accent:#6e59ff; --accent-2:#24d07c; --danger:#ff5d5d; --border:rgba(255,255,255,.08);
+--radius:12px;
+/* Depth system - layered shadows for 3D effect */
+--shadow-ambient:0 2px 8px rgba(0,0,0,.12);
+--shadow-elevation-1:0 4px 16px rgba(0,0,0,.15), 0 1px 4px rgba(0,0,0,.1);
+--shadow-elevation-2:0 8px 30px rgba(0,0,0,.2), 0 2px 8px rgba(0,0,0,.12);
+--shadow-elevation-3:0 16px 60px rgba(0,0,0,.25), 0 4px 16px rgba(0,0,0,.15);
+/* Glassmorphism support */
+--glass-bg:rgba(17,19,23,.85); --glass-border:rgba(255,255,255,.12);
+--backdrop-blur:blur(20px); --backdrop-saturate:saturate(180%);
+/* Spatial spacing system */
+--space-1:8px; --space-2:16px; --space-3:24px; --space-4:32px; --space-5:48px;
+--space-section:clamp(48px,8vw,96px); --space-layout:clamp(16px,4vw,32px);
+/* Fluid typography */
+--step--1:clamp(.86rem,.83rem + .2vw,.94rem);
+--step-0: clamp(1rem,.95rem + .35vw,1.125rem);
+--step-1: clamp(1.25rem,1.1rem + .7vw,1.5rem);
+--step-2: clamp(1.6rem,1.3rem + 1.1vw,2.125rem);
+--step-3: clamp(2.1rem,1.6rem + 1.8vw,3rem);
+/* Animation system */
+--transition-fast:150ms cubic-bezier(0.4,0,0.2,1);
+--transition-smooth:300ms cubic-bezier(0.4,0,0.2,1);
+--transition-slow:500ms cubic-bezier(0.4,0,0.2,1);
+}
+@media (prefers-color-scheme:light){
+:root{--bg:#fff;--surface:#f7f7fb;--text:#0b0c0f;--muted:#5c6370;--border:rgba(0,0,0,.08);
+--glass-bg:rgba(247,247,251,.85); --glass-border:rgba(0,0,0,.08);}
+}
+@media (prefers-reduced-motion:reduce){
+:root{--transition-fast:0ms;--transition-smooth:0ms;--transition-slow:0ms;}
+}
+
+```
+
+**Tailwind mapping**
+
+```
+// tailwind.config.ts (excerpt)
+extend:{
+  colors:{ bg:"var(--bg)", surface:"var(--surface)", text:"var(--text)", muted:"var(--muted)",
+           accent:"var(--accent)", accent2:"var(--accent-2)", border:"var(--border)",
+           glass:"var(--glass-bg)", glassBorder:"var(--glass-border)" },
+  borderRadius:{ lg:"var(--radius)" },
+  boxShadow:{
+    ambient:"var(--shadow-ambient)",
+    elevation1:"var(--shadow-elevation-1)", elevation2:"var(--shadow-elevation-2)", elevation3:"var(--shadow-elevation-3)"
+  },
+  backdropBlur:{ glass:"var(--backdrop-blur)" }, backdropSaturate:{ glass:"var(--backdrop-saturate)" },
+  fontSize:{ xs:"var(--step--1)", base:"var(--step-0)", lg:"var(--step-1)", xl:"var(--step-2)", "2xl":"var(--step-3)" },
+  spacing:{ layout:"var(--space-layout)", section:"var(--space-section)" },
+  transitionDuration:{ fast:"var(--transition-fast)", smooth:"var(--transition-smooth)", slow:"var(--transition-slow)" }
+}
+
+```
+
+---
+
+## 5: Components & Conventions
+
+- Components accept `className` and forward `aria`/`label` props.
+- Use Radix for dialogs/menus/tabs; theme via tokens.
+
+**Copy patterns:**
+
+```tsx
+// components/ui/Button.tsx
+"use client";
+import { cva } from "class-variance-authority";
+import { cn } from "@/lib/cn";
+const styles = cva(
+  "inline-flex items-center justify-center rounded-lg border transition-all duration-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+  { variants:{
+      variant:{
+        primary:"bg-accent text-white border-accent hover:shadow-elevation1 hover:-translate-y-0.5 active:translate-y-0",
+        ghost:"bg-transparent text-text border-border hover:bg-surface/60 hover:shadow-ambient",
+        glass:"bg-glass border-glassBorder backdrop-blur-glass backdrop-saturate-glass hover:shadow-elevation2"
+      },
+      size:{ sm:"h-9 px-3 text-xs", md:"h-10 px-4 text-base", lg:"h-11 px-6 text-lg" }
+    },
+    defaultVariants:{ variant:"primary", size:"md" }
+  }
+);
+export function Button({ className, variant, size, ...props }){
+  return <button className={cn(styles({ variant, size }), className)} {...props} />
+}
+
+// components/ui/Card.tsx - Glassmorphic floating card
+export function Card({ className, children, elevated = false, ...props }) {
+  return (
+    <div
+      className={cn(
+        "rounded-lg border border-glassBorder bg-glass backdrop-blur-glass backdrop-saturate-glass transition-all duration-smooth",
+        elevated ? "shadow-elevation2 hover:shadow-elevation3 hover:-translate-y-1" : "shadow-elevation1",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}
+
+```
+
+---
+
+## 6: Data & Validation
+
+- Parse all inputs at the boundary with Zod; derive types from schemas.
+- Client data that needs caching/invalidation → TanStack Query. Keep fetchers in `/lib/api/*`.
+
+---
+
+## 7: Security & Trust
+
+- Ship a Content‑Security‑Policy; avoid inline scripts. Whitelist only needed domains (fonts/analytics).
+- Clearly label affiliate/vendor links in UI copy.
+
+---
+
+## 8: Cutting-Edge UI/UX Patterns (Linear/Raycast-inspired)
+
+### Depth & Dimensionality
+
+- **Multi-layer shadows**: Use layered shadows to create true depth—combine ambient + directional shadows for floating elements
+- **Glassmorphic overlays**: Semi
+
+**Do**
+
+- Keep files small; extract hooks/components early; by‑feature folders.
+- Add metadata + JSON‑LD on every routable page; include breadcrumbs where hierarchical.
+- Hit CWV budgets; use `next/image`, `next/font`; reserve space for media.
+- Use Radix/shadcn components themed via tokens; keep spacing on the 8‑pt grid.
+
+**Don't**
+
+- Don't create mega files or dump everything in `/components` or `/lib`.
+- Don't add client components where RSC is enough.
+- Don't violate CSP with inline scripts.
