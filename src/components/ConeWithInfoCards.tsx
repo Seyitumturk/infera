@@ -16,185 +16,6 @@ const ringColors = [
   '#2b2b2b', // 4: Dark gray
 ];
 
-// Studio Light Inside Cone - appears after 3 seconds
-function StudioLight({ isActive }: { isActive: boolean }) {
-  const lightRef = useRef<THREE.PointLight>(null)
-  const innerLightRef = useRef<THREE.PointLight>(null)
-  const [lightIntensity, setLightIntensity] = useState(0)
-
-  useEffect(() => {
-    if (!isActive) return
-    
-    // Smooth fade-in animation
-    const duration = 2000 // 2 seconds fade-in
-    const startTime = Date.now()
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      
-      // Smooth ease-in-out curve
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setLightIntensity(eased * 2.5) // Final intensity of 2.5
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate)
-      }
-    }
-    
-    animate()
-  }, [isActive])
-
-  useFrame((state) => {
-    if (lightRef.current && isActive) {
-      // Subtle pulsing effect
-      const time = state.clock.elapsedTime
-      const pulse = 1 + Math.sin(time * 1.5) * 0.1 // 10% variation
-      lightRef.current.intensity = lightIntensity * pulse
-      
-      // Soft color temperature variation (warm to cool)
-      const colorShift = Math.sin(time * 0.8) * 0.1 + 0.9
-      lightRef.current.color.setRGB(colorShift, colorShift * 0.95, 1)
-    }
-    
-    if (innerLightRef.current && isActive) {
-      // Inner glow with different timing
-      const time = state.clock.elapsedTime
-      const innerPulse = 1 + Math.sin(time * 2.2) * 0.15
-      innerLightRef.current.intensity = lightIntensity * 0.8 * innerPulse
-    }
-  })
-
-  if (!isActive) return null
-
-  return (
-    <group position={[0, -3.8, 0]}>
-      {/* Main studio light - positioned inside cone center */}
-      <pointLight
-        ref={lightRef}
-        position={[0, 0, 0]}
-        intensity={lightIntensity}
-        distance={25}
-        decay={1.8}
-        color="#ffffff"
-        castShadow={false}
-      />
-      
-      {/* Inner warm glow */}
-      <pointLight
-        ref={innerLightRef}
-        position={[0, 0.2, 0]}
-        intensity={lightIntensity * 0.8}
-        distance={15}
-        decay={2}
-        color="#fff4e6"
-        castShadow={false}
-      />
-      
-      {/* Upward directional light for navbar reveal */}
-      <spotLight
-        position={[0, 0, 0]}
-        target-position={[0, 15, 0]}
-        angle={Math.PI / 3}
-        penumbra={0.8}
-        intensity={lightIntensity * 1.2}
-        distance={30}
-        decay={1.5}
-        color="#ffffff"
-        castShadow={false}
-      />
-    </group>
-  )
-}
-
-// Modern Glassmorphic Navbar
-function GlassmorphicNavbar({ isVisible }: { isVisible: boolean }) {
-  const [navOpacity, setNavOpacity] = useState(0)
-  
-  useEffect(() => {
-    if (!isVisible) return
-    
-    // Delayed reveal after light starts
-    const timer = setTimeout(() => {
-      const duration = 1500
-      const startTime = Date.now()
-      
-      const animate = () => {
-        const elapsed = Date.now() - startTime
-        const progress = Math.min(elapsed / duration, 1)
-        
-        // Smooth ease-out curve
-        const eased = 1 - Math.pow(1 - progress, 2)
-        setNavOpacity(eased)
-        
-        if (progress < 1) {
-          requestAnimationFrame(animate)
-        }
-      }
-      
-      animate()
-    }, 800) // Start 800ms after light begins
-    
-    return () => clearTimeout(timer)
-  }, [isVisible])
-  
-  const navItems = [
-    { label: 'Home', href: '#home' },
-    { label: 'Features', href: '#features' }, 
-    { label: 'Infera', href: '#infera' }
-  ]
-
-  return (
-    <div 
-      className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-1000"
-      style={{
-        opacity: navOpacity,
-        transform: `translateX(-50%) translateY(${isVisible ? '0' : '-20px'})`,
-      }}
-    >
-      <nav className="relative">
-        {/* Main glassmorphic container */}
-        <div className="relative backdrop-blur-xl bg-white/[0.08] border border-white/[0.12] rounded-2xl px-8 py-4 shadow-2xl">
-          {/* Inner glow effect */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/[0.02] via-white/[0.05] to-white/[0.02] opacity-60"></div>
-          
-          {/* Navigation items */}
-          <div className="relative flex items-center space-x-8">
-            {navItems.map((item, index) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="relative group py-2 px-4 text-white/90 hover:text-white transition-all duration-300 font-medium text-sm tracking-wide"
-                style={{
-                  animationDelay: `${index * 150}ms`,
-                  animation: navOpacity > 0.5 ? 'fadeInUp 0.6s ease-out forwards' : 'none'
-                }}
-              >
-                {/* Hover glow effect */}
-                <div className="absolute inset-0 rounded-lg bg-white/[0.06] opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"></div>
-                
-                {/* Text */}
-                <span className="relative z-10">{item.label}</span>
-                
-                {/* Active indicator */}
-                <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full group-hover:left-0 transition-all duration-300 rounded-full"></div>
-              </a>
-            ))}
-          </div>
-          
-          {/* Subtle animated border */}
-          <div className="absolute inset-0 rounded-2xl border border-transparent bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-blue-400/20 opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10" 
-               style={{ 
-                 background: 'linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1), rgba(59, 130, 246, 0.1))',
-                 animation: navOpacity > 0.8 ? 'borderShimmer 3s ease-in-out infinite' : 'none'
-               }}>
-          </div>
-        </div>
-      </nav>
-    </div>
-  )
-}
-
 // Info card data positioned in horizontal rows aligned with cone sections
 // Cone 3D positions: tek.glb=0.4, tek2.glb=0.15, tek3.glb=-0.15, tek4.glb=-0.4
 // Equal positioning system for all cards
@@ -398,23 +219,12 @@ function DynamicCameraController() {
 // Optimized cone scene
 function OptimizedConeScene({ 
   onRingComplete,
-  onAnimationComplete
+  lightIntensity = 0
 }: { 
   onRingComplete: (ringIndex: number) => void
-  onAnimationComplete: () => void
+  lightIntensity?: number
 }) {
   const { viewport } = useThree()
-  const [showStudioLight, setShowStudioLight] = useState(false)
-
-  // Trigger studio light after 3 seconds (when animation settles)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowStudioLight(true)
-      onAnimationComplete()
-    }, 3000)
-    
-    return () => clearTimeout(timer)
-  }, [onAnimationComplete])
 
   const coneFiles = [
     { url: '/cone/tek.glb', position: [0, 0.4, 0] as [number, number, number], delay: 300 },      // Top ring
@@ -436,8 +246,19 @@ function OptimizedConeScene({
       <pointLight position={[-8, 0, -15]} intensity={0.4} color="#4A90E2" />
       <pointLight position={[8, 0, -15]} intensity={0.4} color="#E24A90" />
 
-      {/* Studio Light inside cone */}
-      <StudioLight isActive={showStudioLight} />
+      {/* Flashlight beam from cone top */}
+      {lightIntensity > 0 && (
+        <spotLight
+          position={[0, -3.6, 0]}
+          target-position={[0, 10, 0]}
+          angle={Math.PI / 3}
+          penumbra={0.8}
+          intensity={lightIntensity * 3}
+          color="#ffffff"
+          distance={30}
+          decay={1}
+        />
+      )}
 
       <Environment preset="city" />
       <DynamicCameraController />
@@ -570,12 +391,16 @@ function EnhancedLoadingFallback() {
 }
 
 // Main component
-export default function ConeWithInfoCards() {
+export default function ConeWithInfoCards({ 
+  onLightIntensityChange 
+}: { 
+  onLightIntensityChange?: (intensity: number) => void 
+}) {
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [revealedCards, setRevealedCards] = useState<number[]>([]) // Track which cards are revealed
   const [showFinalLayout, setShowFinalLayout] = useState(false) // Final layout with connection lines
-  const [showNavbar, setShowNavbar] = useState(false) // Control navbar visibility
+  const [lightIntensity, setLightIntensity] = useState(0) // Light intensity for navbar reveal
 
   useEffect(() => {
     setMounted(true)
@@ -584,6 +409,41 @@ export default function ConeWithInfoCards() {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // One-time smooth light intensity animation that triggers after cone animation settles
+  useEffect(() => {
+    let animationStarted = false
+    
+    const lightTimer = setTimeout(() => {
+      if (animationStarted) return // Prevent multiple animations
+      animationStarted = true
+      
+      // Start smooth light intensity animation after 3 seconds
+      let intensity = 0
+      const duration = 2000 // 2 seconds for smooth transition
+      const startTime = Date.now()
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        
+        // Smooth easing function (ease-out cubic)
+        const easedProgress = 1 - Math.pow(1 - progress, 3)
+        intensity = easedProgress
+        
+        setLightIntensity(intensity)
+        onLightIntensityChange?.(intensity)
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        }
+      }
+      
+      requestAnimationFrame(animate)
+    }, 3000)
+    
+    return () => clearTimeout(lightTimer)
+  }, []) // Removed onLightIntensityChange dependency to prevent re-triggering
 
   const handleRingComplete = (ringIndex: number) => {
     setRevealedCards(prev => {
@@ -596,13 +456,6 @@ export default function ConeWithInfoCards() {
       }
       return newRevealed
     })
-  }
-
-  const handleAnimationComplete = () => {
-    // Show navbar when studio light activates
-    setTimeout(() => {
-      setShowNavbar(true)
-    }, 1000) // 1 second after light starts
   }
 
   const cardData = getCardData(isMobile)
@@ -635,13 +488,118 @@ export default function ConeWithInfoCards() {
           <Suspense fallback={null}>
             <OptimizedConeScene 
               onRingComplete={handleRingComplete}
-              onAnimationComplete={handleAnimationComplete}
+              lightIntensity={lightIntensity}
             />
           </Suspense>
         </Canvas>
         
-        {/* Glassmorphic Navbar - Revealed by studio light */}
-        <GlassmorphicNavbar isVisible={showNavbar} />
+        {/* Single smooth light beam overlay - behind the cone */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{ 
+            zIndex: -1,
+            opacity: lightIntensity
+          }}
+        >
+          {/* Wide scattered upward light */}
+          <div 
+            className="absolute left-1/2 transform -translate-x-1/2"
+            style={{
+              bottom: '45%',
+              width: `${350 + lightIntensity * 450}px`,
+              height: `${450 + lightIntensity * 400}px`,
+              background: `linear-gradient(180deg, 
+                rgba(255, 255, 255, 0.025) 0%,
+                rgba(255, 255, 255, 0.035) 30%,
+                rgba(255, 255, 255, 0.018) 60%,
+                rgba(255, 255, 255, 0.008) 80%,
+                transparent 100%)`,
+              filter: 'blur(100px)',
+              borderRadius: '50%',
+            }}
+          />
+          
+          {/* Medium scattered upward light */}
+          <div 
+            className="absolute left-1/2 transform -translate-x-1/2"
+            style={{
+              bottom: '45%',
+              width: `${250 + lightIntensity * 350}px`,
+              height: `${400 + lightIntensity * 350}px`,
+              background: `linear-gradient(180deg, 
+                rgba(255, 255, 255, 0.035) 0%,
+                rgba(255, 255, 255, 0.05) 40%,
+                rgba(255, 255, 255, 0.025) 70%,
+                rgba(255, 255, 255, 0.012) 90%,
+                transparent 100%)`,
+              filter: 'blur(70px)',
+              borderRadius: '50%',
+            }}
+          />
+          
+          {/* Core scattered upward light */}
+          <div 
+            className="absolute left-1/2 transform -translate-x-1/2"
+            style={{
+              bottom: '45%',
+              width: `${180 + lightIntensity * 250}px`,
+              height: `${350 + lightIntensity * 300}px`,
+              background: `linear-gradient(180deg, 
+                rgba(255, 255, 255, 0.05) 0%,
+                rgba(255, 255, 255, 0.075) 50%,
+                rgba(255, 255, 255, 0.035) 80%,
+                transparent 100%)`,
+              filter: 'blur(50px)',
+              borderRadius: '50%',
+            }}
+          />
+          
+          {/* Bright inner upward light */}
+          <div 
+            className="absolute left-1/2 transform -translate-x-1/2"
+            style={{
+              bottom: '45%',
+              width: `${120 + lightIntensity * 180}px`,
+              height: `${300 + lightIntensity * 250}px`,
+              background: `linear-gradient(180deg, 
+                rgba(255, 255, 255, 0.065) 0%,
+                rgba(255, 255, 255, 0.095) 60%,
+                rgba(255, 255, 255, 0.045) 85%,
+                transparent 100%)`,
+              filter: 'blur(30px)',
+              borderRadius: '50%',
+            }}
+          />
+          
+          {/* Top illumination for navbar */}
+          <div 
+            className="absolute left-1/2 transform -translate-x-1/2"
+            style={{
+              top: '5%',
+              width: `${300 + lightIntensity * 350}px`,
+              height: `${150 + lightIntensity * 180}px`,
+              background: `radial-gradient(ellipse, 
+                rgba(255, 255, 255, 0.035) 0%,
+                rgba(255, 255, 255, 0.018) 60%,
+                transparent 100%)`,
+              filter: 'blur(80px)',
+              borderRadius: '50%',
+            }}
+          />
+          
+          {/* Point source */}
+          <div 
+            className="absolute left-1/2 transform -translate-x-1/2"
+            style={{
+              bottom: '45%',
+              width: '8px',
+              height: '8px',
+              background: `rgba(255, 255, 255, 0.6)`,
+              borderRadius: '50%',
+              filter: 'blur(3px)',
+            }}
+          />
+        </div>
         
         {/* Modern sequenced cards */}
         {cardData.map((card, index) => (
