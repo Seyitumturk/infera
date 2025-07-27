@@ -1,6 +1,6 @@
 'use client'
 
-import ConeAnimation from './ConeAnimationOptimized'
+import ConeAnimation from './ConeWithInfoCards'
 
 export default function Hero() {
   return (
@@ -8,8 +8,8 @@ export default function Hero() {
       <div className="w-full max-w-none">
         {/* Center the 3D animation as main hero */}
         <div className="flex flex-col items-center space-y-12">
-          {/* Main 3D Cone Animation - Much Larger */}
-          <div className="w-full h-[70vh] lg:h-[80vh] max-w-6xl relative">
+          {/* Main 3D Cone Animation - Expanded viewport */}
+          <div className="w-full h-[80vh] lg:h-[90vh] max-w-none relative overflow-hidden">
             <ConeAnimation />
           </div>
           
