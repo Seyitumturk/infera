@@ -136,8 +136,11 @@ function ConeSegment({
   return (
     <animated.group
       ref={meshRef}
+      // @ts-ignore - React Spring types conflict with R3F types
       position={animatedPosition}
+      // @ts-ignore
       rotation={rotation}
+      // @ts-ignore  
       scale={scale}
     >
       <primitive object={enhancedScene} />
@@ -401,6 +404,7 @@ export default function ConeWithInfoCards({
   const [revealedCards, setRevealedCards] = useState<number[]>([]) // Track which cards are revealed
   const [showFinalLayout, setShowFinalLayout] = useState(false) // Final layout with connection lines
   const [lightIntensity, setLightIntensity] = useState(0) // Light intensity for navbar reveal
+  const [textVisible, setTextVisible] = useState(false) // Hero text visibility
 
   useEffect(() => {
     setMounted(true)
@@ -434,6 +438,11 @@ export default function ConeWithInfoCards({
         setLightIntensity(intensity)
         onLightIntensityChange?.(intensity)
         
+        // Show hero text when light reaches 60% intensity
+        if (intensity >= 0.6 && !textVisible) {
+          setTextVisible(true)
+        }
+        
         if (progress < 1) {
           requestAnimationFrame(animate)
         }
@@ -443,7 +452,7 @@ export default function ConeWithInfoCards({
     }, 3000)
     
     return () => clearTimeout(lightTimer)
-  }, []) // Removed onLightIntensityChange dependency to prevent re-triggering
+  }, [textVisible]) // Added textVisible dependency
 
   const handleRingComplete = (ringIndex: number) => {
     setRevealedCards(prev => {
@@ -492,6 +501,38 @@ export default function ConeWithInfoCards({
             />
           </Suspense>
         </Canvas>
+        
+        {/* Hero text within the light beam area */}
+        <div className={`absolute top-[15%] left-1/2 transform -translate-x-1/2 text-center space-y-6 max-w-2xl px-4 transition-all duration-1000 ease-out z-30 ${
+          textVisible 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-8'
+        }`}>
+          <h1 className="text-3xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
+            AI opportunities, quantified.
+          </h1>
+          
+          <p className="text-base lg:text-lg text-gray-200 leading-relaxed">
+            Infera analyzes your business and delivers a clear, prioritized AI roadmap.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <button 
+              className="px-8 py-4 bg-brandInk hover:bg-ink80 text-white font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brandInk focus:ring-offset-2 focus:ring-offset-brandNight shadow-lg"
+              aria-label="Start an AI audit"
+            >
+              Start an AI audit
+            </button>
+            
+            <button 
+              className="px-8 py-4 border border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-brandNight shadow-lg backdrop-blur-sm"
+              aria-label="See sample roadmap"
+            >
+              See sample roadmap
+            </button>
+          </div>
+        </div>
         
         {/* Single smooth light beam overlay - behind the cone */}
         <div 
