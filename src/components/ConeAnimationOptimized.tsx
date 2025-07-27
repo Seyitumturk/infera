@@ -96,56 +96,80 @@ function DynamicCameraController() {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null)
   const [animationComplete, setAnimationComplete] = useState(false)
 
-  // Start camera movement after all pieces have landed
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimationComplete(true)
-    }, 3000) // Start after all pieces have fallen
-    return () => clearTimeout(timer)
-  }, [])
+     // Mark animation complete when all rings have finished falling
+   useEffect(() => {
+     const timer = setTimeout(() => {
+       setAnimationComplete(true)
+     }, 2000) // 1800ms total ring animation + 200ms buffer
+     return () => clearTimeout(timer)
+   }, [])
 
      useFrame((state) => {
-     if (cameraRef.current && animationComplete) {
+     if (cameraRef.current) {
        const t = state.clock.elapsedTime * 0.15
+       const elapsedTime = state.clock.elapsedTime * 1000 // Convert to milliseconds
        
-       // Move towards a more top-down, 2D-like view
-       const progress = Math.min((state.clock.elapsedTime - 3) / 8, 1) // Slow transition over 8 seconds
        const baseDistance = viewport.width > 768 ? 35 : 40
-       const baseHeight = viewport.width > 768 ? 6 : 5
+       const startHeight = viewport.width > 768 ? 10 : 8
+       const finalDistance = baseDistance * 0.45 // Final zoom target
+       const finalHeight = startHeight + 10 // Final height target
        
-       // Gradually move towards more overhead position
-       const targetDistance = baseDistance * 0.7 // Move closer
-       const targetHeight = baseHeight + 12 // Much higher for 2D view
+       // Progressive zoom tied to ring falling timing
+       // Ring timing: 300ms, 700ms, 1100ms, 1500ms + 300ms fall time = 1800ms total
+       let zoomProgress = 0
        
-       const currentDistance = baseDistance + (targetDistance - baseDistance) * progress
-       const currentHeight = baseHeight + (targetHeight - baseHeight) * progress
+       if (elapsedTime <= 600) {
+         // Ring 1 falling (300ms + 300ms fall) -> 25% zoom
+         zoomProgress = Math.min(elapsedTime / 600, 1) * 0.25
+       } else if (elapsedTime <= 1000) {
+         // Ring 2 falling (700ms + 300ms fall) -> 50% zoom
+         const localProgress = (elapsedTime - 600) / 400
+         zoomProgress = 0.25 + (Math.min(localProgress, 1) * 0.25)
+       } else if (elapsedTime <= 1400) {
+         // Ring 3 falling (1100ms + 300ms fall) -> 75% zoom
+         const localProgress = (elapsedTime - 1000) / 400
+         zoomProgress = 0.5 + (Math.min(localProgress, 1) * 0.25)
+       } else if (elapsedTime <= 1800) {
+         // Ring 4 falling (1500ms + 300ms fall) -> 100% zoom
+         const localProgress = (elapsedTime - 1400) / 400
+         zoomProgress = 0.75 + (Math.min(localProgress, 1) * 0.25)
+       } else {
+         // All rings landed - final position
+         zoomProgress = 1
+       }
        
-       // Add gentle variation on top of the transition
-       const heightVariation = Math.sin(t) * 1.5
-       const finalHeight = currentHeight + heightVariation
+       // Apply smooth easing to zoom progress
+       const easedProgress = 1 - Math.pow(1 - zoomProgress, 3) // ease-out cubic
+       
+       // Smooth interpolation from start to final position
+       const currentDistance = baseDistance + (finalDistance - baseDistance) * easedProgress
+       const currentHeight = startHeight + (finalHeight - startHeight) * easedProgress
+       
+       // Add gentle variation only after all animations complete
+       const heightVariation = animationComplete ? Math.sin(t) * 0.8 : 0
+       const finalY = currentHeight + heightVariation
        
        cameraRef.current.position.x = currentDistance
        cameraRef.current.position.z = currentDistance
-       cameraRef.current.position.y = finalHeight
+       cameraRef.current.position.y = finalY
        cameraRef.current.lookAt(0, 0, 0)
      }
    })
 
-  const distance = viewport.width > 768 ? 35 : 40
-  const height = viewport.width > 768 ? 6 : 5
-  const fov = viewport.width > 768 ? 60 : 70
+     const distance = viewport.width > 768 ? 35 : 40
+   const startHeight = viewport.width > 768 ? 10 : 8 // Start more normalized
+   const fov = viewport.width > 768 ? 60 : 70
 
-  return (
-    <PerspectiveCamera
-      ref={cameraRef}
-      makeDefault
-      fov={fov}
-      position={[distance, height, distance]}
-      near={0.1}
-      far={100}
-      onUpdate={(camera) => !animationComplete && camera.lookAt(0, 0, 0)}
-    />
-  )
+   return (
+     <PerspectiveCamera
+       ref={cameraRef}
+       makeDefault
+       fov={fov}
+       position={[distance, startHeight, distance]}
+       near={0.1}
+       far={100}
+     />
+   )
 }
 
 // Optimized scene with reduced complexity for mobile
@@ -243,7 +267,7 @@ export default function ConeAnimationOptimized() {
           style={{
             background: 'transparent',
           }}
-                     camera={{ position: [35, 6, 35], fov: 60 }}
+                     camera={{ position: [35, 10, 35], fov: 60 }}
         >
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
