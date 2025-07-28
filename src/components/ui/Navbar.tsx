@@ -24,8 +24,8 @@ export default function Navbar({ isVisible, lightIntensity }: NavbarProps) {
 
   return (
     <nav 
-      className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-1000 ease-out ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+      className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-1500 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8'
       }`}
       style={{
         filter: `brightness(${1 + lightIntensity * 0.4})`,

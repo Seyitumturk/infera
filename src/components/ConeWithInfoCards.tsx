@@ -422,24 +422,24 @@ export default function ConeWithInfoCards({
       if (animationStarted) return // Prevent multiple animations
       animationStarted = true
       
-      // Start smooth light intensity animation after 3 seconds
+      // Start smooth light intensity animation after cone rings complete
       let intensity = 0
-      const duration = 2000 // 2 seconds for smooth transition
+      const duration = 3500 // 3.5 seconds for slower, more dramatic transition
       const startTime = Date.now()
       
       const animate = () => {
         const elapsed = Date.now() - startTime
         const progress = Math.min(elapsed / duration, 1)
         
-        // Smooth easing function (ease-out cubic)
+        // Smooth easing function (ease-out cubic for dramatic reveal)
         const easedProgress = 1 - Math.pow(1 - progress, 3)
         intensity = easedProgress
         
         setLightIntensity(intensity)
         onLightIntensityChange?.(intensity)
         
-        // Show hero text when light reaches 60% intensity
-        if (intensity >= 0.6 && !textVisible) {
+        // Show hero text when light reaches 50% intensity (earlier for smoother reveal)
+        if (intensity >= 0.5 && !textVisible) {
           setTextVisible(true)
         }
         
@@ -449,10 +449,10 @@ export default function ConeWithInfoCards({
       }
       
       requestAnimationFrame(animate)
-    }, 3000)
+    }, 3200) // Start slightly later to ensure cone animation is fully complete
     
     return () => clearTimeout(lightTimer)
-  }, [textVisible]) // Added textVisible dependency
+  }, []) // No dependencies to prevent multiple runs
 
   const handleRingComplete = (ringIndex: number) => {
     setRevealedCards(prev => {
@@ -502,12 +502,12 @@ export default function ConeWithInfoCards({
           </Suspense>
         </Canvas>
         
-        {/* Hero text within the light beam area */}
-        <div className={`absolute top-[15%] left-1/2 transform -translate-x-1/2 text-center space-y-6 max-w-2xl px-4 transition-all duration-1000 ease-out z-30 ${
-          textVisible 
-            ? 'opacity-100 translate-y-0' 
-            : 'opacity-0 translate-y-8'
-        }`}>
+                 {/* Hero text within the light beam area - positioned lower */}
+         <div className={`absolute top-[15%] left-1/2 transform -translate-x-1/2 text-center space-y-6 max-w-2xl px-4 transition-all duration-1000 ease-out z-30 ${
+           textVisible 
+             ? 'opacity-100 translate-y-0' 
+             : 'opacity-0 translate-y-8'
+         }`}>
           <h1 className="text-3xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
             AI opportunities, quantified.
           </h1>
@@ -542,91 +542,77 @@ export default function ConeWithInfoCards({
             opacity: lightIntensity
           }}
         >
-          {/* Wide scattered upward light */}
-          <div 
-            className="absolute left-1/2 transform -translate-x-1/2"
-            style={{
-              bottom: '45%',
-              width: `${350 + lightIntensity * 450}px`,
-              height: `${450 + lightIntensity * 400}px`,
-              background: `linear-gradient(180deg, 
-                rgba(255, 255, 255, 0.025) 0%,
-                rgba(255, 255, 255, 0.035) 30%,
-                rgba(255, 255, 255, 0.018) 60%,
-                rgba(255, 255, 255, 0.008) 80%,
-                transparent 100%)`,
-              filter: 'blur(100px)',
-              borderRadius: '50%',
-            }}
-          />
+                     {/* Wide scattered upward light - extends to top */}
+           <div 
+             className="absolute left-1/2 transform -translate-x-1/2"
+             style={{
+               bottom: '45%',
+               width: `${350 + lightIntensity * 450}px`,
+               height: `${750 + lightIntensity * 400}px`,
+               background: `linear-gradient(180deg, 
+                 rgba(255, 255, 255, 0.025) 0%,
+                 rgba(255, 255, 255, 0.035) 30%,
+                 rgba(255, 255, 255, 0.018) 60%,
+                 rgba(255, 255, 255, 0.008) 80%,
+                 transparent 100%)`,
+               filter: 'blur(100px)',
+               borderRadius: '50%',
+             }}
+           />
+           
+           {/* Medium scattered upward light - extends to top */}
+           <div 
+             className="absolute left-1/2 transform -translate-x-1/2"
+             style={{
+               bottom: '45%',
+               width: `${250 + lightIntensity * 350}px`,
+               height: `${700 + lightIntensity * 350}px`,
+               background: `linear-gradient(180deg, 
+                 rgba(255, 255, 255, 0.035) 0%,
+                 rgba(255, 255, 255, 0.05) 40%,
+                 rgba(255, 255, 255, 0.025) 70%,
+                 rgba(255, 255, 255, 0.012) 90%,
+                 transparent 100%)`,
+               filter: 'blur(70px)',
+               borderRadius: '50%',
+             }}
+           />
+           
+           {/* Core scattered upward light - extends to top */}
+           <div 
+             className="absolute left-1/2 transform -translate-x-1/2"
+             style={{
+               bottom: '45%',
+               width: `${180 + lightIntensity * 250}px`,
+               height: `${650 + lightIntensity * 300}px`,
+               background: `linear-gradient(180deg, 
+                 rgba(255, 255, 255, 0.05) 0%,
+                 rgba(255, 255, 255, 0.075) 50%,
+                 rgba(255, 255, 255, 0.035) 80%,
+                 transparent 100%)`,
+               filter: 'blur(50px)',
+               borderRadius: '50%',
+             }}
+           />
+           
+           {/* Bright inner upward light - extends to top */}
+           <div 
+             className="absolute left-1/2 transform -translate-x-1/2"
+             style={{
+               bottom: '45%',
+               width: `${120 + lightIntensity * 180}px`,
+               height: `${600 + lightIntensity * 250}px`,
+               background: `linear-gradient(180deg, 
+                 rgba(255, 255, 255, 0.065) 0%,
+                 rgba(255, 255, 255, 0.095) 60%,
+                 rgba(255, 255, 255, 0.045) 85%,
+                 transparent 100%)`,
+               filter: 'blur(30px)',
+               borderRadius: '50%',
+             }}
+           />
           
-          {/* Medium scattered upward light */}
-          <div 
-            className="absolute left-1/2 transform -translate-x-1/2"
-            style={{
-              bottom: '45%',
-              width: `${250 + lightIntensity * 350}px`,
-              height: `${400 + lightIntensity * 350}px`,
-              background: `linear-gradient(180deg, 
-                rgba(255, 255, 255, 0.035) 0%,
-                rgba(255, 255, 255, 0.05) 40%,
-                rgba(255, 255, 255, 0.025) 70%,
-                rgba(255, 255, 255, 0.012) 90%,
-                transparent 100%)`,
-              filter: 'blur(70px)',
-              borderRadius: '50%',
-            }}
-          />
           
-          {/* Core scattered upward light */}
-          <div 
-            className="absolute left-1/2 transform -translate-x-1/2"
-            style={{
-              bottom: '45%',
-              width: `${180 + lightIntensity * 250}px`,
-              height: `${350 + lightIntensity * 300}px`,
-              background: `linear-gradient(180deg, 
-                rgba(255, 255, 255, 0.05) 0%,
-                rgba(255, 255, 255, 0.075) 50%,
-                rgba(255, 255, 255, 0.035) 80%,
-                transparent 100%)`,
-              filter: 'blur(50px)',
-              borderRadius: '50%',
-            }}
-          />
-          
-          {/* Bright inner upward light */}
-          <div 
-            className="absolute left-1/2 transform -translate-x-1/2"
-            style={{
-              bottom: '45%',
-              width: `${120 + lightIntensity * 180}px`,
-              height: `${300 + lightIntensity * 250}px`,
-              background: `linear-gradient(180deg, 
-                rgba(255, 255, 255, 0.065) 0%,
-                rgba(255, 255, 255, 0.095) 60%,
-                rgba(255, 255, 255, 0.045) 85%,
-                transparent 100%)`,
-              filter: 'blur(30px)',
-              borderRadius: '50%',
-            }}
-          />
-          
-          {/* Top illumination for navbar */}
-          <div 
-            className="absolute left-1/2 transform -translate-x-1/2"
-            style={{
-              top: '5%',
-              width: `${300 + lightIntensity * 350}px`,
-              height: `${150 + lightIntensity * 180}px`,
-              background: `radial-gradient(ellipse, 
-                rgba(255, 255, 255, 0.035) 0%,
-                rgba(255, 255, 255, 0.018) 60%,
-                transparent 100%)`,
-              filter: 'blur(80px)',
-              borderRadius: '50%',
-            }}
-          />
           
           {/* Point source */}
           <div 

@@ -11,27 +11,30 @@ export default function Hero() {
   const handleLightIntensityChange = (intensity: number) => {
     setLightIntensity(intensity)
     
-    // Show navbar only after light animation is completely finished
-    if (intensity >= 1.0 && !navbarVisible) {
-      // Add a small delay to ensure light is fully visible before navbar
-      setTimeout(() => setNavbarVisible(true), 300)
+    // Show navbar earlier in the light animation for smoother reveal
+    if (intensity >= 0.75 && !navbarVisible) {
+      // Slightly longer delay for more dramatic entrance
+      setTimeout(() => setNavbarVisible(true), 500)
     }
   }
 
   return (
-    <main className="min-h-screen bg-brandNight flex items-center justify-center px-4 py-6 relative overflow-hidden">
-      {/* Navbar - revealed by lighting */}
+    <div className="relative min-h-screen bg-brandNight overflow-hidden">
+      {/* Navbar - positioned absolutely to overlay everything */}
       <Navbar isVisible={navbarVisible} lightIntensity={lightIntensity} />
       
-      <div className="w-full max-w-none">
-        {/* Center the 3D animation as main hero */}
-        <div className="flex flex-col items-center">
-          {/* Main 3D Cone Animation - Full viewport */}
-          <div className="w-full h-[80vh] lg:h-[90vh] max-w-none relative overflow-hidden">
-            <ConeAnimation onLightIntensityChange={handleLightIntensityChange} />
-          </div>
-        </div>
-      </div>
-    </main>
+             {/* Hero content - takes full screen starting from top */}
+       <main className="h-screen px-4">
+         <div className="w-full max-w-none h-full">
+           {/* Center the 3D animation as main hero - full height from top */}
+           <div className="flex flex-col items-center h-full">
+             {/* Main 3D Cone Animation - Full viewport height */}
+             <div className="w-full h-full max-w-none relative overflow-hidden">
+               <ConeAnimation onLightIntensityChange={handleLightIntensityChange} />
+             </div>
+           </div>
+         </div>
+       </main>
+    </div>
   )
 } 
