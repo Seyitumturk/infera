@@ -96,26 +96,4 @@ export function CardDescription({ className, children, ...props }: CardDescripti
   );
 }
 
-interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
-}
-
-export function CardContent({ className, children, ...props }: CardContentProps) {
-  return (
-    <div className={cn("pt-0", className)} {...props}>
-      {children}
-    </div>
-  );
-}
-
-interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
-}
-
-export function CardFooter({ className, children, ...props }: CardFooterProps) {
-  return (
-    <div className={cn("flex items-center pt-0", className)} {...props}>
-      {children}
-    </div>
-  );
-} 
+ 

@@ -3,10 +3,9 @@
 import { Suspense, useRef, useEffect, useState, useMemo } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Environment, PerspectiveCamera, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei'
-import { useSpring, animated, config } from '@react-spring/three'
+import { useSpring, animated } from '@react-spring/three'
 import * as THREE from 'three'
 import ErrorBoundary from './ErrorBoundary'
-import { Card, CardHeader, CardTitle, CardDescription } from './ui/Card'
 
 // Ring colors matching cone sections
 const ringColors = [
@@ -230,10 +229,10 @@ function OptimizedConeScene({
   const { viewport } = useThree()
 
   const coneFiles = [
-    { url: '/cone/tek.glb', position: [0, 0.4, 0] as [number, number, number], delay: 300 },      // Top ring
-    { url: '/cone/tek2.glb', position: [0, 0.15, 0] as [number, number, number], delay: 700 },   // Second ring
-    { url: '/cone/tek3.glb', position: [0, -0.15, 0] as [number, number, number], delay: 1100 }, // Third ring  
-    { url: '/cone/tek4.glb', position: [0, -0.4, 0] as [number, number, number], delay: 1500 },  // Bottom ring
+    { url: '/cone/tek.glb', position: [0, 0.4, 0] as [number, number, number], delay: 1500 },    // Top ring (last to fall)
+    { url: '/cone/tek2.glb', position: [0, 0.15, 0] as [number, number, number], delay: 1100 },  // Second ring
+    { url: '/cone/tek3.glb', position: [0, -0.15, 0] as [number, number, number], delay: 700 },  // Third ring  
+    { url: '/cone/tek4.glb', position: [0, -0.4, 0] as [number, number, number], delay: 300 },   // Bottom ring (first to fall)
   ]
 
   return (

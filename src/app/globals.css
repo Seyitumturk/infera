@@ -5,7 +5,6 @@
   --brand-ink: #02193b;
   --brand-night: #06080a;
   --ink-80: #102846;
-  --ink-40: #2a3d59;
 }
 
 /* Reset and base styles */
@@ -28,17 +27,7 @@ body {
   color: white !important;
 }
 
-/* Responsive container utilities */
-.container-responsive {
-  width: clamp(560px, 50vw, 760px);
-  margin: 0 auto;
-}
 
-@media (max-width: 900px) {
-  .container-responsive {
-    width: 92vw;
-  }
-}
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {

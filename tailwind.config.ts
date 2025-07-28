@@ -12,7 +12,6 @@ const config: Config = {
         brandInk: '#02193b',
         brandNight: '#06080a',
         ink80: '#102846',
-        ink40: '#2a3d59',
       },
       fontFamily: {
         sans: ['var(--font-inter)'],
