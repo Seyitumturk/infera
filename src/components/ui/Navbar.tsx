@@ -24,7 +24,7 @@ export default function Navbar({ isVisible, lightIntensity }: NavbarProps) {
 
   return (
     <nav 
-      className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-1500 ease-out ${
+      className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-[9999] transition-all duration-1500 ease-out ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8'
       }`}
       style={{
@@ -32,16 +32,16 @@ export default function Navbar({ isVisible, lightIntensity }: NavbarProps) {
         boxSizing: 'border-box',
       }}
     >
-             {/* Modern glassmorphic container - wider with better spacing */}
+             {/* Modern glassmorphic container - compact spacing */}
        <div 
-         className="relative px-16 py-8 rounded-2xl border-l border-r border-b border-white/15 backdrop-blur-xl bg-gradient-to-r from-white/8 to-white/12 shadow-2xl"
+         className="relative px-8 py-2 rounded-2xl border-l border-r border-b border-white/15 backdrop-blur-xl bg-gradient-to-r from-white/8 to-white/12 shadow-2xl"
                  style={{
            boxShadow: `
              0 12px 40px rgba(0, 0, 0, 0.4),
              inset 0 -1px 0 rgba(0, 0, 0, 0.15)
            `,
            boxSizing: 'border-box',
-           minWidth: '500px',
+           minWidth: '400px',
          }}
       >
                  {/* Enhanced light glow effect */}
@@ -63,7 +63,7 @@ export default function Navbar({ isVisible, lightIntensity }: NavbarProps) {
                   href={item.href}
                   className={`
                     relative text-sm font-semibold tracking-wide transition-all duration-300 
-                    hover:text-white group cursor-pointer inline-block py-3 px-6
+                    hover:text-white group cursor-pointer inline-block py-1 px-4
                     ${lightIntensity > 0.2 ? 'text-white/95' : 'text-white/85'}
                   `}
                  style={{
@@ -83,7 +83,7 @@ export default function Navbar({ isVisible, lightIntensity }: NavbarProps) {
                 
                                  {/* Subtle hover glow */}
                  <span 
-                   className={`absolute inset-0 -mx-4 -my-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                   className={`absolute inset-0 -mx-2 -my-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
                      lightIntensity > 0.2 ? 'bg-white/8' : 'bg-white/5'
                    }`}
                    style={{ boxSizing: 'border-box' }}
