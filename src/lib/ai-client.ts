@@ -238,10 +238,11 @@ export class AIClient {
     safeMetrics: SafeMetric[],
     matchedSolutions: MatchedUseCase[],
     roadmap: RoadmapItem[],
-    aiInsights: string[]
+    aiInsights: string[],
+    recommendedTools: any[]
   }> {
     try {
-      // Step 1: AI analysis
+      // Step 1: AI analysis (now includes recommended tools)
       const userAnalysis = await this.analyzeUserInput(answers, customProblem, companyProfile)
 
       // Step 2: Vector similarity search
@@ -256,7 +257,8 @@ export class AIClient {
         safeMetrics: userAnalysis.safeMetrics,
         matchedSolutions,
         roadmap,
-        aiInsights: userAnalysis.aiInsights
+        aiInsights: userAnalysis.aiInsights,
+        recommendedTools: (userAnalysis as any).recommendedTools || []
       }
 
     } catch (error) {

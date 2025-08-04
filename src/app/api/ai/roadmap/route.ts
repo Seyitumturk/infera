@@ -76,16 +76,35 @@ Expected JSON array format:
 
 Return only the JSON array above, nothing else:`
 
-    console.log('🚀 Generating roadmap with Claude...')
+    console.log('🚀 Generating roadmap with Claude Sonnet 4 (THE BEAST!)...')
 
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4000,
-      messages: [{
-        role: 'user',
-        content: prompt
-      }]
-    })
+    // Retry logic for Claude API overload
+    let response
+    const maxRetries = 3
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        response = await anthropic.messages.create({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4000,
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
+        })
+        break // Success, exit retry loop
+      } catch (error: any) {
+        console.log(`🔄 Claude roadmap API attempt ${attempt}/${maxRetries}:`, error.status)
+        
+        if (error.status === 529 && attempt < maxRetries) {
+          const delay = Math.pow(2, attempt) * 1000 // 2s, 4s, 8s
+          console.log(`⏱️ Retrying roadmap generation in ${delay/1000}s...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+          continue
+        }
+        
+        throw error // Re-throw if not retryable or max retries reached
+      }
+    }
 
     // Extract JSON from Claude's response (handle markdown formatting)
     let responseText = response.content[0].text

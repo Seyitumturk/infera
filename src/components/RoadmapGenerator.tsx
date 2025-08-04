@@ -11,7 +11,8 @@ import {
   ProcessQuestion, 
   MatchedUseCase, 
   RoadmapItem,
-  ROICalculation 
+  ROICalculation,
+  RecommendedTool 
 } from '@/lib/types'
 import { AIClient } from '@/lib/ai-client'
 import { 
@@ -39,6 +40,7 @@ import {
   ChartBarIcon as BarChart3,
   BoltIcon as Zap
 } from '@heroicons/react/24/outline'
+import RecommendedToolsDisplay from '@/components/RecommendedToolsDisplay'
 
 interface RoadmapGeneratorProps {
   processFlags: ProcessFlag[]
@@ -55,6 +57,7 @@ export default function RoadmapGenerator({
 }: RoadmapGeneratorProps) {
   const [roadmap, setRoadmap] = useState<RoadmapItem[]>([])
   const [matchedUseCases, setMatchedUseCases] = useState<MatchedUseCase[]>([])
+  const [recommendedTools, setRecommendedTools] = useState<RecommendedTool[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedItem, setSelectedItem] = useState<RoadmapItem | null>(null)
   const [viewMode, setViewMode] = useState<'timeline' | 'priority' | 'roi'>('timeline')
@@ -86,9 +89,11 @@ export default function RoadmapGenerator({
         console.log('✅ AI analysis complete:', aiResults)
         console.log('📊 Matched solutions:', aiResults.matchedSolutions.length)
         console.log('🗺️ Roadmap items:', aiResults.roadmap.length)
+        console.log('🔧 Recommended tools:', aiResults.recommendedTools?.length || 0)
         
         setMatchedUseCases(aiResults.matchedSolutions)
         setRoadmap(aiResults.roadmap)
+        setRecommendedTools(aiResults.recommendedTools || [])
         
       } catch (error) {
         console.error('❌ AI roadmap generation failed:', error)
@@ -127,31 +132,40 @@ export default function RoadmapGenerator({
 
   if (roadmap.length === 0) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-danger/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-danger" />
+      <section className="relative bg-bg py-section min-h-screen">
+        <div className="container mx-auto px-layout max-w-4xl">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-danger/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-elevation1">
+                <AlertTriangle className="w-10 h-10 text-danger" />
+              </div>
+              <h2 className="text-2xl font-bold text-text mb-4">No Roadmap Generated</h2>
+              <p className="text-lg text-muted mb-4">The AI analysis didn't produce any recommendations.</p>
+              <p className="text-sm text-muted">Please check the browser console for error details.</p>
+            </div>
           </div>
-          <h2 className="text-xl font-bold text-text mb-2">No Roadmap Generated</h2>
-          <p className="text-muted mb-4">The AI analysis didn't produce any recommendations.</p>
-          <p className="text-sm text-muted">Please check the browser console for error details.</p>
         </div>
-      </div>
+      </section>
     )
   }
 
   return (
-    <div className="min-h-screen bg-bg">
-      <div className="container mx-auto px-layout py-section max-w-7xl">
+    <section className="relative bg-bg py-section min-h-screen">
+      <div className="container mx-auto px-layout max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text mb-2">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-12 text-center"
+        >
+          <h1 className="text-3xl md:text-4xl font-bold text-text mb-4">
             Your AI Automation Roadmap
           </h1>
-          <p className="text-muted">
+          <p className="text-lg text-muted max-w-2xl mx-auto">
             Prioritized recommendations based on your business processes and potential ROI
           </p>
-        </div>
+        </motion.div>
 
         {/* Executive Summary */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -203,6 +217,17 @@ export default function RoadmapGenerator({
             </CardContent>
           </Card>
         </div>
+
+        {/* Recommended Tools Section */}
+        {recommendedTools.length > 0 && (
+          <div className="mb-12">
+            <RecommendedToolsDisplay 
+              tools={recommendedTools}
+              title="🎯 Personalized Tool Recommendations" 
+              subtitle="AI-selected tools based on your workflow analysis and company profile"
+            />
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Roadmap */}
@@ -387,7 +412,7 @@ export default function RoadmapGenerator({
           </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 

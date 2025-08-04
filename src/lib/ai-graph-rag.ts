@@ -169,41 +169,55 @@ export class AIGraphRAG {
     problemContext: string,
     aiInsights: string[]
   }> {
-    console.log('🔍 Analyzing user input with Claude Sonnet 4...')
+    console.log('🔍 Analyzing user input with Claude Sonnet 4 (THE BEAST!)...')
 
-    const prompt = `You are an expert AI consultant analyzing a business for automation opportunities.
+    const prompt = `You are a friendly AI business consultant who understands SMB pain points. The user just shared their daily frustrations in casual, conversational language.
 
 COMPANY CONTEXT:
-- Industry: ${companyProfile?.industry || 'Not specified'}
-- Size: ${companyProfile?.size || 'Not specified'} 
-- Budget: ${companyProfile?.budget || 'Not specified'}
+- Business type: ${companyProfile?.industry || 'Not specified'}
+- Team size: ${companyProfile?.size || 'Not specified'} 
+- Budget comfort: ${companyProfile?.budget_range || 'Not specified'}
 
-USER RESPONSES:
+USER'S FRUSTRATIONS & RESPONSES:
 ${answers.map(a => `${a.category} - ${a.question}: ${JSON.stringify(a.answer)}`).join('\\n')}
 
-CUSTOM PROBLEM:
-${customProblem || 'None provided'}
+ADDITIONAL CONCERNS:
+${customProblem || 'None mentioned'}
 
-ANALYZE AND EXTRACT:
+TRANSLATE THEIR PAIN INTO BUSINESS INSIGHTS:
 
-1. PROCESS FLAGS: Identify specific manual/inefficient processes that could be automated
-2. SAFE METRICS: Extract or estimate volumes, time spent, costs, error rates
-3. SEMANTIC INTENT: What is the user's core business challenge?
-4. PROBLEM CONTEXT: Industry-specific context and constraints
-5. AI INSIGHTS: Key automation opportunities you identify
+1. PROCESS FLAGS: Convert their frustrations into specific automation opportunities:
+   - "Too many emails" → "Email management automation"
+   - "Chasing approvals" → "Approval workflow automation"  
+   - "Manual data entry" → "Document processing automation"
+   - "Customer support taking forever" → "Customer service automation"
+   - "Tracking invoices/payments" → "Accounts payable automation"
 
-Return a JSON response with this structure:
+2. SAFE METRICS: Estimate time/cost from casual descriptions:
+   - "A few hours here and there" → 5 hours/week
+   - "About half a day" → 4 hours/week
+   - "A full day or more" → 8 hours/week
+   - "All we do sometimes" → 20+ hours/week
+
+3. SEMANTIC INTENT: What's really bothering them day-to-day? (use their language)
+4. PROBLEM CONTEXT: Their practical business reality and constraints
+5. AI INSIGHTS: Actionable automation wins they can implement
+
+Remember: They spoke about daily headaches, not technical workflows. Interpret their emotions and frustrations into concrete automation opportunities.
+
+Return ONLY this JSON (no markdown, no explanations):
 {
   "processFlags": [{"id": "string", "label": "string", "category": "string", "confidence": 0.0-1.0, "editable": true}],
   "safeMetrics": [{"id": "string", "label": "string", "value": "string", "unit": "string", "editable": true}],
-  "semanticIntent": "string describing core challenge",
-  "problemContext": "string with industry/business context", 
+  "semanticIntent": "string describing their real daily pain",
+  "problemContext": "string with practical business context", 
   "aiInsights": ["insight1", "insight2", "insight3"]
 }`
 
     try {
-      const response = await this.anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
+      // Add retry logic for rate limiting
+      const response = await this.makeClaudeRequestWithRetry({
+        model: 'claude-sonnet-4-20250514', // Claude Sonnet 4 - THE BEAST!
         max_tokens: 2000,
         messages: [{
           role: 'user',
@@ -335,8 +349,8 @@ Consider:
 Return JSON array of roadmap items with detailed analysis.`
 
     try {
-      const response = await this.anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
+      const response = await this.makeClaudeRequestWithRetry({
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 4000,
         messages: [{
           role: 'user',
@@ -480,6 +494,29 @@ Return JSON array of roadmap items with detailed analysis.`
     } catch (error) {
       console.error('❌ AI processing failed:', error)
       throw error
+    }
+  }
+
+  /**
+   * Make Claude request with retry logic for rate limiting
+   */
+  private async makeClaudeRequestWithRetry(request: any, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await this.anthropic.messages.create(request)
+      } catch (error: any) {
+        console.log(`🔄 Claude API attempt ${attempt}/${maxRetries}:`, error.status)
+        
+        if (error.status === 529 && attempt < maxRetries) {
+          // Exponential backoff for overload errors
+          const delay = Math.pow(2, attempt) * 1000 // 2s, 4s, 8s
+          console.log(`⏱️ Retrying in ${delay/1000}s due to API overload...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+          continue
+        }
+        
+        throw error // Re-throw if not retryable or max retries reached
+      }
     }
   }
 

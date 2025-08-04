@@ -97,17 +97,29 @@ export function getProgressColor(score: number): string {
  */
 export async function loadSolutions(): Promise<Solution[]> {
   try {
-    const response = await fetch('/api/solutions')
-    if (!response.ok) {
-      // Fallback to local import if API not available
+    // Check if we're in a server environment (API route)
+    if (typeof window === 'undefined') {
+      // Server-side: import directly
       const solutionsModule = await import('../solutions.json')
       return solutionsModule.default as Solution[]
+    } else {
+      // Client-side: use fetch
+      const response = await fetch('/api/solutions')
+      if (!response.ok) {
+        throw new Error(`Failed to fetch solutions: ${response.statusText}`)
+      }
+      return await response.json()
     }
-    return await response.json()
   } catch (error) {
     console.error('Failed to load solutions:', error)
-    // Final fallback to empty array
-    return []
+    // Fallback to local import
+    try {
+      const solutionsModule = await import('../solutions.json')
+      return solutionsModule.default as Solution[]
+    } catch (importError) {
+      console.error('Failed to import solutions:', importError)
+      return []
+    }
   }
 }
 
@@ -116,16 +128,29 @@ export async function loadSolutions(): Promise<Solution[]> {
  */
 export async function loadTools(): Promise<Tool[]> {
   try {
-    const response = await fetch('/api/tools')
-    if (!response.ok) {
-      // Fallback to local import if API not available
+    // Check if we're in a server environment (API route)
+    if (typeof window === 'undefined') {
+      // Server-side: import directly
       const toolsModule = await import('../tools.json')
       return toolsModule.default as Tool[]
+    } else {
+      // Client-side: use fetch
+      const response = await fetch('/api/tools')
+      if (!response.ok) {
+        throw new Error(`Failed to fetch tools: ${response.statusText}`)
+      }
+      return await response.json()
     }
-    return await response.json()
   } catch (error) {
     console.error('Failed to load tools:', error)
-    return []
+    // Fallback to local import
+    try {
+      const toolsModule = await import('../tools.json')
+      return toolsModule.default as Tool[]
+    } catch (importError) {
+      console.error('Failed to import tools:', importError)
+      return []
+    }
   }
 }
 

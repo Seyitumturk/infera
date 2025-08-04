@@ -98,6 +98,22 @@ export interface MatchedUseCase {
   recommended_tools: Tool[]
 }
 
+export interface RecommendedTool {
+  id: string
+  vendor_name: string
+  product_name: string
+  one_liner: string
+  primary_use_cases: string[]
+  ideal_customer: {
+    company_size: string[]
+    verticals: string[]
+  }
+  pricing_band_usd_per_month: { low: number | null; high: number | null }
+  time_to_value_weeks: { low: number; high: number }
+  homepage_url: string
+  match_reasoning: string
+}
+
 export interface ROICalculation {
   labor_savings: {
     items_per_month: number
