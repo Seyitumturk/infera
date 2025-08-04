@@ -7,8 +7,8 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   elevated?: boolean;
   interactive?: boolean;
-  variant?: 'default' | 'subtle' | 'elevated';
-  bgColor?: string;
+  variant?: 'default' | 'glass' | 'elevated';
+  glass?: boolean;
 }
 
 export function Card({ 
@@ -17,42 +17,40 @@ export function Card({
   elevated = false, 
   interactive = false,
   variant = 'default',
-  bgColor,
+  glass = false,
   ...props 
 }: CardProps) {
-  const baseStyles = "rounded-xl backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 relative overflow-hidden";
+  const baseStyles = "rounded-lg transition-all duration-smooth relative overflow-hidden";
   
-  const borderStyles = "border border-white/10"; // Smaller border
+  const backgroundStyles = glass || variant === 'glass'
+    ? "bg-glass border-glassBorder backdrop-blur-glass backdrop-saturate-glass"
+    : "bg-surface border-border";
   
   const shadowStyles = {
-    default: "shadow-2xl",
-    subtle: "shadow-lg",
-    elevated: "shadow-2xl hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)] hover:-translate-y-1"
+    default: "shadow-elevation1",
+    glass: "shadow-elevation2",
+    elevated: "shadow-elevation2 hover:shadow-elevation3 hover:-translate-y-1"
   };
 
   const interactiveStyles = interactive 
-    ? "hover:border-white/30 hover:bg-black/60 cursor-pointer group" 
+    ? "hover:border-accent/50 hover:bg-surface/80 cursor-pointer group" 
     : "";
 
   const elevatedStyles = elevated && variant === 'default'
-    ? "shadow-2xl hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)] hover:-translate-y-1"
+    ? "shadow-elevation2 hover:shadow-elevation3 hover:-translate-y-1"
     : "";
 
   return (
     <div
       className={cn(
         baseStyles,
-        borderStyles,
+        backgroundStyles,
         shadowStyles[variant],
         elevatedStyles,
         interactiveStyles,
-        "!p-6", // FORCE PADDING WITH !important TO OVERRIDE CSS RESET
+        "border p-6",
         className
       )}
-      style={{
-        backgroundColor: bgColor || 'rgba(0, 0, 0, 0.4)',
-        ...props.style
-      }}
       {...props}
     >
       {children}
@@ -78,7 +76,7 @@ interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
 
 export function CardTitle({ className, children, ...props }: CardTitleProps) {
   return (
-    <h3 className={cn("text-base font-semibold leading-tight tracking-tight text-white", className)} {...props}>
+    <h3 className={cn("text-lg font-semibold leading-tight tracking-tight text-text", className)} {...props}>
       {children}
     </h3>
   );
@@ -90,9 +88,33 @@ interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement
 
 export function CardDescription({ className, children, ...props }: CardDescriptionProps) {
   return (
-    <p className={cn("text-sm text-gray-300 leading-relaxed", className)} {...props}>
+    <p className={cn("text-sm text-muted leading-relaxed", className)} {...props}>
       {children}
     </p>
+  );
+}
+
+interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export function CardContent({ className, children, ...props }: CardContentProps) {
+  return (
+    <div className={cn("pt-0", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export function CardFooter({ className, children, ...props }: CardFooterProps) {
+  return (
+    <div className={cn("flex items-center pt-4", className)} {...props}>
+      {children}
+    </div>
   );
 }
 

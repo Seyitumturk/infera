@@ -9,10 +9,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Infera - AI Opportunities, Quantified",
-  description: "Infera analyzes a business, identifies AI opportunities, recommends off-the-shelf tools or vetted consultants, and quantifies cost savings per use case—delivering a clear, prioritized AI roadmap.",
+      title: "Mizar - AI Opportunities, Quantified",
+      description: "Mizar analyzes a business, identifies AI opportunities, recommends off-the-shelf tools or vetted consultants, and quantifies cost savings per use case—delivering a clear, prioritized AI roadmap.",
   keywords: ["AI", "artificial intelligence", "business analysis", "ROI", "automation"],
-  authors: [{ name: "Infera" }],
+      authors: [{ name: "Mizar" }],
   viewport: "width=device-width, initial-scale=1",
 };
 

@@ -19,7 +19,7 @@ export default function Navbar({ isVisible, lightIntensity }: NavbarProps) {
   const navItems = [
     { name: 'Home', href: '#home' },
     { name: 'Features', href: '#features' },
-    { name: 'Infera', href: '#infera' }
+          { name: 'Mizar', href: '#mizar' }
   ]
 
   return (

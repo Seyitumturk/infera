@@ -512,7 +512,7 @@ export default function ConeWithInfoCards({
           </h1>
           
           <p className="text-base lg:text-lg text-gray-200 leading-relaxed">
-            Infera analyzes your business and delivers a clear, prioritized AI roadmap.
+            Mizar analyzes your business and delivers a clear, prioritized AI roadmap.
           </p>
 
           {/* CTAs */}
