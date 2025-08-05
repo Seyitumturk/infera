@@ -3,8 +3,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Button from '@/components/ui/Button'
-import { CompanyProfile } from '@/lib/types'
-// Simplified inline implementation - no heavy external dependencies needed
 
 interface InlineAIAuditProps {
   isVisible: boolean
@@ -54,15 +52,22 @@ const PROCESS_QUESTIONS = [
   }
 ]
 
-type AppState = 'intake' | 'processing' | 'roadmap'
+type AppState = 'intake' | 'processing' | 'results'
+
+interface CompanyProfile {
+  industry: string
+  size: string
+  budget_range?: string
+}
 
 export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps) {
   const [appState, setAppState] = useState<AppState>('intake')
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<string, any>>({})
   const [companyProfile, setCompanyProfile] = useState<Partial<CompanyProfile>>({})
-  const [sessionData, setSessionData] = useState<any>(null)
+  const [assessment, setAssessment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleAnswer = (questionId: string, answer: any) => {
     setAnswers(prev => ({ ...prev, [questionId]: answer }))
@@ -79,11 +84,12 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
   const startAnalysis = async () => {
     setAppState('processing')
     setIsLoading(true)
+    setError(null)
     
     try {
-      // Prepare data for backend
       const requestData = {
-        companyProfile,
+        action: 'assessment',
+        companyProfile: companyProfile as CompanyProfile,
         answers: Object.entries(answers).map(([id, answer]) => ({
           id,
           category: PROCESS_QUESTIONS.find(q => q.id === id)?.category || '',
@@ -93,48 +99,80 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
         customProblem: ''
       }
 
-      // Call the actual AI analysis endpoint
-      const response = await fetch('/api/ai/analyze', {
+      console.log('🚀 Calling unified Infera API...')
+      
+      const response = await fetch('/api/infera', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
       })
 
       if (!response.ok) {
-        throw new Error('Analysis failed')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Assessment failed')
       }
 
-      const results = await response.json()
+      const result = await response.json()
       
-      setSessionData({
-        ...results,
-        companyProfile: companyProfile as CompanyProfile,
-        answers: requestData.answers
-      })
-      
-      setAppState('roadmap')
-    } catch (error) {
-      console.error('Analysis failed:', error)
-      // Fallback to mock data if backend fails
-      const mockResults = {
-        processFlags: [],
-        safeMetrics: [],
-        aiInsights: ['Analysis completed with available data'],
-        recommendedTools: [],
-        companyProfile: companyProfile as CompanyProfile,
-        answers: Object.entries(answers).map(([id, answer]) => ({
-          id,
-          category: PROCESS_QUESTIONS.find(q => q.id === id)?.category || '',
-          question: PROCESS_QUESTIONS.find(q => q.id === id)?.question || '',
-          answer
-        }))
+      if (!result.success) {
+        throw new Error(result.error || 'Assessment failed')
       }
-      setSessionData(mockResults)
-      setAppState('roadmap')
+
+      setAssessment(result.data)
+      setAppState('results')
+      
+      console.log('✅ Assessment completed successfully')
+
+    } catch (error) {
+      console.error('❌ Assessment failed:', error)
+      setError(error instanceof Error ? error.message : 'Assessment failed')
+      // Still show results with fallback data
+      setAssessment({
+        processFlags: [],
+        recommendedTools: [],
+        roadmap: [],
+        executiveSummary: {
+          totalPotentialSavings: 0,
+          quickWins: 0,
+          implementationTimeframe: "Contact us for detailed analysis",
+          topRecommendation: "Schedule a consultation to get started"
+        },
+        aiInsights: ['Analysis completed with available data', 'Please contact us for detailed recommendations']
+      })
+      setAppState('results')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleExport = async (format: 'pdf' | 'ppt' = 'pdf') => {
+    if (!assessment) return
+
+    try {
+      const response = await fetch('/api/infera', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export',
+          assessment,
+          format
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Export failed')
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        // In a real implementation, this would trigger a download
+        alert(`${format.toUpperCase()} report generated! Download link: ${result.data.downloadLink}`)
+      }
+
+    } catch (error) {
+      console.error('Export failed:', error)
+      alert('Export failed. Please try again.')
     }
   }
 
@@ -143,7 +181,8 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
     setCurrentQuestion(0)
     setAnswers({})
     setCompanyProfile({})
-    setSessionData(null)
+    setAssessment(null)
+    setError(null)
   }
 
   if (!isVisible) return null
@@ -157,7 +196,7 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
       className="relative bg-brandNight py-20 lg:py-32 overflow-hidden"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-8xl">
-        {/* Header with close button */}
+        {/* Header */}
         <div className="text-center mb-16 lg:mb-24 relative">
           <button
             onClick={onClose}
@@ -177,15 +216,15 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
             </p>
           </div>
 
-          {/* Progress labels */}
+          {/* Progress */}
           <div className="flex justify-center gap-6 text-sm text-gray-400 mt-8">
             <span className={appState === 'intake' ? 'text-accent' : ''}>Assessment</span>
             <span className={appState === 'processing' ? 'text-accent' : ''}>Analysis</span>
-            <span className={appState === 'roadmap' ? 'text-accent' : ''}>Roadmap</span>
+            <span className={appState === 'results' ? 'text-accent' : ''}>Results</span>
           </div>
         </div>
 
-        {/* Main content area - using same glassmorphism as Tool Pool */}
+        {/* Main Content */}
         <div className="relative">
           <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
             <AnimatePresence mode="wait">
@@ -200,9 +239,7 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
                 >
                   {currentQuestion === 0 && !companyProfile.industry && (
                     <CompanyProfileForm 
-                      onSubmit={(profile) => {
-                        setCompanyProfile(profile)
-                      }}
+                      onSubmit={(profile) => setCompanyProfile(profile)}
                     />
                   )}
                   
@@ -231,15 +268,20 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
                 </motion.div>
               )}
 
-              {appState === 'roadmap' && sessionData && (
+              {appState === 'results' && assessment && (
                 <motion.div
-                  key="roadmap"
+                  key="results"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="w-full space-y-8"
                 >
-                  <AIResultsDisplay results={sessionData} onRestart={handleRestart} />
+                  <AssessmentResults 
+                    assessment={assessment} 
+                    onExport={handleExport}
+                    onRestart={handleRestart}
+                    error={error}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -250,12 +292,12 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
   )
 }
 
-function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: Partial<CompanyProfile>) => void }) {
+function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: CompanyProfile) => void }) {
   const [profile, setProfile] = useState<Partial<CompanyProfile>>({})
 
   const handleSubmit = () => {
     if (profile.industry && profile.size) {
-      onSubmit(profile)
+      onSubmit(profile as CompanyProfile)
     }
   }
 
@@ -277,6 +319,8 @@ function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: Partial<CompanyP
             <option value="Finance">Finance</option>
             <option value="Retail">Retail</option>
             <option value="Manufacturing">Manufacturing</option>
+            <option value="Professional Services">Professional Services</option>
+            <option value="Education">Education</option>
             <option value="Other">Other</option>
           </select>
         </div>
@@ -419,34 +463,194 @@ function ProcessingState() {
   )
 }
 
-function AIResultsDisplay({ results, onRestart }: { results: any, onRestart: () => void }) {
+function AssessmentResults({ 
+  assessment, 
+  onExport, 
+  onRestart, 
+  error 
+}: { 
+  assessment: any
+  onExport: (format: 'pdf' | 'ppt') => void
+  onRestart: () => void
+  error: string | null
+}) {
   return (
     <div className="space-y-12">
       {/* Header */}
       <div className="text-center">
-        <h3 className="text-3xl font-bold text-white mb-4">Your AI Analysis Results</h3>
+        <h3 className="text-3xl font-bold text-white mb-4">Your AI Assessment Results</h3>
+        {error && (
+          <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-4 max-w-2xl mx-auto">
+            <p className="text-yellow-200 text-sm">{error}</p>
+          </div>
+        )}
         <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-          Our AI has analyzed your business and identified specific automation opportunities tailored to your needs.
+          Our AI has analyzed your business and identified specific automation opportunities.
         </p>
         <Button onClick={onRestart} variant="outline" size="sm">
           Start New Assessment
         </Button>
       </div>
 
-      {/* AI Insights Section */}
-      {results.aiInsights && results.aiInsights.length > 0 && (
+      {/* Executive Summary */}
+      {assessment.executiveSummary && (
         <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-accent">
-                <path d="M12 2C13.1 2 14 2.9 14 4C14 4.33 13.92 4.64 13.78 4.92C15.66 5.53 17.13 7.18 17.5 9.25C17.81 9.09 18.15 9 18.5 9C19.88 9 21 10.12 21 11.5C21 12.88 19.88 14 18.5 14C18.12 14 17.76 13.9 17.43 13.72C16.97 15.55 15.38 16.94 13.41 17.31C13.2 17.76 12.65 18.05 12 18.05C11.35 18.05 10.8 17.76 10.59 17.31C8.62 16.94 7.03 15.55 6.57 13.72C6.24 13.9 5.88 14 5.5 14C4.12 14 3 12.88 3 11.5C3 10.12 4.12 9 5.5 9C5.85 9 6.19 9.09 6.5 9.25C6.87 7.18 8.34 5.53 10.22 4.92C10.08 4.64 10 4.33 10 4C10 2.9 10.9 2 12 2Z" fill="currentColor"/>
-              </svg>
+            <h4 className="text-2xl font-bold text-white mb-3">Executive Summary</h4>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto text-center">
+            <div className="p-6 bg-white/5 rounded-lg">
+              <div className="text-3xl font-bold text-accent mb-2">
+                ${assessment.executiveSummary.totalPotentialSavings?.toLocaleString() || '0'}
+              </div>
+              <p className="text-gray-300 text-sm">Potential Annual Savings</p>
             </div>
+            <div className="p-6 bg-white/5 rounded-lg">
+              <div className="text-3xl font-bold text-accent2 mb-2">
+                {assessment.executiveSummary.quickWins || 0}
+              </div>
+              <p className="text-gray-300 text-sm">Quick Win Opportunities</p>
+            </div>
+            <div className="p-6 bg-white/5 rounded-lg">
+              <div className="text-lg font-semibold text-white mb-2">
+                {assessment.executiveSummary.implementationTimeframe || 'Contact us'}
+              </div>
+              <p className="text-gray-300 text-sm">Implementation Timeline</p>
+            </div>
+          </div>
+          {assessment.executiveSummary.topRecommendation && (
+            <div className="mt-8 text-center">
+              <p className="text-yellow-400 font-medium">
+                💡 {assessment.executiveSummary.topRecommendation}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Process Flags */}
+      {assessment.processFlags?.length > 0 && (
+        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
+          <div className="text-center mb-8">
+            <h4 className="text-2xl font-bold text-white mb-3">Automation Opportunities</h4>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {assessment.processFlags.map((flag: any, index: number) => (
+              <div key={flag.id} className="p-6 bg-white/5 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h5 className="text-lg font-semibold text-white">{flag.label}</h5>
+                  <span className={`text-sm px-2 py-1 rounded ${
+                    flag.impact === 'high' ? 'bg-red-500/20 text-red-300' :
+                    flag.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                    'bg-green-500/20 text-green-300'
+                  }`}>
+                    {flag.impact} impact
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400 capitalize">{flag.category}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recommended Tools */}
+      {assessment.recommendedTools?.length > 0 && (
+        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
+          <div className="text-center mb-8">
+            <h4 className="text-2xl font-bold text-white mb-3">Recommended Solutions</h4>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {assessment.recommendedTools.slice(0, 6).map((tool: any, index: number) => (
+              <div key={tool.id} className="p-6 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h5 className="text-lg font-semibold text-white mb-1">{tool.name}</h5>
+                    <p className="text-sm text-gray-400">{tool.vendor}</p>
+                  </div>
+                  <span className="text-xs text-accent2 bg-accent2/20 px-2 py-1 rounded">
+                    #{tool.priority}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-300 mb-4">{tool.description}</p>
+                <div className="space-y-2 text-xs text-gray-400">
+                  <p><strong>Use Case:</strong> {tool.useCase}</p>
+                  <p><strong>Pricing:</strong> {tool.pricing}</p>
+                  <p><strong>Time to Value:</strong> {tool.timeToValue}</p>
+                </div>
+                {tool.matchReason && (
+                  <p className="text-xs text-accent italic mt-3">{tool.matchReason}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Implementation Roadmap */}
+      {assessment.roadmap?.length > 0 && (
+        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
+          <div className="text-center mb-8">
+            <h4 className="text-2xl font-bold text-white mb-3">Implementation Roadmap</h4>
+          </div>
+          <div className="space-y-6 max-w-4xl mx-auto">
+            {assessment.roadmap.map((item: any, index: number) => (
+              <div key={item.id} className="p-6 bg-white/5 rounded-lg">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h5 className="text-xl font-semibold text-white mb-2">{item.title}</h5>
+                    <p className="text-gray-300">{item.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm ${
+                      item.priority === 'quick_win' ? 'bg-green-500/20 text-green-300' :
+                      item.priority === 'high' ? 'bg-red-500/20 text-red-300' :
+                      item.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                      'bg-gray-500/20 text-gray-300'
+                    }`}>
+                      {item.priority === 'quick_win' ? 'Quick Win' : `${item.priority} priority`}
+                    </span>
+                    <p className="text-sm text-gray-400 mt-1">{item.timeline.replace('_', ' ')}</p>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4 mb-4">
+                  <div className="text-center p-3 bg-white/5 rounded">
+                    <div className="font-semibold text-white">Impact: {item.impact}/5</div>
+                  </div>
+                  <div className="text-center p-3 bg-white/5 rounded">
+                    <div className="font-semibold text-white">Effort: {item.effort}/5</div>
+                  </div>
+                  <div className="text-center p-3 bg-white/5 rounded">
+                    <div className="font-semibold text-accent">${item.roi?.annual_savings?.toLocaleString() || '0'}/year</div>
+                  </div>
+                </div>
+                {item.next_steps?.length > 0 && (
+                  <div>
+                    <h6 className="font-medium text-white mb-2">Next Steps:</h6>
+                    <ul className="text-sm text-gray-300 space-y-1">
+                      {item.next_steps.map((step: string, i: number) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-accent rounded-full flex-shrink-0"></div>
+                          {step}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* AI Insights */}
+      {assessment.aiInsights?.length > 0 && (
+        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
+          <div className="text-center mb-8">
             <h4 className="text-2xl font-bold text-white mb-3">AI Insights</h4>
-            <p className="text-gray-300">Key findings from your business analysis</p>
           </div>
           <div className="grid gap-4 max-w-3xl mx-auto">
-            {results.aiInsights.map((insight: string, index: number) => (
+            {assessment.aiInsights.map((insight: string, index: number) => (
               <div key={index} className="flex items-center gap-4 p-4 bg-white/5 rounded-lg">
                 <div className="w-2 h-2 bg-accent rounded-full flex-shrink-0"></div>
                 <p className="text-gray-300">{insight}</p>
@@ -456,108 +660,19 @@ function AIResultsDisplay({ results, onRestart }: { results: any, onRestart: () 
         </div>
       )}
 
-      {/* Process Flags Section */}
-      {results.processFlags && results.processFlags.length > 0 && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-accent2/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-accent2">
-                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-            <h4 className="text-2xl font-bold text-white mb-3">Automation Opportunities</h4>
-            <p className="text-gray-300">Specific processes identified for AI automation</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {results.processFlags.map((flag: any, index: number) => (
-              <div key={flag.id} className="p-6 bg-white/5 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <h5 className="text-lg font-semibold text-white">{flag.label}</h5>
-                  <span className="text-sm text-accent2 bg-accent2/20 px-2 py-1 rounded">
-                    {Math.round(flag.confidence * 100)}% match
-                  </span>
-                </div>
-                <p className="text-sm text-gray-400 capitalize">{flag.category} automation</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Recommended Tools Section */}
-      {results.recommendedTools && results.recommendedTools.length > 0 && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-yellow-400/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-yellow-400">
-                <path d="M11.7 2.805a.75.75 0 01.6 0A60.65 60.65 0 0122.83 8.72a.75.75 0 01-.231 1.337 49.949 49.949 0 00-9.902 3.912l-.003.002-.34.18a.75.75 0 01-.707 0A50.009 50.009 0 007.5 12.174v-.224c0-.131.067-.248.172-.311a54.614 54.614 0 014.653-2.52.75.75 0 00-.65-1.352 56.129 56.129 0 00-4.78 2.589 1.858 1.858 0 00-.859 1.228 49.803 49.803 0 00-4.634-1.527.75.75 0 01-.231-1.337A60.653 60.653 0 0111.7 2.805z" fill="currentColor"/>
-              </svg>
-            </div>
-            <h4 className="text-2xl font-bold text-white mb-3">Recommended Tools</h4>
-            <p className="text-gray-300">AI-matched solutions for your specific needs</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {results.recommendedTools.slice(0, 6).map((tool: any, index: number) => (
-              <div key={tool.id} className="p-6 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h5 className="text-lg font-semibold text-white mb-1">{tool.product_name}</h5>
-                    <p className="text-sm text-gray-400">{tool.vendor_name}</p>
-                  </div>
-                  {tool.pricing_band_usd_per_month && (
-                    <span className="text-xs text-accent2 bg-accent2/20 px-2 py-1 rounded">
-                      ${tool.pricing_band_usd_per_month.low}-{tool.pricing_band_usd_per_month.high}/mo
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-300 mb-4">{tool.one_liner}</p>
-                {tool.match_reasoning && (
-                  <p className="text-xs text-gray-400 italic">{tool.match_reasoning}</p>
-                )}
-                {tool.time_to_value_weeks && (
-                  <div className="mt-3 text-xs text-yellow-400">
-                    Time to value: {tool.time_to_value_weeks.low}-{tool.time_to_value_weeks.high} weeks
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Business Metrics Section */}
-      {results.safeMetrics && results.safeMetrics.length > 0 && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-400/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-blue-400">
-                <path d="M7 14L9 12L13 16L17 8M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-            <h4 className="text-2xl font-bold text-white mb-3">Key Business Metrics</h4>
-            <p className="text-gray-300">Important data points identified from your input</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {results.safeMetrics.map((metric: any, index: number) => (
-              <div key={metric.id} className="p-6 bg-white/5 rounded-lg text-center">
-                <h5 className="text-lg font-semibold text-white mb-2">{metric.label}</h5>
-                <p className="text-2xl font-bold text-blue-400 mb-1">{metric.value}</p>
-                <p className="text-sm text-gray-400">{metric.unit}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Next Steps */}
+      {/* Export Actions */}
       <div className="text-center">
         <h4 className="text-xl font-bold text-white mb-4">Ready to Implement?</h4>
         <p className="text-gray-300 mb-6">
-          Get detailed implementation guides and ROI calculations for your selected tools.
+          Export your detailed assessment report or schedule a consultation.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg">Download Full Report</Button>
-          <Button variant="outline" size="lg">Schedule Consultation</Button>
+          <Button size="lg" onClick={() => onExport('pdf')}>
+            Download PDF Report
+          </Button>
+          <Button variant="outline" size="lg" onClick={() => onExport('ppt')}>
+            Download PPT Slides
+          </Button>
         </div>
       </div>
     </div>
