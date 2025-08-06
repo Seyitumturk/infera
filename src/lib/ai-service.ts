@@ -31,6 +31,12 @@ interface ProcessFlag {
   category: string
   confidence: number
   impact: 'high' | 'medium' | 'low'
+  currentState?: string
+  automationPotential?: string
+  timeSavingsPerInstance?: string
+  errorReduction?: string
+  complexityScore?: number
+  prerequisiteConditions?: string[]
 }
 
 interface RecommendedTool {
@@ -40,9 +46,17 @@ interface RecommendedTool {
   description: string
   useCase: string
   pricing: string
+  implementationCost?: string
   timeToValue: string
   matchReason: string
   priority: number
+  integrationComplexity?: string
+  prosAndCons?: {
+    pros: string[]
+    cons: string[]
+  }
+  alternativeOptions?: string[]
+  industryFit?: string
 }
 
 interface RoadmapItem {
@@ -57,10 +71,22 @@ interface RoadmapItem {
     annual_savings: number
     implementation_cost: number
     payback_months: number
+    low_scenario?: number
+    base_scenario?: number
+    high_scenario?: number
+    confidence_level?: number
   }
   next_steps: string[]
   owner: string
   kpis: string[]
+  risks?: string[]
+  dependencies?: string[]
+  resourceRequirements?: {
+    technical: string
+    human: string
+    budget: string
+  }
+  changeManagement?: string
 }
 
 interface InferaAssessment {
@@ -69,11 +95,33 @@ interface InferaAssessment {
   roadmap: RoadmapItem[]
   executiveSummary: {
     totalPotentialSavings: number
+    savingsRange?: {
+      low: number
+      base: number
+      high: number
+    }
     quickWins: number
+    strategicInitiatives?: number
     implementationTimeframe: string
     topRecommendation: string
+    keySuccessFactors?: string[]
+    businessCase?: string
+    competitiveAdvantage?: string
   }
   aiInsights: string[]
+  industryBenchmarks?: {
+    automationMaturity: string
+    typicalROI: string
+    commonChallenges: string[]
+    successPatterns: string[]
+  }
+  implementationStrategy?: {
+    phase1_30days: string
+    phase2_60days: string
+    phase3_90days: string
+    criticalSuccessFactors: string[]
+    potentialRoadblocks: string[]
+  }
 }
 
 export class InferaAIService {
@@ -118,9 +166,9 @@ export class InferaAIService {
     try {
       const response = await this.makeClaudeRequest({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
+        max_tokens: 6000,
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3
+        temperature: 0.1
       })
 
       const assessment = this.parseClaudeResponse(response.content[0].text)
@@ -135,51 +183,48 @@ export class InferaAIService {
   }
 
   private buildComprehensivePrompt(input: z.infer<typeof AssessmentInputSchema>): string {
-    return `You are an expert AI implementation consultant generating a comprehensive business automation assessment report. 
+    // Extract key metrics from the comprehensive answers
+    const workflowDescription = input.answers.find(a => a.id === 'workflow_description')?.answer || 'Not specified'
+    const processOwner = input.answers.find(a => a.id === 'process_owner')?.answer || 'Not specified'
+    const urgencyValue = input.answers.find(a => a.id === 'urgency_value')?.answer || 'Not specified'
+    const timeCost = input.answers.find(a => a.id === 'time_cost')?.answer || 'Not specified'
+    const monetaryCost = input.answers.find(a => a.id === 'monetary_cost')?.answer || 'Not specified'
+    const workflowSteps = input.answers.find(a => a.id === 'workflow_steps')?.answer || 'Not specified'
+    const painPoints = input.answers.find(a => a.id === 'pain_points')?.answer || 'Not specified'
+    const currentSoftware = input.answers.find(a => a.id === 'current_software')?.answer || []
+    const manualTasks = input.answers.find(a => a.id === 'manual_tasks')?.answer || 'Not specified'
+    const peopleCount = input.answers.find(a => a.id === 'people_count')?.answer || 'Not specified'
+    const frequency = input.answers.find(a => a.id === 'frequency')?.answer || 'Not specified'
+    const errorRate = input.answers.find(a => a.id === 'error_rate')?.answer || 'Not specified'
+    const errorCost = input.answers.find(a => a.id === 'error_cost')?.answer || 'Not specified'
+    const whyNotSolved = input.answers.find(a => a.id === 'why_not_solved')?.answer || 'Not specified'
+    const successfulSolution = input.answers.find(a => a.id === 'successful_solution')?.answer || 'Not specified'
 
-COMPANY CONTEXT:
-- Industry: ${input.companyProfile.industry}
-- Size: ${input.companyProfile.size}
-- Budget: ${input.companyProfile.budget_range || 'Not specified'}
+    return `You are an AI automation consultant creating a business assessment for a ${input.companyProfile.size} ${input.companyProfile.industry} company.
 
-USER RESPONSES:
-${input.answers.map(a => `${a.category}: ${a.question} → ${JSON.stringify(a.answer)}`).join('\n')}
+BUSINESS CONTEXT:
+- Workflow: ${workflowDescription}
+- Owner: ${processOwner}  
+- Time Cost: ${timeCost}
+- Financial Impact: ${monetaryCost}
+- Pain Points: ${painPoints}
+- Current State: ${workflowSteps}
+- Manual Tasks: ${manualTasks}
+- People: ${peopleCount}
+- Frequency: ${frequency}
+- Error Rate: ${errorRate}
+- Why Unsolved: ${whyNotSolved}
+- Success Vision: ${successfulSolution}
 
-ADDITIONAL CONTEXT:
-${input.customProblem || 'None provided'}
+TASK: Generate a focused automation assessment with realistic recommendations.
 
-AVAILABLE TOOL CATEGORIES (select from these):
-- Document Processing (OCR, invoice automation, form processing)
-- Email Automation (filtering, responses, routing)
-- Customer Service (chatbots, ticket routing, knowledge base)
-- Workflow Automation (approvals, notifications, integrations)
-- Data Entry (CRM updates, spreadsheet automation)
-- Financial Processes (expense tracking, payment processing)
-- Sales Tools (lead scoring, pipeline management)
-
-GENERATE A COMPLETE ASSESSMENT WITH:
-
-1. PROCESS FLAGS (3-6 key automation opportunities):
-   - Identify specific manual processes that can be automated
-   - Focus on high-impact, realistic opportunities
-   - Consider company size and industry constraints
-
-2. RECOMMENDED TOOLS (4-8 specific tools):
-   - Match tools to identified processes
-   - Include realistic pricing estimates
-   - Prioritize by impact/effort ratio
-   - Focus on proven solutions for their company size
-
-3. IMPLEMENTATION ROADMAP (3-5 prioritized items):
-   - Order by impact vs effort (quick wins first)
-   - Include realistic timelines and ROI estimates
-   - Consider change management and dependencies
-
-4. EXECUTIVE SUMMARY:
-   - Total potential annual savings
-   - Number of quick wins (30-day implementations)
-   - Overall timeframe
-   - Top single recommendation
+GUIDELINES:
+- Focus on the specific workflow described
+- Provide 3-5 process flags with clear automation opportunities
+- Recommend 4-6 practical tools with real pricing
+- Create 3-4 roadmap items prioritized by impact/effort
+- Include realistic ROI calculations
+- Keep insights actionable and specific
 
 Return ONLY valid JSON in this exact format:
 
@@ -187,30 +232,38 @@ Return ONLY valid JSON in this exact format:
   "processFlags": [
     {
       "id": "flag_1",
-      "label": "Specific process name",
-      "category": "process_category",
+      "label": "Process name",
+      "category": "automation_category", 
       "confidence": 0.85,
-      "impact": "high"
+      "impact": "high",
+      "currentState": "How it works now",
+      "automationPotential": "How to automate it",
+      "timeSavingsPerInstance": "2 hours saved per invoice",
+      "errorReduction": "90% error reduction"
     }
   ],
   "recommendedTools": [
     {
-      "id": "tool_1", 
+      "id": "tool_1",
       "name": "Tool Name",
-      "vendor": "Vendor Name",
-      "description": "What it does specifically",
-      "useCase": "How it solves their problem",
-      "pricing": "$X-Y/month",
+      "vendor": "Company Name", 
+      "description": "What it does",
+      "useCase": "How it helps your workflow",
+      "pricing": "$200-500/month",
       "timeToValue": "2-4 weeks",
-      "matchReason": "Why it fits their needs",
-      "priority": 1
+      "matchReason": "Why it fits your needs",
+      "priority": 1,
+      "prosAndCons": {
+        "pros": ["Easy to use", "Quick setup"],
+        "cons": ["Monthly cost", "Learning curve"]
+      }
     }
   ],
   "roadmap": [
     {
       "id": "roadmap_1",
-      "title": "Initiative Name", 
-      "description": "What this accomplishes",
+      "title": "Project Name",
+      "description": "What this achieves", 
       "priority": "quick_win",
       "timeline": "30_days",
       "impact": 4,
@@ -220,7 +273,7 @@ Return ONLY valid JSON in this exact format:
         "implementation_cost": 5000,
         "payback_months": 2
       },
-      "next_steps": ["Step 1", "Step 2", "Step 3"],
+      "next_steps": ["Step 1", "Step 2"],
       "owner": "Department/Role",
       "kpis": ["Metric 1", "Metric 2"]
     }
@@ -228,13 +281,14 @@ Return ONLY valid JSON in this exact format:
   "executiveSummary": {
     "totalPotentialSavings": 150000,
     "quickWins": 2,
-    "implementationTimeframe": "3-6 months for full rollout",
-    "topRecommendation": "Start with X because Y"
+    "implementationTimeframe": "3-6 months",
+    "topRecommendation": "Start with X because Y",
+    "businessCase": "Key business rationale"
   },
   "aiInsights": [
-    "Key insight about their business",
-    "Important automation opportunity",
-    "Strategic recommendation"
+    "Key insight about automation opportunity",
+    "Strategic recommendation",
+    "Industry-specific observation"
   ]
 }`
   }
@@ -271,7 +325,9 @@ Return ONLY valid JSON in this exact format:
           implementationTimeframe: "3-6 months",
           topRecommendation: "Start with process automation"
         },
-        aiInsights: parsed.aiInsights || []
+        aiInsights: parsed.aiInsights || [],
+        industryBenchmarks: parsed.industryBenchmarks,
+        implementationStrategy: parsed.implementationStrategy
       }
 
     } catch (error) {
