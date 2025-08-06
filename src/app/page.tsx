@@ -63,8 +63,8 @@ export default function HomePage() {
             <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12 border border-white/10 max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-accent">
+                  <div className="w-16 h-16 bg-gray-400/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
                       <path d="M12 2L2 7V10C2 16 6 20.5 12 22C18 20.5 22 16 22 10V7L12 2Z" stroke="currentColor" strokeWidth="2" fill="none"/>
                     </svg>
                   </div>
@@ -75,8 +75,8 @@ export default function HomePage() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-accent2/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-accent2">
+                  <div className="w-16 h-16 bg-gray-400/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
                       <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" fill="none"/>
                     </svg>
                   </div>
@@ -87,8 +87,8 @@ export default function HomePage() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-yellow-400/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-yellow-400">
+                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
                       <path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V16.5C21 17.9001 21 18.6002 20.7275 19.135C20.4878 19.6054 20.1054 19.9878 19.635 20.2275C19.1002 20.5 18.4001 20.5 17 20.5H7C5.59987 20.5 4.8998 20.5 4.36502 20.2275C3.89462 19.9878 3.51217 19.6054 3.27248 19.135C3 18.6002 3 17.9001 3 16.5V8.5C3 7.09987 3 6.3998 3.27248 5.86502C3.51217 5.39462 3.89462 5.01217 4.36502 4.77248C4.8998 4.5 5.59987 4.5 7 4.5H17C18.4001 4.5 19.1002 4.5 19.635 4.77248C20.1054 5.01217 20.4878 5.39462 20.7275 5.86502C21 6.3998 21 7.09987 21 8.5Z" stroke="currentColor" strokeWidth="2" fill="none"/>
                     </svg>
                   </div>

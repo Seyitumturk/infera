@@ -10,31 +10,31 @@ interface InlineAIAuditProps {
 }
 
 const PROCESS_QUESTIONS = [
-  // Part 1: Universal Qualifying Questions
+  // Part 1: Business Process Questions
   {
     id: 'workflow_description',
-    category: 'Universal Qualifying Questions',
-    question: 'Describe the exact workflow or process you want to automate/improve (e.g., "Invoice processing", "Customer onboarding", "Email handling")',
+    category: 'Business Process Questions',
+    question: 'What are the most time-consuming tasks your team handles daily?',
     type: 'text' as const,
-    placeholder: 'e.g., Invoice processing from receipt to payment approval'
+    placeholder: 'e.g., Processing invoices, managing customer support tickets, data entry tasks'
   },
   {
     id: 'process_owner',
-    category: 'Universal Qualifying Questions',
+    category: 'Business Process Questions',
     question: 'Who currently owns or manages this process? (Name, role)',
     type: 'text' as const,
     placeholder: 'e.g., Sarah Johnson, Accounts Payable Manager'
   },
   {
     id: 'urgency_value',
-    category: 'Universal Qualifying Questions',
+    category: 'Business Process Questions',
     question: 'Why is improving this workflow urgent or valuable? What happens if nothing changes?',
     type: 'text' as const,
     placeholder: 'e.g., We lose 2 hours daily to manual data entry, causing payment delays'
   },
   {
     id: 'time_cost',
-    category: 'Universal Qualifying Questions',
+    category: 'Business Process Questions',
     question: 'Roughly how many hours per week does your team spend on this process today?',
     type: 'single_choice' as const,
     options: [
@@ -47,7 +47,7 @@ const PROCESS_QUESTIONS = [
   },
   {
     id: 'monetary_cost',
-    category: 'Universal Qualifying Questions',
+    category: 'Business Process Questions',
     question: 'Can you estimate monthly or yearly monetary costs (labor, errors, delays) of this process?',
     type: 'single_choice' as const,
     options: [
@@ -489,11 +489,74 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
             </div>
           )}
 
-          {/* Progress */}
-          <div className="flex justify-center gap-6 text-sm text-gray-400 mt-8">
-            <span className={appState === 'intake' ? 'text-accent' : ''}>Assessment</span>
-            <span className={appState === 'processing' ? 'text-accent' : ''}>Analysis</span>
-            <span className={appState === 'results' ? 'text-accent' : ''}>Results</span>
+          {/* Modern Progress Indicator */}
+          <div className="flex items-center justify-center gap-8 mt-12">
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                appState === 'intake' 
+                  ? 'bg-accent text-white shadow-lg shadow-accent/30' 
+                  : 'bg-white/10 text-gray-400'
+              }`}>
+                <span className="text-sm font-semibold">1</span>
+              </div>
+              <div className="text-center">
+                <div className={`text-sm font-medium transition-colors ${
+                  appState === 'intake' ? 'text-accent' : 'text-gray-400'
+                }`}>Assessment</div>
+              </div>
+            </div>
+            
+            <div className={`w-12 h-0.5 transition-colors ${
+              appState === 'processing' || appState === 'results' ? 'bg-accent' : 'bg-white/20'
+            }`}></div>
+            
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                appState === 'processing' 
+                  ? 'bg-accent text-white shadow-lg shadow-accent/30' 
+                  : appState === 'results'
+                  ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
+                  : 'bg-white/10 text-gray-400'
+              }`}>
+                {appState === 'processing' ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="animate-spin">
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                ) : (
+                  <span className="text-sm font-semibold">2</span>
+                )}
+              </div>
+              <div className="text-center">
+                <div className={`text-sm font-medium transition-colors ${
+                  appState === 'processing' ? 'text-accent' : appState === 'results' ? 'text-green-400' : 'text-gray-400'
+                }`}>Analysis</div>
+              </div>
+            </div>
+            
+            <div className={`w-12 h-0.5 transition-colors ${
+              appState === 'results' ? 'bg-accent' : 'bg-white/20'
+            }`}></div>
+            
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                appState === 'results' 
+                  ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' 
+                  : 'bg-white/10 text-gray-400'
+              }`}>
+                {appState === 'results' ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <span className="text-sm font-semibold">3</span>
+                )}
+              </div>
+              <div className="text-center">
+                <div className={`text-sm font-medium transition-colors ${
+                  appState === 'results' ? 'text-green-400' : 'text-gray-400'
+                }`}>Results</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -522,6 +585,7 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
                       answer={answers[PROCESS_QUESTIONS[currentQuestion].id]}
                       onAnswer={(answer) => handleAnswer(PROCESS_QUESTIONS[currentQuestion].id, answer)}
                       onNext={handleNext}
+                      onBack={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
                       questionNumber={currentQuestion + 1}
                       totalQuestions={PROCESS_QUESTIONS.length}
                     />
@@ -599,17 +663,20 @@ function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: CompanyProfile) 
   }, [])
 
   return (
-    <div className="max-w-md mx-auto">
-      <h3 className="text-2xl font-bold text-white mb-6">Tell Us About Your Business</h3>
+    <div className="max-w-lg mx-auto">
+      <div className="text-center mb-8">
+        <h3 className="text-3xl font-bold text-white mb-3">Tell Us About Your Business</h3>
+        <p className="text-gray-400">Help us understand your company to provide better recommendations</p>
+      </div>
       
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
-          <label className="block text-white mb-2">What kind of business are you in?</label>
+          <label className="block text-white mb-3 text-lg font-medium">What kind of business are you in?</label>
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setIsIndustryOpen(!isIndustryOpen)}
-              className="w-full p-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-0 focus:border-white/30 transition-colors flex items-center justify-between"
+              className="w-full p-4 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all duration-300 flex items-center justify-between hover:bg-white/10"
             >
               <span className={profile.industry ? 'text-white' : 'text-gray-400'}>
                 {profile.industry || 'Select industry'}
@@ -645,19 +712,26 @@ function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: CompanyProfile) 
         </div>
 
         <div>
-          <label className="block text-white mb-2">How big is your team?</label>
-          <div className="grid grid-cols-2 gap-3">
+          <label className="block text-white mb-3 text-lg font-medium">How big is your team?</label>
+          <div className="grid grid-cols-2 gap-4">
             {['Startup (1-10)', 'Small (11-50)', 'Medium (51-500)', 'Enterprise (500+)'].map((size) => (
               <button
                 key={size}
                 onClick={() => setProfile(prev => ({ ...prev, size }))}
-                className={`p-3 rounded-lg border transition-all ${
+                className={`p-4 rounded-xl border transition-all duration-300 hover:scale-[1.02] ${
                   profile.size === size
-                    ? 'bg-accent/20 border-accent text-accent'
-                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                    ? 'bg-accent/20 border-accent text-accent shadow-lg shadow-accent/20'
+                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/30'
                 }`}
               >
-                {size}
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{size}</span>
+                  {profile.size === size && (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-accent">
+                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
               </button>
             ))}
           </div>
@@ -666,7 +740,8 @@ function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: CompanyProfile) 
         <Button 
           onClick={handleSubmit} 
           disabled={!profile.industry || !profile.size}
-          className="w-full"
+          className="w-full py-4 text-lg font-medium"
+          size="lg"
         >
           Continue to Assessment
         </Button>
@@ -680,6 +755,7 @@ function QuestionForm({
   answer,
   onAnswer,
   onNext,
+  onBack,
   questionNumber,
   totalQuestions
 }: {
@@ -687,38 +763,73 @@ function QuestionForm({
   answer: any
   onAnswer: (answer: any) => void
   onNext: () => void
+  onBack?: () => void
   questionNumber: number
   totalQuestions: number
 }) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Tab') {
+        event.preventDefault()
+        onNext()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onNext])
+
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-accent font-medium">Question {questionNumber} of {totalQuestions}</span>
-          <div className="flex gap-1">
+      <div className="mb-8">
+        {/* Modern Step Tracker */}
+        <div className="mb-6">
+          <div className="text-center mb-3">
+            <span className="text-sm text-gray-400">Question {questionNumber} of {totalQuestions}</span>
+            <span className="text-xs text-gray-500 ml-2">• Approx. 3-5 minutes</span>
+          </div>
+          <div className="flex justify-center items-center gap-2">
             {Array.from({ length: totalQuestions }).map((_, i) => (
               <div
                 key={i}
-                className={`w-2 h-2 rounded-full ${
-                  i < questionNumber ? 'bg-accent' : 'bg-white/20'
+                className={`transition-all duration-300 ${
+                  i < questionNumber 
+                    ? 'w-8 h-2 bg-accent rounded-full' 
+                    : i === questionNumber - 1
+                    ? 'w-8 h-2 bg-accent rounded-full'
+                    : 'w-2 h-2 bg-white/20 rounded-full'
                 }`}
               />
             ))}
           </div>
         </div>
-        <h3 className="text-2xl font-bold text-white mb-2">{question.category}</h3>
-        <p className="text-gray-300">{question.question}</p>
+        
+        {/* Question Content */}
+        <div className="text-center mb-6">
+          <p className="text-xl text-gray-200 leading-relaxed">{question.question}</p>
+        </div>
       </div>
 
       <div className="mb-8">
         {question.type === 'text' ? (
-          <textarea
-            value={answer || ''}
-            onChange={(e) => onAnswer(e.target.value)}
-            placeholder={question.placeholder}
-            className="w-full p-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-white/30 resize-none transition-colors"
-            rows={4}
-          />
+          <div className="relative">
+            <textarea
+              value={answer || ''}
+              onChange={(e) => onAnswer(e.target.value)}
+              placeholder={question.placeholder}
+              className="w-full p-6 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none transition-all duration-300 text-lg leading-relaxed"
+              rows={4}
+            />
+            <div className="absolute bottom-4 right-4 text-xs text-gray-500">
+              {(answer || '').length > 0 ? `${(answer || '').length} characters` : (
+                <span className="flex items-center gap-1">
+                  <span>Press</span>
+                  <kbd className="px-1.5 py-0.5 text-xs bg-white/10 rounded border-0 text-gray-400">Tab</kbd>
+                  <span>to skip</span>
+                </span>
+              )}
+            </div>
+          </div>
         ) : (
           <div className="space-y-3">
             {question.options.map((option: string) => (
@@ -730,36 +841,45 @@ function QuestionForm({
                     : [...(answer || []), option]
                   : option
                 )}
-                className={`w-full p-4 text-left rounded-lg border transition-all ${
+                className={`w-full p-4 text-left rounded-lg border transition-all hover:scale-[1.02] ${
                   (question.type === 'multiple_choice' ? (answer || []).includes(option) : answer === option)
-                    ? 'bg-accent/20 border-accent text-accent'
-                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                    ? 'bg-accent/20 border-accent text-accent shadow-lg shadow-accent/20'
+                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/30'
                 }`}
               >
-                {option}
+                <div className="flex items-center justify-between">
+                  <span>{option}</span>
+                  {(question.type === 'multiple_choice' ? (answer || []).includes(option) : answer === option) && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-accent">
+                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      <div className="flex gap-4">
-        <Button
+      <div className="flex items-center justify-center gap-4 w-full">
+        {questionNumber > 1 && onBack && (
+          <button
+            onClick={onBack}
+            className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium hover:scale-105"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="rotate-180">
+              <path d="M5 12H19M12 5L19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back
+          </button>
+        )}
+        <button
           onClick={onNext}
           disabled={!answer || (Array.isArray(answer) && answer.length === 0) || (typeof answer === 'string' && answer.trim().length === 0)}
-          className="flex-1"
+          className="px-8 py-3 bg-gradient-to-r from-accent to-accent2 hover:from-accent/90 hover:to-accent2/90 text-white rounded-xl transition-all duration-300 font-medium hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
         >
-          {questionNumber === totalQuestions ? 'Generate My AI Roadmap' : 'Next Question'}
-        </Button>
-        {question.type === 'text' && (
-          <Button
-            variant="outline"
-            onClick={() => onAnswer('Prefer not to answer')}
-            className="px-6"
-          >
-            Skip
-          </Button>
-        )}
+          {questionNumber === totalQuestions ? 'Generate My AI Roadmap' : 'Continue'}
+        </button>
       </div>
     </div>
   )
@@ -826,9 +946,11 @@ function AssessmentResults({
             <p className="text-yellow-200 text-sm">{error}</p>
           </div>
         )}
-        <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-          Our AI has analyzed your business and identified specific automation opportunities.
-        </p>
+        <div className="mt-8 mb-6 flex justify-center">
+          <p className="text-gray-300 max-w-2xl text-center">
+            Our AI has analyzed your business and identified specific automation opportunities.
+          </p>
+        </div>
         <Button onClick={onRestart} variant="outline" size="sm">
           Start New Assessment
         </Button>
@@ -836,7 +958,7 @@ function AssessmentResults({
 
       {/* Executive Summary */}
       {assessment.executiveSummary && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
+        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
           <div className="text-center mb-8">
             <h4 className="text-2xl font-bold text-white mb-3">Executive Summary</h4>
             {assessment.executiveSummary.businessCase && (
@@ -880,7 +1002,7 @@ function AssessmentResults({
           {/* Top Recommendation */}
           {assessment.executiveSummary.topRecommendation && (
             <div className="bg-gradient-to-r from-accent/20 to-accent2/20 rounded-lg p-6 mb-6">
-              <h5 className="text-lg font-semibold text-white mb-2">🎯 Top Recommendation</h5>
+              <h5 className="text-lg font-semibold text-white mb-2">Top Recommendation</h5>
               <p className="text-gray-200">{assessment.executiveSummary.topRecommendation}</p>
             </div>
           )}
@@ -889,7 +1011,7 @@ function AssessmentResults({
           <div className="grid md:grid-cols-2 gap-6">
             {assessment.executiveSummary.keySuccessFactors && (
               <div className="bg-white/5 rounded-lg p-6">
-                <h5 className="text-lg font-semibold text-white mb-3">🔑 Key Success Factors</h5>
+                <h5 className="text-lg font-semibold text-white mb-3">Key Success Factors</h5>
                 <ul className="space-y-2">
                   {assessment.executiveSummary.keySuccessFactors.map((factor, i) => (
                     <li key={i} className="flex items-center gap-2 text-gray-300">
@@ -902,7 +1024,7 @@ function AssessmentResults({
             )}
             {assessment.executiveSummary.competitiveAdvantage && (
               <div className="bg-white/5 rounded-lg p-6">
-                <h5 className="text-lg font-semibold text-white mb-3">🚀 Competitive Advantage</h5>
+                <h5 className="text-lg font-semibold text-white mb-3">Competitive Advantage</h5>
                 <p className="text-gray-300">{assessment.executiveSummary.competitiveAdvantage}</p>
               </div>
             )}
@@ -912,10 +1034,12 @@ function AssessmentResults({
 
       {/* Process Flags */}
       {assessment.processFlags?.length > 0 && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <h4 className="text-2xl font-bold text-white mb-3">Deep Process Analysis</h4>
-            <p className="text-gray-300 max-w-2xl mx-auto">Detailed breakdown of automation opportunities identified in your workflow</p>
+        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
+          <div className="text-center mb-12">
+            <h4 className="text-2xl font-bold text-white mb-4">Deep Process Analysis</h4>
+            <div className="mt-6 flex justify-center">
+              <p className="text-gray-300 max-w-2xl text-center">Detailed breakdown of automation opportunities identified in your workflow</p>
+            </div>
           </div>
           <div className="space-y-6 max-w-5xl mx-auto">
             {assessment.processFlags.map((flag: any, index: number) => (
@@ -1002,10 +1126,12 @@ function AssessmentResults({
 
       {/* Recommended Tools */}
       {assessment.recommendedTools?.length > 0 && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <h4 className="text-2xl font-bold text-white mb-3">Enterprise Solution Analysis</h4>
-            <p className="text-gray-300 max-w-2xl mx-auto">Comprehensive vendor evaluation with pros, cons, and implementation guidance</p>
+        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
+          <div className="text-center mb-12">
+            <h4 className="text-2xl font-bold text-white mb-4">Enterprise Solution Analysis</h4>
+            <div className="mt-6 flex justify-center">
+              <p className="text-gray-300 max-w-2xl text-center">Comprehensive vendor evaluation with pros, cons, and implementation guidance</p>
+            </div>
           </div>
           <div className="space-y-6 max-w-6xl mx-auto">
             {assessment.recommendedTools.map((tool: any, index: number) => (
@@ -1075,7 +1201,7 @@ function AssessmentResults({
                   {tool.prosAndCons && (
                     <div className="grid md:grid-cols-2 gap-6 mb-6">
                       <div>
-                        <h6 className="font-medium text-green-400 mb-2">✓ Advantages</h6>
+                        <h6 className="font-medium text-green-400 mb-2">Advantages</h6>
                         <ul className="space-y-1">
                           {tool.prosAndCons.pros.map((pro: string, i: number) => (
                             <li key={i} className="text-sm text-gray-300 flex items-center gap-2">
@@ -1121,10 +1247,12 @@ function AssessmentResults({
 
       {/* Implementation Roadmap */}
       {assessment.roadmap?.length > 0 && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <h4 className="text-2xl font-bold text-white mb-3">Strategic Implementation Roadmap</h4>
-            <p className="text-gray-300 max-w-2xl mx-auto">Detailed 30/60/90-day execution plan with ROI scenarios, risk analysis, and resource requirements</p>
+        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
+          <div className="text-center mb-12">
+            <h4 className="text-2xl font-bold text-white mb-4">Strategic Implementation Roadmap</h4>
+            <div className="mt-6 flex justify-center">
+              <p className="text-gray-300 max-w-2xl text-center">Detailed 30/60/90-day execution plan with ROI scenarios, risk analysis, and resource requirements</p>
+            </div>
           </div>
           <div className="space-y-8 max-w-6xl mx-auto">
             {assessment.roadmap.map((item: any, index: number) => (
@@ -1208,15 +1336,15 @@ function AssessmentResults({
                   {item.resourceRequirements && (
                     <div className="grid md:grid-cols-3 gap-6 mb-6">
                       <div>
-                        <h6 className="font-medium text-white mb-2">👥 Human Resources</h6>
+                        <h6 className="font-medium text-white mb-2">Human Resources</h6>
                         <p className="text-sm text-gray-300">{item.resourceRequirements.human}</p>
                       </div>
                       <div>
-                        <h6 className="font-medium text-white mb-2">⚙️ Technical Requirements</h6>
+                        <h6 className="font-medium text-white mb-2">Technical Requirements</h6>
                         <p className="text-sm text-gray-300">{item.resourceRequirements.technical}</p>
                       </div>
                       <div>
-                        <h6 className="font-medium text-white mb-2">💰 Budget Allocation</h6>
+                        <h6 className="font-medium text-white mb-2">Budget Allocation</h6>
                         <p className="text-sm text-gray-300">{item.resourceRequirements.budget}</p>
                       </div>
                     </div>
@@ -1226,7 +1354,7 @@ function AssessmentResults({
                   <div className="grid md:grid-cols-2 gap-6 mb-6">
                     {item.risks && item.risks.length > 0 && (
                       <div>
-                        <h6 className="font-medium text-red-400 mb-2">⚠️ Key Risks</h6>
+                        <h6 className="font-medium text-red-400 mb-2">Key Risks</h6>
                         <ul className="space-y-1">
                           {item.risks.map((risk: string, i: number) => (
                             <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
@@ -1239,7 +1367,7 @@ function AssessmentResults({
                     )}
                     {item.dependencies && item.dependencies.length > 0 && (
                       <div>
-                        <h6 className="font-medium text-yellow-400 mb-2">🔗 Dependencies</h6>
+                        <h6 className="font-medium text-yellow-400 mb-2">Dependencies</h6>
                         <ul className="space-y-1">
                           {item.dependencies.map((dep: string, i: number) => (
                             <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
@@ -1255,7 +1383,7 @@ function AssessmentResults({
                   {/* Change Management */}
                   {item.changeManagement && (
                     <div className="mb-6">
-                      <h6 className="font-medium text-white mb-2">📈 Change Management</h6>
+                      <h6 className="font-medium text-white mb-2">Change Management</h6>
                       <p className="text-sm text-gray-300">{item.changeManagement}</p>
                     </div>
                   )}
@@ -1264,7 +1392,7 @@ function AssessmentResults({
                   <div className="grid md:grid-cols-2 gap-6">
                     {item.next_steps?.length > 0 && (
                       <div>
-                        <h6 className="font-medium text-white mb-2">📋 Next Steps</h6>
+                        <h6 className="font-medium text-white mb-2">Next Steps</h6>
                         <ul className="text-sm text-gray-300 space-y-2">
                           {item.next_steps.map((step: string, i: number) => (
                             <li key={i} className="flex items-start gap-2">
@@ -1279,7 +1407,7 @@ function AssessmentResults({
                     )}
                     {item.kpis?.length > 0 && (
                       <div>
-                        <h6 className="font-medium text-white mb-2">📊 Success Metrics</h6>
+                        <h6 className="font-medium text-white mb-2">Success Metrics</h6>
                         <ul className="text-sm text-gray-300 space-y-1">
                           {item.kpis.map((kpi: string, i: number) => (
                             <li key={i} className="flex items-center gap-2">
@@ -1307,25 +1435,27 @@ function AssessmentResults({
 
       {/* Industry Benchmarks */}
       {assessment.industryBenchmarks && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <h4 className="text-2xl font-bold text-white mb-3">Industry Benchmarks & Context</h4>
-            <p className="text-gray-300 max-w-2xl mx-auto">How your automation maturity compares to industry standards</p>
+        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
+          <div className="text-center mb-12">
+            <h4 className="text-2xl font-bold text-white mb-4">Industry Benchmarks & Context</h4>
+            <div className="mt-6 flex justify-center">
+              <p className="text-gray-300 max-w-2xl text-center">How your automation maturity compares to industry standards</p>
+            </div>
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <div className="space-y-6">
               <div>
-                <h5 className="text-lg font-semibold text-white mb-3">📊 Automation Maturity</h5>
+                <h5 className="text-lg font-semibold text-white mb-3">Automation Maturity</h5>
                 <p className="text-gray-300">{assessment.industryBenchmarks.automationMaturity}</p>
               </div>
               <div>
-                <h5 className="text-lg font-semibold text-white mb-3">💰 Typical ROI Range</h5>
+                <h5 className="text-lg font-semibold text-white mb-3">Typical ROI Range</h5>
                 <p className="text-accent font-medium">{assessment.industryBenchmarks.typicalROI}</p>
               </div>
             </div>
             <div className="space-y-6">
               <div>
-                <h5 className="text-lg font-semibold text-white mb-3">⚠️ Common Challenges</h5>
+                <h5 className="text-lg font-semibold text-white mb-3">Common Challenges</h5>
                 <ul className="space-y-2">
                   {assessment.industryBenchmarks.commonChallenges.map((challenge: string, i: number) => (
                     <li key={i} className="flex items-start gap-2 text-gray-300">
@@ -1336,7 +1466,7 @@ function AssessmentResults({
                 </ul>
               </div>
               <div>
-                <h5 className="text-lg font-semibold text-white mb-3">✅ Success Patterns</h5>
+                <h5 className="text-lg font-semibold text-white mb-3">Success Patterns</h5>
                 <ul className="space-y-2">
                   {assessment.industryBenchmarks.successPatterns.map((pattern: string, i: number) => (
                     <li key={i} className="flex items-start gap-2 text-gray-300">
@@ -1353,24 +1483,26 @@ function AssessmentResults({
 
       {/* Implementation Strategy */}
       {assessment.implementationStrategy && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <h4 className="text-2xl font-bold text-white mb-3">30/60/90-Day Implementation Strategy</h4>
-            <p className="text-gray-300 max-w-2xl mx-auto">Phased approach to ensure successful deployment and adoption</p>
+        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
+          <div className="text-center mb-12">
+            <h4 className="text-2xl font-bold text-white mb-4">30/60/90-Day Implementation Strategy</h4>
+            <div className="mt-6 flex justify-center">
+              <p className="text-gray-300 max-w-2xl text-center">Phased approach to ensure successful deployment and adoption</p>
+            </div>
           </div>
           <div className="space-y-6 max-w-5xl mx-auto">
             {/* Phase Breakdown */}
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-green-500/10 rounded-lg p-6 border border-green-500/20">
-                <h5 className="text-xl font-semibold text-green-300 mb-3">📅 Phase 1: 30 Days</h5>
+                <h5 className="text-xl font-semibold text-green-300 mb-3">Phase 1: 30 Days</h5>
                 <p className="text-gray-300">{assessment.implementationStrategy.phase1_30days}</p>
               </div>
               <div className="bg-blue-500/10 rounded-lg p-6 border border-blue-500/20">
-                <h5 className="text-xl font-semibold text-blue-300 mb-3">📅 Phase 2: 60 Days</h5>
+                <h5 className="text-xl font-semibold text-blue-300 mb-3">Phase 2: 60 Days</h5>
                 <p className="text-gray-300">{assessment.implementationStrategy.phase2_60days}</p>
               </div>
               <div className="bg-purple-500/10 rounded-lg p-6 border border-purple-500/20">
-                <h5 className="text-xl font-semibold text-purple-300 mb-3">📅 Phase 3: 90 Days</h5>
+                <h5 className="text-xl font-semibold text-purple-300 mb-3">Phase 3: 90 Days</h5>
                 <p className="text-gray-300">{assessment.implementationStrategy.phase3_90days}</p>
               </div>
             </div>
@@ -1378,7 +1510,7 @@ function AssessmentResults({
             {/* Success Factors & Roadblocks */}
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h5 className="text-lg font-semibold text-white mb-4">🎯 Critical Success Factors</h5>
+                <h5 className="text-lg font-semibold text-white mb-4">Critical Success Factors</h5>
                 <ul className="space-y-3">
                   {assessment.implementationStrategy.criticalSuccessFactors.map((factor: string, i: number) => (
                     <li key={i} className="flex items-start gap-3 p-3 bg-green-500/10 rounded border border-green-500/20">
@@ -1391,7 +1523,7 @@ function AssessmentResults({
                 </ul>
               </div>
               <div>
-                <h5 className="text-lg font-semibold text-white mb-4">🚧 Potential Roadblocks</h5>
+                <h5 className="text-lg font-semibold text-white mb-4">Potential Roadblocks</h5>
                 <ul className="space-y-3">
                   {assessment.implementationStrategy.potentialRoadblocks.map((roadblock: string, i: number) => (
                     <li key={i} className="flex items-start gap-3 p-3 bg-red-500/10 rounded border border-red-500/20">
@@ -1410,16 +1542,18 @@ function AssessmentResults({
 
       {/* AI Insights */}
       {assessment.aiInsights?.length > 0 && (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
-          <div className="text-center mb-8">
-            <h4 className="text-2xl font-bold text-white mb-3">Strategic AI Insights</h4>
-            <p className="text-gray-300 max-w-2xl mx-auto">Deep analysis and strategic recommendations from our AI consultant</p>
+        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
+          <div className="text-center mb-12">
+            <h4 className="text-2xl font-bold text-white mb-4">Strategic AI Insights</h4>
+            <div className="mt-6 flex justify-center">
+              <p className="text-gray-300 max-w-2xl text-center">Deep analysis and strategic recommendations from our AI consultant</p>
+            </div>
           </div>
           <div className="grid gap-6 max-w-4xl mx-auto">
             {assessment.aiInsights.map((insight: string, index: number) => (
               <div key={index} className="flex items-start gap-4 p-6 bg-gradient-to-r from-accent/10 to-accent2/10 rounded-lg border border-accent/20">
                 <div className="w-8 h-8 bg-accent/20 text-accent rounded-full text-sm flex items-center justify-center flex-shrink-0 mt-1">
-                  🧠
+                  AI
                 </div>
                 <p className="text-gray-200 leading-relaxed">{insight}</p>
               </div>

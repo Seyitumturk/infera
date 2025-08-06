@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(copy:*)",
+      "Bash(cp:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }
