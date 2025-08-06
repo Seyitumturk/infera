@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Button from '@/components/ui/Button'
 
@@ -567,12 +567,36 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
 
 function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: CompanyProfile) => void }) {
   const [profile, setProfile] = useState<Partial<CompanyProfile>>({})
+  const [isIndustryOpen, setIsIndustryOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const handleSubmit = () => {
     if (profile.industry && profile.size) {
       onSubmit(profile as CompanyProfile)
     }
   }
+
+  const industries = [
+    'Technology',
+    'Healthcare', 
+    'Finance',
+    'Retail',
+    'Manufacturing',
+    'Professional Services',
+    'Education',
+    'Other'
+  ]
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsIndustryOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <div className="max-w-md mx-auto">
@@ -581,21 +605,43 @@ function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: CompanyProfile) 
       <div className="space-y-6">
         <div>
           <label className="block text-white mb-2">What kind of business are you in?</label>
-          <select
-            value={profile.industry || ''}
-            onChange={(e) => setProfile(prev => ({ ...prev, industry: e.target.value }))}
-            className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-accent"
-          >
-            <option value="">Select industry</option>
-            <option value="Technology">Technology</option>
-            <option value="Healthcare">Healthcare</option>
-            <option value="Finance">Finance</option>
-            <option value="Retail">Retail</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Professional Services">Professional Services</option>
-            <option value="Education">Education</option>
-            <option value="Other">Other</option>
-          </select>
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsIndustryOpen(!isIndustryOpen)}
+              className="w-full p-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-0 focus:border-white/30 transition-colors flex items-center justify-between"
+            >
+              <span className={profile.industry ? 'text-white' : 'text-gray-400'}>
+                {profile.industry || 'Select industry'}
+              </span>
+              <svg 
+                className={`w-5 h-5 transition-transform ${isIndustryOpen ? 'rotate-180' : ''}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {isIndustryOpen && (
+              <div className="absolute z-50 w-full mt-1 border border-white/20 rounded-lg shadow-xl" style={{backgroundColor: '#06080a'}}>
+                {industries.map((industry) => (
+                  <button
+                    key={industry}
+                    type="button"
+                    onClick={() => {
+                      setProfile(prev => ({ ...prev, industry }))
+                      setIsIndustryOpen(false)
+                    }}
+                    className="w-full px-3 py-2 text-left text-white hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                  >
+                    {industry}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div>
@@ -670,7 +716,7 @@ function QuestionForm({
             value={answer || ''}
             onChange={(e) => onAnswer(e.target.value)}
             placeholder={question.placeholder}
-            className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent resize-none"
+            className="w-full p-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-white/30 resize-none transition-colors"
             rows={4}
           />
         ) : (
