@@ -958,11 +958,13 @@ function AssessmentResults({
 
       {/* Executive Summary */}
       {assessment.executiveSummary && (
-        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
+        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12 text-center">
           <div className="text-center mb-8">
             <h4 className="text-2xl font-bold text-white mb-3">Executive Summary</h4>
             {assessment.executiveSummary.businessCase && (
-              <p className="text-gray-300 max-w-3xl mx-auto">{assessment.executiveSummary.businessCase}</p>
+              <div className="flex justify-center">
+                <p className="text-gray-300 max-w-3xl text-center leading-relaxed" style={{textAlign: 'center'}}>{assessment.executiveSummary.businessCase}</p>
+              </div>
             )}
           </div>
           
@@ -1001,7 +1003,7 @@ function AssessmentResults({
 
           {/* Top Recommendation */}
           {assessment.executiveSummary.topRecommendation && (
-            <div className="bg-gradient-to-r from-accent/20 to-accent2/20 rounded-lg p-6 mb-6">
+            <div className="bg-gradient-to-r from-accent/20 to-accent2/20 rounded-lg p-6 mb-6 text-center">
               <h5 className="text-lg font-semibold text-white mb-2">Top Recommendation</h5>
               <p className="text-gray-200">{assessment.executiveSummary.topRecommendation}</p>
             </div>
@@ -1023,7 +1025,7 @@ function AssessmentResults({
               </div>
             )}
             {assessment.executiveSummary.competitiveAdvantage && (
-              <div className="bg-white/5 rounded-lg p-6">
+              <div className="bg-white/5 rounded-lg p-6 text-center">
                 <h5 className="text-lg font-semibold text-white mb-3">Competitive Advantage</h5>
                 <p className="text-gray-300">{assessment.executiveSummary.competitiveAdvantage}</p>
               </div>
@@ -1041,77 +1043,89 @@ function AssessmentResults({
               <p className="text-gray-300 max-w-2xl text-center">Detailed breakdown of automation opportunities identified in your workflow</p>
             </div>
           </div>
-          <div className="space-y-6 max-w-5xl mx-auto">
+          <div className="grid gap-8 max-w-6xl mx-auto">
             {assessment.processFlags.map((flag: any, index: number) => (
-              <div key={flag.id} className="bg-white/5 rounded-lg overflow-hidden">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h5 className="text-xl font-semibold text-white mb-2">{flag.label}</h5>
-                      <p className="text-sm text-gray-400 capitalize">{flag.category}</p>
+              <div key={flag.id} className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-accent2/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:border-accent/20 hover:shadow-lg hover:shadow-accent/10">
+                  
+                  {/* Header Section */}
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8">
+                    <div className="flex-1">
+                      <h5 className="text-2xl font-bold text-white mb-3">{flag.label}</h5>
+                      <p className="text-lg text-gray-400 capitalize mb-4 lg:mb-0">{flag.category?.replace(/_/g, ' ')}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-sm px-3 py-1 rounded-full ${
-                        flag.impact === 'high' ? 'bg-red-500/20 text-red-300' :
-                        flag.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                        'bg-green-500/20 text-green-300'
+                    <div className="flex items-center gap-4">
+                      <div className={`px-4 py-2 rounded-full font-medium text-sm ${
+                        flag.impact === 'high' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
+                        flag.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                        'bg-green-500/20 text-green-300 border border-green-500/30'
                       }`}>
                         {flag.impact} impact
-                      </span>
+                      </div>
                       {flag.confidence && (
-                        <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded">
+                        <div className="px-3 py-2 bg-blue-500/20 text-blue-300 rounded-lg border border-blue-500/30 text-sm font-medium">
                           {Math.round(flag.confidence * 100)}% confidence
-                        </span>
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Current State & Automation Potential */}
-                  <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  {/* Current State & Automation Approach */}
+                  <div className="grid lg:grid-cols-2 gap-8 mb-8">
                     {flag.currentState && (
-                      <div>
-                        <h6 className="font-medium text-white mb-2">Current State</h6>
-                        <p className="text-sm text-gray-300">{flag.currentState}</p>
+                      <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                        <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                          Current State
+                        </h6>
+                        <p className="text-gray-300 leading-relaxed">{flag.currentState}</p>
                       </div>
                     )}
                     {flag.automationPotential && (
-                      <div>
-                        <h6 className="font-medium text-white mb-2">Automation Approach</h6>
-                        <p className="text-sm text-gray-300">{flag.automationPotential}</p>
+                      <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                        <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                          <div className="w-2 h-2 bg-accent rounded-full"></div>
+                          Automation Approach
+                        </h6>
+                        <p className="text-gray-300 leading-relaxed">{flag.automationPotential}</p>
                       </div>
                     )}
                   </div>
 
-                  {/* Metrics */}
-                  <div className="grid md:grid-cols-3 gap-4 mb-4">
+                  {/* Metrics Cards */}
+                  <div className="flex flex-wrap justify-center gap-6 mb-8">
                     {flag.timeSavingsPerInstance && (
-                      <div className="text-center p-3 bg-white/5 rounded">
-                        <div className="font-semibold text-accent">{flag.timeSavingsPerInstance}</div>
-                        <div className="text-xs text-gray-400">Time Savings</div>
+                      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl p-6 border border-accent/20 text-center min-w-[200px] flex-1 max-w-[280px]">
+                        <div className="text-2xl font-bold text-accent mb-2">{flag.timeSavingsPerInstance}</div>
+                        <div className="text-sm font-medium text-gray-300">Time Savings</div>
                       </div>
                     )}
                     {flag.errorReduction && (
-                      <div className="text-center p-3 bg-white/5 rounded">
-                        <div className="font-semibold text-green-400">{flag.errorReduction}</div>
-                        <div className="text-xs text-gray-400">Error Reduction</div>
+                      <div className="bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-xl p-6 border border-green-500/20 text-center min-w-[200px] flex-1 max-w-[280px]">
+                        <div className="text-2xl font-bold text-green-400 mb-2">{flag.errorReduction}</div>
+                        <div className="text-sm font-medium text-gray-300">Error Reduction</div>
                       </div>
                     )}
                     {flag.complexityScore && (
-                      <div className="text-center p-3 bg-white/5 rounded">
-                        <div className="font-semibold text-white">{flag.complexityScore}/5</div>
-                        <div className="text-xs text-gray-400">Complexity</div>
+                      <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 border border-white/20 text-center min-w-[200px] flex-1 max-w-[280px]">
+                        <div className="text-2xl font-bold text-white mb-2">{flag.complexityScore}/5</div>
+                        <div className="text-sm font-medium text-gray-300">Complexity</div>
                       </div>
                     )}
                   </div>
 
                   {/* Prerequisites */}
                   {flag.prerequisiteConditions && flag.prerequisiteConditions.length > 0 && (
-                    <div>
-                      <h6 className="font-medium text-white mb-2">Prerequisites</h6>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="bg-orange-500/5 rounded-xl p-6 border border-orange-500/20">
+                      <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        Prerequisites
+                      </h6>
+                      <div className="flex flex-wrap gap-3">
                         {flag.prerequisiteConditions.map((condition: string, i: number) => (
-                          <span key={i} className="text-xs px-2 py-1 bg-orange-500/20 text-orange-300 rounded">
-                            {condition}
+                          <span key={i} className="px-3 py-2 bg-orange-500/20 text-orange-300 rounded-lg border border-orange-500/30 text-sm font-medium">
+                            {condition.replace(/_/g, ' ')}
                           </span>
                         ))}
                       </div>
@@ -1133,90 +1147,107 @@ function AssessmentResults({
               <p className="text-gray-300 max-w-2xl text-center">Comprehensive vendor evaluation with pros, cons, and implementation guidance</p>
             </div>
           </div>
-          <div className="space-y-6 max-w-6xl mx-auto">
+          <div className="grid gap-8 max-w-6xl mx-auto">
             {assessment.recommendedTools.map((tool: any, index: number) => (
-              <div key={tool.id} className="bg-white/5 rounded-lg overflow-hidden hover:bg-white/10 transition-all">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h5 className="text-xl font-semibold text-white mb-1">{tool.name}</h5>
-                      <p className="text-sm text-gray-400 mb-2">{tool.vendor}</p>
+              <div key={tool.id} className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-accent2/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:border-accent/20 hover:shadow-lg hover:shadow-accent/10">
+                  
+                  {/* Header Section */}
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8">
+                    <div className="flex-1">
+                      <h5 className="text-2xl font-bold text-white mb-2">{tool.name}</h5>
+                      <p className="text-lg text-gray-400 mb-3">{tool.vendor}</p>
                       {tool.industryFit && (
-                        <p className="text-sm text-blue-300">{tool.industryFit}</p>
+                        <p className="text-blue-300 font-medium mb-4 lg:mb-0">{tool.industryFit}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-accent2 bg-accent2/20 px-2 py-1 rounded">
+                    <div className="flex items-center gap-4">
+                      <div className="px-4 py-2 bg-gradient-to-r from-accent2/30 to-accent2/20 text-accent2 rounded-full font-semibold text-sm border border-accent2/30">
                         Priority #{tool.priority}
-                      </span>
+                      </div>
                       {tool.integrationComplexity && (
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          tool.integrationComplexity === 'low' ? 'bg-green-500/20 text-green-300' :
-                          tool.integrationComplexity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                          'bg-red-500/20 text-red-300'
+                        <div className={`px-3 py-2 rounded-lg font-medium text-sm ${
+                          tool.integrationComplexity === 'low' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
+                          tool.integrationComplexity === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                          'bg-red-500/20 text-red-300 border border-red-500/30'
                         }`}>
                           {tool.integrationComplexity} complexity
-                        </span>
+                        </div>
                       )}
                     </div>
                   </div>
                   
-                  <p className="text-gray-300 mb-6">{tool.description}</p>
+                  <div className="mb-10">
+                    <p className="text-gray-300 leading-relaxed text-lg">{tool.description}</p>
+                  </div>
                   
-                  {/* Key Details */}
-                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="text-center p-3 bg-white/5 rounded">
-                      <div className="font-semibold text-white">{tool.pricing}</div>
-                      <div className="text-xs text-gray-400">Monthly Cost</div>
+                  {/* Key Details - Centered Flex Layout */}
+                  <div className="flex flex-wrap justify-center gap-4 mb-8">
+                    <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/20 text-center min-w-[160px] flex-1 max-w-[200px]">
+                      <div className="text-lg font-bold text-white mb-1 leading-tight">{tool.pricing}</div>
+                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Monthly Cost</div>
                     </div>
                     {tool.implementationCost && (
-                      <div className="text-center p-3 bg-white/5 rounded">
-                        <div className="font-semibold text-accent">{tool.implementationCost}</div>
-                        <div className="text-xs text-gray-400">Setup Cost</div>
+                      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl p-5 border border-accent/20 text-center min-w-[160px] flex-1 max-w-[200px]">
+                        <div className="text-lg font-bold text-accent mb-1 leading-tight">{tool.implementationCost}</div>
+                        <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Setup Cost</div>
                       </div>
                     )}
-                    <div className="text-center p-3 bg-white/5 rounded">
-                      <div className="font-semibold text-green-400">{tool.timeToValue}</div>
-                      <div className="text-xs text-gray-400">Time to Value</div>
+                    <div className="bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-xl p-5 border border-green-500/20 text-center min-w-[160px] flex-1 max-w-[200px]">
+                      <div className="text-lg font-bold text-green-400 mb-1 leading-tight">{tool.timeToValue}</div>
+                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Time to Value</div>
                     </div>
-                    <div className="text-center p-3 bg-white/5 rounded">
-                      <div className="font-semibold text-blue-400">#{tool.priority}</div>
-                      <div className="text-xs text-gray-400">Recommended Order</div>
+                    <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/10 rounded-xl p-5 border border-blue-500/20 text-center min-w-[160px] flex-1 max-w-[200px]">
+                      <div className="text-lg font-bold text-blue-400 mb-1 leading-tight">#{tool.priority}</div>
+                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Recommended Order</div>
                     </div>
                   </div>
 
                   {/* Use Case & Match Reason */}
-                  <div className="grid md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <h6 className="font-medium text-white mb-2">Specific Use Case</h6>
-                      <p className="text-sm text-gray-300">{tool.useCase}</p>
+                  <div className="grid lg:grid-cols-2 gap-8 mb-8">
+                    <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                      <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        Specific Use Case
+                      </h6>
+                      <p className="text-gray-300 leading-relaxed">{tool.useCase}</p>
                     </div>
-                    <div>
-                      <h6 className="font-medium text-white mb-2">Why This Fits Your Needs</h6>
-                      <p className="text-sm text-accent">{tool.matchReason}</p>
+                    <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                      <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-accent rounded-full"></div>
+                        Why This Fits Your Needs
+                      </h6>
+                      <p className="text-accent leading-relaxed font-medium">{tool.matchReason}</p>
                     </div>
                   </div>
 
                   {/* Pros & Cons */}
                   {tool.prosAndCons && (
-                    <div className="grid md:grid-cols-2 gap-6 mb-6">
-                      <div>
-                        <h6 className="font-medium text-green-400 mb-2">Advantages</h6>
-                        <ul className="space-y-1">
+                    <div className="grid lg:grid-cols-2 gap-6 mb-6">
+                      <div className="bg-green-500/5 rounded-xl p-5 border border-green-500/20">
+                        <h6 className="text-base font-semibold text-green-400 mb-3 flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                          Advantages
+                        </h6>
+                        <ul className="space-y-2">
                           {tool.prosAndCons.pros.map((pro: string, i: number) => (
-                            <li key={i} className="text-sm text-gray-300 flex items-center gap-2">
-                              <div className="w-1 h-1 bg-green-400 rounded-full flex-shrink-0"></div>
+                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                              <div className="w-1 h-1 bg-green-400 rounded-full flex-shrink-0 mt-2"></div>
                               {pro}
                             </li>
                           ))}
                         </ul>
                       </div>
-                      <div>
-                        <h6 className="font-medium text-red-400 mb-2">⚠ Considerations</h6>
-                        <ul className="space-y-1">
+                      <div className="bg-red-500/5 rounded-xl p-5 border border-red-500/20">
+                        <h6 className="text-base font-semibold text-red-400 mb-3 flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
+                          ⚠ Considerations
+                        </h6>
+                        <ul className="space-y-2">
                           {tool.prosAndCons.cons.map((con: string, i: number) => (
-                            <li key={i} className="text-sm text-gray-300 flex items-center gap-2">
-                              <div className="w-1 h-1 bg-red-400 rounded-full flex-shrink-0"></div>
+                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                              <div className="w-1 h-1 bg-red-400 rounded-full flex-shrink-0 mt-2"></div>
                               {con}
                             </li>
                           ))}
@@ -1227,12 +1258,15 @@ function AssessmentResults({
 
                   {/* Alternative Options */}
                   {tool.alternativeOptions && tool.alternativeOptions.length > 0 && (
-                    <div>
-                      <h6 className="font-medium text-white mb-2">Alternative Options</h6>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="bg-purple-500/5 rounded-xl p-6 border border-purple-500/20">
+                      <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        Alternative Options
+                      </h6>
+                      <div className="flex flex-wrap gap-3">
                         {tool.alternativeOptions.map((alt: string, i: number) => (
-                          <span key={i} className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded">
-                            {alt}
+                          <span key={i} className="px-3 py-2 bg-purple-500/20 text-purple-300 rounded-lg border border-purple-500/30 text-sm font-medium">
+                            {alt.replace(/_/g, ' ')}
                           </span>
                         ))}
                       </div>
@@ -1254,49 +1288,54 @@ function AssessmentResults({
               <p className="text-gray-300 max-w-2xl text-center">Detailed 30/60/90-day execution plan with ROI scenarios, risk analysis, and resource requirements</p>
             </div>
           </div>
-          <div className="space-y-8 max-w-6xl mx-auto">
+          <div className="grid gap-8 max-w-6xl mx-auto">
             {assessment.roadmap.map((item: any, index: number) => (
-              <div key={item.id} className="bg-white/5 rounded-lg overflow-hidden">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <h5 className="text-2xl font-semibold text-white mb-2">{item.title}</h5>
-                      <p className="text-gray-300 mb-4">{item.description}</p>
+              <div key={item.id} className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-accent2/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:border-accent/20 hover:shadow-lg hover:shadow-accent/10">
+                  
+                  {/* Header Section */}
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8">
+                    <div className="flex-1">
+                      <h5 className="text-2xl font-bold text-white mb-3">{item.title}</h5>
+                      <div className="mb-4 lg:mb-0">
+                        <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${
-                        item.priority === 'quick_win' ? 'bg-green-500/20 text-green-300' :
-                        item.priority === 'high' ? 'bg-red-500/20 text-red-300' :
-                        item.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                        'bg-gray-500/20 text-gray-300'
+                    <div className="flex flex-col lg:items-end gap-3">
+                      <div className={`px-4 py-2 rounded-full font-semibold text-sm border ${
+                        item.priority === 'quick_win' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                        item.priority === 'high' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
+                        item.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                        'bg-gray-500/20 text-gray-300 border-gray-500/30'
                       }`}>
-                        {item.priority === 'quick_win' ? 'Quick Win' : `${item.priority} priority`}
-                      </span>
-                      <p className="text-sm text-gray-400 mt-2">{item.timeline.replace('_', ' ')}</p>
+                        {item.priority === 'quick_win' ? 'Quick Win' : `${item.priority?.replace('_', ' ')} priority`}
+                      </div>
+                      <p className="text-gray-400 font-medium">{item.timeline?.replace(/_/g, ' ')}</p>
                     </div>
                   </div>
 
-                  {/* Key Metrics */}
-                  <div className="grid md:grid-cols-5 gap-4 mb-6">
-                    <div className="text-center p-4 bg-white/5 rounded">
-                      <div className="text-2xl font-bold text-white mb-1">{item.impact}/5</div>
-                      <div className="text-xs text-gray-400">Business Impact</div>
+                  {/* Key Metrics - Centered Flex Layout */}
+                  <div className="flex flex-wrap justify-center gap-4 mb-8">
+                    <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/20 text-center min-w-[140px] flex-1 max-w-[160px]">
+                      <div className="text-lg font-bold text-white mb-1 leading-tight">{item.impact}/5</div>
+                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Business Impact</div>
                     </div>
-                    <div className="text-center p-4 bg-white/5 rounded">
-                      <div className="text-2xl font-bold text-white mb-1">{item.effort}/5</div>
-                      <div className="text-xs text-gray-400">Implementation Effort</div>
+                    <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/20 text-center min-w-[140px] flex-1 max-w-[160px]">
+                      <div className="text-lg font-bold text-white mb-1 leading-tight">{item.effort}/5</div>
+                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Implementation Effort</div>
                     </div>
-                    <div className="text-center p-4 bg-white/5 rounded">
-                      <div className="text-2xl font-bold text-accent mb-1">${item.roi?.annual_savings?.toLocaleString() || '0'}</div>
-                      <div className="text-xs text-gray-400">Annual Savings</div>
+                    <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl p-5 border border-accent/20 text-center min-w-[140px] flex-1 max-w-[160px]">
+                      <div className="text-lg font-bold text-accent mb-1 leading-tight">${item.roi?.annual_savings?.toLocaleString() || '0'}</div>
+                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Annual Savings</div>
                     </div>
-                    <div className="text-center p-4 bg-white/5 rounded">
-                      <div className="text-2xl font-bold text-orange-400 mb-1">${item.roi?.implementation_cost?.toLocaleString() || '0'}</div>
-                      <div className="text-xs text-gray-400">Implementation Cost</div>
+                    <div className="bg-gradient-to-br from-orange-500/20 to-orange-500/10 rounded-xl p-5 border border-orange-500/20 text-center min-w-[140px] flex-1 max-w-[160px]">
+                      <div className="text-lg font-bold text-orange-400 mb-1 leading-tight">${item.roi?.implementation_cost?.toLocaleString() || '0'}</div>
+                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Implementation Cost</div>
                     </div>
-                    <div className="text-center p-4 bg-white/5 rounded">
-                      <div className="text-2xl font-bold text-green-400 mb-1">{item.roi?.payback_months || 0}</div>
-                      <div className="text-xs text-gray-400">Payback Months</div>
+                    <div className="bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-xl p-5 border border-green-500/20 text-center min-w-[140px] flex-1 max-w-[160px]">
+                      <div className="text-lg font-bold text-green-400 mb-1 leading-tight">{item.roi?.payback_months || 0}</div>
+                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Payback Months</div>
                     </div>
                   </div>
 
@@ -1388,15 +1427,18 @@ function AssessmentResults({
                     </div>
                   )}
 
-                  {/* Next Steps & KPIs */}
-                  <div className="grid md:grid-cols-2 gap-6">
+                  {/* Next Steps & Success Metrics */}
+                  <div className="grid lg:grid-cols-2 gap-6 mb-6">
                     {item.next_steps?.length > 0 && (
-                      <div>
-                        <h6 className="font-medium text-white mb-2">Next Steps</h6>
-                        <ul className="text-sm text-gray-300 space-y-2">
+                      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
+                        <h6 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
+                          Next Steps
+                        </h6>
+                        <ul className="space-y-2">
                           {item.next_steps.map((step: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <div className="w-5 h-5 bg-accent/20 text-accent rounded text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+                              <div className="w-5 h-5 bg-accent/20 text-accent rounded-lg text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                                 {i + 1}
                               </div>
                               {step}
@@ -1406,12 +1448,15 @@ function AssessmentResults({
                       </div>
                     )}
                     {item.kpis?.length > 0 && (
-                      <div>
-                        <h6 className="font-medium text-white mb-2">Success Metrics</h6>
-                        <ul className="text-sm text-gray-300 space-y-1">
+                      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
+                        <h6 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                          Success Metrics
+                        </h6>
+                        <ul className="space-y-2">
                           {item.kpis.map((kpi: string, i: number) => (
-                            <li key={i} className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></div>
+                            <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                              <div className="w-1 h-1 bg-green-400 rounded-full flex-shrink-0 mt-2"></div>
                               {kpi}
                             </li>
                           ))}
@@ -1420,10 +1465,10 @@ function AssessmentResults({
                     )}
                   </div>
 
-                  {/* Owner */}
-                  <div className="mt-6 pt-4 border-t border-white/10">
-                    <p className="text-sm text-gray-400">
-                      <strong className="text-white">Project Owner:</strong> {item.owner}
+                  {/* Project Owner */}
+                  <div className="bg-white/5 rounded-xl p-5 border border-white/10">
+                    <p className="text-sm text-gray-300">
+                      <span className="font-semibold text-white">Project Owner:</span> {item.owner}
                     </p>
                   </div>
                 </div>
