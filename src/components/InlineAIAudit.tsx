@@ -956,6 +956,123 @@ function AssessmentResults({
         </Button>
       </div>
 
+      {/* Dashboard Summary */}
+      <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12 mb-12">
+        <div className="text-center mb-12">
+          <h3 className="text-3xl font-bold text-white mb-4">Assessment Overview</h3>
+          <p className="text-gray-300 max-w-2xl mx-auto">
+            Your personalized AI automation analysis with quantified impact and implementation roadmap
+          </p>
+        </div>
+
+        {/* Key Performance Indicators */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {/* Total Savings */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:border-accent/30 text-center">
+              <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-accent">
+                  <path d="M12 2V6M6.414 6.414L9.172 9.172M2 12H6M6.414 17.586L9.172 14.828M12 18V22M17.586 17.586L14.828 14.828M22 12H18M17.586 6.414L14.828 9.172" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </div>
+              <div className="text-2xl font-bold text-accent mb-2">
+                ${assessment.executiveSummary?.totalPotentialSavings?.toLocaleString() || '0'}
+              </div>
+              <p className="text-gray-300 text-sm font-medium">Annual Savings Potential</p>
+            </div>
+          </div>
+
+          {/* Process Opportunities */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:border-blue-500/30 text-center">
+              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-blue-400">
+                  <path d="M9 12L11 14L15 10M7.5 21L17.5 21C18.9001 21 19.6002 21 20.135 20.7275C20.6054 20.4878 20.9878 20.1054 21.2275 19.635C21.5 19.1002 21.5 18.4001 21.5 17V7C21.5 5.59987 21.5 4.8998 21.2275 4.36502C20.9878 3.89462 20.6054 3.51217 20.135 3.27248C19.6002 3 18.9001 3 17.5 3L6.5 3C5.09987 3 4.3998 3 3.86502 3.27248C3.39462 3.51217 3.01217 3.89462 2.77248 4.36502C2.5 4.8998 2.5 5.59987 2.5 7V17C2.5 18.4001 2.5 19.1002 2.77248 19.635C3.01217 20.1054 3.39462 20.4878 3.86502 20.7275C4.3998 21 5.09987 21 6.5 21L7.5 21Z" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </div>
+              <div className="text-2xl font-bold text-blue-400 mb-2">
+                {assessment.processFlags?.length || 0}
+              </div>
+              <p className="text-gray-300 text-sm font-medium">Automation Opportunities</p>
+            </div>
+          </div>
+
+          {/* Quick Wins */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-green-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:border-green-500/30 text-center">
+              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-green-400">
+                  <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </div>
+              <div className="text-2xl font-bold text-green-400 mb-2">
+                {assessment.roadmap?.filter((item: any) => item.priority === 'quick_win').length || 0}
+              </div>
+              <p className="text-gray-300 text-sm font-medium">Quick Wins (30 days)</p>
+            </div>
+          </div>
+
+          {/* Recommended Tools */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:border-purple-500/30 text-center">
+              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-purple-400">
+                  <path d="M21 16V8C21 5.79086 19.2091 4 17 4H7C4.79086 4 3 5.79086 3 8V16C3 18.2091 4.79086 20 7 20H17C19.2091 20 21 18.2091 21 16Z" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M7 8H17M7 12H17M7 16H13" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </div>
+              <div className="text-2xl font-bold text-purple-400 mb-2">
+                {assessment.recommendedTools?.length || 0}
+              </div>
+              <p className="text-gray-300 text-sm font-medium">Solution Recommendations</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Impact Breakdown */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* High Impact Opportunities */}
+          <div className="bg-gradient-to-br from-red-500/10 to-red-500/5 rounded-2xl p-6 border border-red-500/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+              <h4 className="text-lg font-semibold text-red-300">High Impact</h4>
+            </div>
+            <div className="text-3xl font-bold text-red-300 mb-2">
+              {assessment.processFlags?.filter((flag: any) => flag.impact === 'high').length || 0}
+            </div>
+            <p className="text-gray-300 text-sm">Critical automation opportunities requiring immediate attention</p>
+          </div>
+
+          {/* Medium Impact Opportunities */}
+          <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 rounded-2xl p-6 border border-yellow-500/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+              <h4 className="text-lg font-semibold text-yellow-300">Medium Impact</h4>
+            </div>
+            <div className="text-3xl font-bold text-yellow-300 mb-2">
+              {assessment.processFlags?.filter((flag: any) => flag.impact === 'medium').length || 0}
+            </div>
+            <p className="text-gray-300 text-sm">Valuable improvements for operational efficiency</p>
+          </div>
+
+          {/* Implementation Timeline */}
+          <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-2xl p-6 border border-accent/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-3 h-3 bg-accent rounded-full"></div>
+              <h4 className="text-lg font-semibold text-accent">Timeline</h4>
+            </div>
+            <div className="text-2xl font-bold text-accent mb-2">
+              {assessment.executiveSummary?.implementationTimeframe || '90 days'}
+            </div>
+            <p className="text-gray-300 text-sm">Complete transformation timeline with phased rollout</p>
+          </div>
+        </div>
+      </div>
+
       {/* Executive Summary */}
       {assessment.executiveSummary && (
         <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12 text-center">
@@ -969,35 +1086,29 @@ function AssessmentResults({
           </div>
           
           {/* Key Metrics */}
-          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto text-center mb-8">
-            <div className="p-6 bg-white/5 rounded-lg">
-              <div className="text-3xl font-bold text-accent mb-2">
-                ${assessment.executiveSummary.totalPotentialSavings?.toLocaleString() || '0'}
+          <div className="space-y-3 max-w-4xl mx-auto mb-8">
+            <div className="flex items-center justify-between py-4 px-6 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+              <span className="text-sm text-gray-400 font-medium">Annual Savings Potential</span>
+              <div className="text-right">
+                <span className="text-lg font-semibold text-accent">${assessment.executiveSummary.totalPotentialSavings?.toLocaleString() || '0'}</span>
+                {assessment.executiveSummary.savingsRange && (
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    ${assessment.executiveSummary.savingsRange.low?.toLocaleString()} - ${assessment.executiveSummary.savingsRange.high?.toLocaleString()}
+                  </div>
+                )}
               </div>
-              <p className="text-gray-300 text-sm">Base Annual Savings</p>
-              {assessment.executiveSummary.savingsRange && (
-                <p className="text-xs text-gray-400 mt-1">
-                  ${assessment.executiveSummary.savingsRange.low?.toLocaleString()} - ${assessment.executiveSummary.savingsRange.high?.toLocaleString()}
-                </p>
-              )}
             </div>
-            <div className="p-6 bg-white/5 rounded-lg">
-              <div className="text-3xl font-bold text-accent2 mb-2">
-                {assessment.executiveSummary.quickWins || 0}
-              </div>
-              <p className="text-gray-300 text-sm">Quick Wins (30 days)</p>
+            <div className="flex items-center justify-between py-4 px-6 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+              <span className="text-sm text-gray-400 font-medium">Quick Wins (30 days)</span>
+              <span className="text-lg font-semibold text-accent2">{assessment.executiveSummary.quickWins || 0}</span>
             </div>
-            <div className="p-6 bg-white/5 rounded-lg">
-              <div className="text-3xl font-bold text-green-400 mb-2">
-                {assessment.executiveSummary.strategicInitiatives || 0}
-              </div>
-              <p className="text-gray-300 text-sm">Strategic Initiatives</p>
+            <div className="flex items-center justify-between py-4 px-6 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+              <span className="text-sm text-gray-400 font-medium">Strategic Initiatives</span>
+              <span className="text-lg font-semibold text-white">{assessment.executiveSummary.strategicInitiatives || 0}</span>
             </div>
-            <div className="p-6 bg-white/5 rounded-lg">
-              <div className="text-lg font-semibold text-white mb-2">
-                {assessment.executiveSummary.implementationTimeframe || 'Contact us'}
-              </div>
-              <p className="text-gray-300 text-sm">Total Timeline</p>
+            <div className="flex items-center justify-between py-4 px-6 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+              <span className="text-sm text-gray-400 font-medium">Implementation Timeline</span>
+              <span className="text-base font-semibold text-white">{assessment.executiveSummary.implementationTimeframe || 'Contact us'}</span>
             </div>
           </div>
 
@@ -1055,19 +1166,14 @@ function AssessmentResults({
                       <h5 className="text-2xl font-bold text-white mb-3">{flag.label}</h5>
                       <p className="text-lg text-gray-400 capitalize mb-4 lg:mb-0">{flag.category?.replace(/_/g, ' ')}</p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className={`px-4 py-2 rounded-full font-medium text-sm ${
-                        flag.impact === 'high' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
-                        flag.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
-                        'bg-green-500/20 text-green-300 border border-green-500/30'
+                    <div className="flex items-center gap-3">
+                      <div className={`px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wide ${
+                        flag.impact === 'high' ? 'bg-white/10 text-gray-300' :
+                        flag.impact === 'medium' ? 'bg-white/10 text-gray-300' :
+                        'bg-white/10 text-gray-300'
                       }`}>
                         {flag.impact} impact
                       </div>
-                      {flag.confidence && (
-                        <div className="px-3 py-2 bg-blue-500/20 text-blue-300 rounded-lg border border-blue-500/30 text-sm font-medium">
-                          {Math.round(flag.confidence * 100)}% confidence
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -1093,24 +1199,24 @@ function AssessmentResults({
                     )}
                   </div>
 
-                  {/* Metrics Cards */}
-                  <div className="flex flex-wrap justify-center gap-6 mb-8">
+                  {/* Metrics - Modern Horizontal Layout */}
+                  <div className="space-y-3 mb-8">
                     {flag.timeSavingsPerInstance && (
-                      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl p-6 border border-accent/20 text-center min-w-[200px] flex-1 max-w-[280px]">
-                        <div className="text-2xl font-bold text-accent mb-2">{flag.timeSavingsPerInstance}</div>
-                        <div className="text-sm font-medium text-gray-300">Time Savings</div>
+                      <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                        <span className="text-sm text-gray-400 font-medium">Time Savings</span>
+                        <span className="text-base font-semibold text-white">{flag.timeSavingsPerInstance}</span>
                       </div>
                     )}
                     {flag.errorReduction && (
-                      <div className="bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-xl p-6 border border-green-500/20 text-center min-w-[200px] flex-1 max-w-[280px]">
-                        <div className="text-2xl font-bold text-green-400 mb-2">{flag.errorReduction}</div>
-                        <div className="text-sm font-medium text-gray-300">Error Reduction</div>
+                      <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                        <span className="text-sm text-gray-400 font-medium">Error Reduction</span>
+                        <span className="text-base font-semibold text-white">{flag.errorReduction}</span>
                       </div>
                     )}
                     {flag.complexityScore && (
-                      <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 border border-white/20 text-center min-w-[200px] flex-1 max-w-[280px]">
-                        <div className="text-2xl font-bold text-white mb-2">{flag.complexityScore}/5</div>
-                        <div className="text-sm font-medium text-gray-300">Complexity</div>
+                      <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                        <span className="text-sm text-gray-400 font-medium">Implementation Complexity</span>
+                        <span className="text-base font-semibold text-white">{flag.complexityScore}/5</span>
                       </div>
                     )}
                   </div>
@@ -1182,25 +1288,25 @@ function AssessmentResults({
                     <p className="text-gray-300 leading-relaxed text-lg">{tool.description}</p>
                   </div>
                   
-                  {/* Key Details - Centered Flex Layout */}
-                  <div className="flex flex-wrap justify-center gap-4 mb-8">
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/20 text-center min-w-[160px] flex-1 max-w-[200px]">
-                      <div className="text-lg font-bold text-white mb-1 leading-tight">{tool.pricing}</div>
-                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Monthly Cost</div>
+                  {/* Key Details - Modern Horizontal Layout */}
+                  <div className="space-y-3 mb-8">
+                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                      <span className="text-sm text-gray-400 font-medium">Monthly Cost</span>
+                      <span className="text-base font-semibold text-white">{tool.pricing}</span>
                     </div>
                     {tool.implementationCost && (
-                      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl p-5 border border-accent/20 text-center min-w-[160px] flex-1 max-w-[200px]">
-                        <div className="text-lg font-bold text-accent mb-1 leading-tight">{tool.implementationCost}</div>
-                        <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Setup Cost</div>
+                      <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                        <span className="text-sm text-gray-400 font-medium">Setup Cost</span>
+                        <span className="text-base font-semibold text-accent">{tool.implementationCost}</span>
                       </div>
                     )}
-                    <div className="bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-xl p-5 border border-green-500/20 text-center min-w-[160px] flex-1 max-w-[200px]">
-                      <div className="text-lg font-bold text-green-400 mb-1 leading-tight">{tool.timeToValue}</div>
-                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Time to Value</div>
+                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                      <span className="text-sm text-gray-400 font-medium">Time to Value</span>
+                      <span className="text-base font-semibold text-white">{tool.timeToValue}</span>
                     </div>
-                    <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/10 rounded-xl p-5 border border-blue-500/20 text-center min-w-[160px] flex-1 max-w-[200px]">
-                      <div className="text-lg font-bold text-blue-400 mb-1 leading-tight">#{tool.priority}</div>
-                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Recommended Order</div>
+                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                      <span className="text-sm text-gray-400 font-medium">Recommended Order</span>
+                      <span className="text-base font-semibold text-white">#{tool.priority}</span>
                     </div>
                   </div>
 
@@ -1315,58 +1421,58 @@ function AssessmentResults({
                     </div>
                   </div>
 
-                  {/* Key Metrics - Centered Flex Layout */}
-                  <div className="flex flex-wrap justify-center gap-4 mb-8">
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/20 text-center min-w-[140px] flex-1 max-w-[160px]">
-                      <div className="text-lg font-bold text-white mb-1 leading-tight">{item.impact}/5</div>
-                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Business Impact</div>
+                  {/* Key Metrics - Modern Horizontal Layout */}
+                  <div className="space-y-3 mb-8">
+                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                      <span className="text-sm text-gray-400 font-medium">Business Impact</span>
+                      <span className="text-base font-semibold text-white">{item.impact}/5</span>
                     </div>
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/20 text-center min-w-[140px] flex-1 max-w-[160px]">
-                      <div className="text-lg font-bold text-white mb-1 leading-tight">{item.effort}/5</div>
-                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Implementation Effort</div>
+                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                      <span className="text-sm text-gray-400 font-medium">Implementation Effort</span>
+                      <span className="text-base font-semibold text-white">{item.effort}/5</span>
                     </div>
-                    <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl p-5 border border-accent/20 text-center min-w-[140px] flex-1 max-w-[160px]">
-                      <div className="text-lg font-bold text-accent mb-1 leading-tight">${item.roi?.annual_savings?.toLocaleString() || '0'}</div>
-                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Annual Savings</div>
+                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                      <span className="text-sm text-gray-400 font-medium">Annual Savings</span>
+                      <span className="text-base font-semibold text-accent">${item.roi?.annual_savings?.toLocaleString() || '0'}</span>
                     </div>
-                    <div className="bg-gradient-to-br from-orange-500/20 to-orange-500/10 rounded-xl p-5 border border-orange-500/20 text-center min-w-[140px] flex-1 max-w-[160px]">
-                      <div className="text-lg font-bold text-orange-400 mb-1 leading-tight">${item.roi?.implementation_cost?.toLocaleString() || '0'}</div>
-                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Implementation Cost</div>
+                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                      <span className="text-sm text-gray-400 font-medium">Implementation Cost</span>
+                      <span className="text-base font-semibold text-white">${item.roi?.implementation_cost?.toLocaleString() || '0'}</span>
                     </div>
-                    <div className="bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-xl p-5 border border-green-500/20 text-center min-w-[140px] flex-1 max-w-[160px]">
-                      <div className="text-lg font-bold text-green-400 mb-1 leading-tight">{item.roi?.payback_months || 0}</div>
-                      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">Payback Months</div>
+                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
+                      <span className="text-sm text-gray-400 font-medium">Payback Period</span>
+                      <span className="text-base font-semibold text-white">{item.roi?.payback_months || 0} months</span>
                     </div>
                   </div>
 
                   {/* ROI Scenarios */}
                   {item.roi && (item.roi.low_scenario || item.roi.high_scenario) && (
-                    <div className="mb-6">
-                      <h6 className="font-medium text-white mb-3">ROI Scenarios</h6>
-                      <div className="grid md:grid-cols-3 gap-4">
+                    <div className="mb-8">
+                      <h6 className="font-medium text-white mb-4">ROI Scenarios</h6>
+                      <div className="space-y-2">
                         {item.roi.low_scenario && (
-                          <div className="text-center p-3 bg-red-500/10 rounded border border-red-500/20">
-                            <div className="font-semibold text-red-300">${item.roi.low_scenario.toLocaleString()}</div>
-                            <div className="text-xs text-gray-400">Conservative Scenario</div>
+                          <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.01] border border-white/[0.03] rounded-full">
+                            <span className="text-sm text-gray-400 font-medium">Conservative Scenario</span>
+                            <span className="text-sm font-semibold text-white">${item.roi.low_scenario.toLocaleString()}</span>
                           </div>
                         )}
                         {item.roi.base_scenario && (
-                          <div className="text-center p-3 bg-blue-500/10 rounded border border-blue-500/20">
-                            <div className="font-semibold text-blue-300">${item.roi.base_scenario.toLocaleString()}</div>
-                            <div className="text-xs text-gray-400">Base Case</div>
+                          <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.01] border border-white/[0.03] rounded-full">
+                            <span className="text-sm text-gray-400 font-medium">Base Case</span>
+                            <span className="text-sm font-semibold text-accent">${item.roi.base_scenario.toLocaleString()}</span>
                           </div>
                         )}
                         {item.roi.high_scenario && (
-                          <div className="text-center p-3 bg-green-500/10 rounded border border-green-500/20">
-                            <div className="font-semibold text-green-300">${item.roi.high_scenario.toLocaleString()}</div>
-                            <div className="text-xs text-gray-400">Optimistic Scenario</div>
+                          <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.01] border border-white/[0.03] rounded-full">
+                            <span className="text-sm text-gray-400 font-medium">Optimistic Scenario</span>
+                            <span className="text-sm font-semibold text-white">${item.roi.high_scenario.toLocaleString()}</span>
                           </div>
                         )}
                       </div>
                       {item.roi.confidence_level && (
-                        <p className="text-center text-sm text-gray-400 mt-2">
-                          Confidence Level: {Math.round(item.roi.confidence_level * 100)}%
-                        </p>
+                        <div className="mt-3 text-center">
+                          <span className="text-xs text-gray-500">Confidence: {Math.round(item.roi.confidence_level * 100)}%</span>
+                        </div>
                       )}
                     </div>
                   )}
