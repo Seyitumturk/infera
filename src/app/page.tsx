@@ -4,162 +4,157 @@ import { useState } from 'react'
 import Hero from '@/components/Hero'
 import Button from '@/components/ui/Button'
 import InlineAIAudit from '@/components/InlineAIAudit'
+import EnhancedAICapabilities from '@/components/EnhancedAICapabilities'
 
 export default function HomePage() {
   const [showAIAudit, setShowAIAudit] = useState(false)
 
   return (
-    <div>
-      <Hero />
+    <div className="bg-gradient-to-b from-[#06080a] via-[#0a0c10] to-[#06080a]">
+      <Hero onStartAudit={() => setShowAIAudit(true)} />
       
-      {/* Section Separator */}
-      <div className="relative bg-brandNight">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-8xl">
-          <div className="relative py-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full">
-                <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      {/* Modern CTA Section */}
+      <section className="relative overflow-hidden min-h-screen flex items-center">
+        {/* Subtle Background Elements */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-1/3 left-1/5 w-72 h-72 bg-accent/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/3 right-1/5 w-80 h-80 bg-accent2/20 rounded-full blur-3xl"></div>
+        </div>
+        
+        {/* Dark overlay for better text contrast */}
+        <div className="absolute inset-0 bg-black/20"></div>
+        
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 lg:px-8 py-24 text-center">
+          {/* Header Badge */}
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-black/40 border border-white/20 backdrop-blur-xl mb-12">
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-white">AI-Powered Automation Platform</span>
+          </div>
+          
+          {/* Main Headline */}
+          <h1 className="text-5xl lg:text-7xl xl:text-8xl font-bold leading-[0.9] text-white drop-shadow-2xl" style={{marginBottom: '4rem'}}>
+            Transform Your<br />
+            Business Processes
+          </h1>
+          
+          {/* Subtitle */}
+          <div className="max-w-4xl mx-auto" style={{marginBottom: '5rem'}}>
+            <p className="text-xl lg:text-2xl text-white/90 leading-relaxed drop-shadow-lg">
+              Get a comprehensive automation assessment with ROI projections, tool recommendations, and implementation roadmaps—delivered in minutes, not weeks.
+            </p>
+          </div>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
+            <Button 
+              size="xl" 
+              className="group relative overflow-hidden bg-gradient-to-r from-accent to-accent2 hover:from-accent/90 hover:to-accent2/90 text-white font-bold px-16 py-5 text-xl shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:scale-105 border-0 rounded-2xl"
+              onClick={() => setShowAIAudit(true)}
+            >
+              <span className="relative z-10">Start Assessment - $99</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </Button>
+            
+            <button className="group flex items-center gap-4 px-10 py-5 text-xl font-medium text-white/80 hover:text-white transition-colors duration-300 rounded-2xl hover:bg-white/5">
+              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group-hover:bg-white/20 transition-all duration-300 backdrop-blur-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-current ml-1">
+                  <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+                </svg>
               </div>
-            </div>
-            <div className="relative flex justify-center">
-              <div className="bg-brandNight px-6">
-                <div className="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+              <span>Watch Demo</span>
+            </button>
+          </div>
+          
+          {/* Social Proof */}
+          <div className="flex flex-wrap items-center justify-center gap-12 text-white/60">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent2 border-2 border-white/20"></div>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent2 to-accent border-2 border-white/20"></div>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent2 border-2 border-white/20"></div>
               </div>
+              <span className="font-medium">500+ companies automated</span>
             </div>
+            <div className="w-px h-6 bg-white/20"></div>
+            <div className="flex items-center gap-2">
+              <div className="text-accent2">★★★★★</div>
+              <span className="font-medium">4.9/5 rating</span>
+            </div>
+            <div className="w-px h-6 bg-white/20"></div>
+            <span className="font-medium">$2.3M+ saved collectively</span>
           </div>
         </div>
-      </div>
 
-      {/* Infera CTA Section */}
-      <section className="relative bg-brandNight overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-8xl">
-          <div className="py-32 lg:py-40 text-center relative">
-            {/* Background decoration */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-20 left-10 w-32 h-32 bg-accent rounded-full blur-3xl"></div>
-              <div className="absolute bottom-20 right-10 w-40 h-40 bg-accent2 rounded-full blur-3xl"></div>
-            </div>
-            
-            <div className="relative z-10">
-              {/* Header Section */}
-              <div className="mb-16">
-                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-10 leading-tight">
-                  Ready to Discover Your AI Opportunities?
-                </h2>
-                <div className="max-w-3xl mx-auto">
-                  <p className="text-xl sm:text-2xl text-gray-300 leading-relaxed mb-12">
-                    Get a personalized AI roadmap with quantified ROI in minutes. 
-                    No more guessing - know exactly which AI tools will save your business time and money.
-                  </p>
+      </section>
+
+      {/* Features Section */}
+      <section className="relative py-32">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          {/* Features Grid */}
+          <div className="grid lg:grid-cols-3 gap-12">
+            {[
+              {
+                number: "01",
+                title: "Process Analysis",
+                description: "AI identifies automation opportunities across your workflow with 95% accuracy and detailed impact analysis."
+              },
+              {
+                number: "02", 
+                title: "ROI Projections",
+                description: "Detailed cost-benefit analysis with conservative, realistic, and optimistic scenarios for informed decision-making."
+              },
+              {
+                number: "03",
+                title: "Implementation Plan",
+                description: "Phased execution roadmap with timelines, milestones, resource requirements, and success metrics."
+              }
+            ].map((feature, index) => (
+              <div key={index} className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative h-full bg-black/20 backdrop-blur-sm border border-white/10 rounded-3xl p-10 hover:bg-black/30 hover:border-white/20 transition-all duration-500 hover:-translate-y-2">
+                  <div className="text-6xl font-bold text-accent/30 mb-6 group-hover:text-accent/50 transition-colors duration-300">
+                    {feature.number}
+                  </div>
+                  <h3 className="text-2xl font-bold text-white" style={{marginBottom: '1.5rem'}}>{feature.title}</h3>
+                  <p className="text-white/70 leading-relaxed text-lg">{feature.description}</p>
                 </div>
               </div>
-            
-              {/* CTA Section */}
-              <div className="mb-20">
-                <Button 
-                  size="xl" 
-                  className="min-w-[280px] text-xl px-10 py-5 shadow-lg shadow-accent/25 hover:shadow-accent/40 transition-all duration-300 hover:scale-105 mb-8"
-                  onClick={() => setShowAIAudit(true)}
-                >
-                  Start Free Assessment
-                </Button>
-                
-                {/* Feature badges */}
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <span className="text-sm text-gray-300 font-medium">5-minute assessment</span>
+            ))}
+          </div>
+
+          {/* Stats Section */}
+          <div className="mt-32 pt-20 border-t border-white/10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
+              {[
+                { value: "95%", label: "Process Accuracy", color: "text-accent" },
+                { value: "3-6x", label: "ROI Multiplier", color: "text-accent2" },
+                { value: "< 5min", label: "Assessment Time", color: "text-accent" },
+                { value: "500+", label: "Companies Served", color: "text-accent2" }
+              ].map((stat, index) => (
+                <div key={index} className="text-center group">
+                  <div className={`text-4xl lg:text-5xl font-bold mb-3 ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
+                    {stat.value}
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm">
-                    <div className="w-2 h-2 bg-accent rounded-full"></div>
-                    <span className="text-sm text-gray-300 font-medium">Instant roadmap</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20 backdrop-blur-sm">
-                    <div className="w-2 h-2 bg-accent2 rounded-full"></div>
-                    <span className="text-sm text-gray-300 font-medium">No signup required</span>
-                  </div>
+                  <div className="text-white/60 text-lg font-medium">{stat.label}</div>
                 </div>
-              </div>
-              
-              {/* Features Grid */}
-              <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Process Analysis */}
-                  <div className="group relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/10 hover:-translate-y-2">
-                      <div className="w-20 h-20 bg-gradient-to-br from-accent/30 to-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-accent">
-                          <path d="M12 2L2 7V10C2 16 6 20.5 12 22C18 20.5 22 16 22 10V7L12 2Z" stroke="currentColor" strokeWidth="2" fill="none"/>
-                        </svg>
-                      </div>
-                      <h3 className="text-2xl font-bold text-white mb-4">Process Analysis</h3>
-                      <p className="text-gray-300 leading-relaxed text-lg">
-                        AI analyzes your workflows to identify automation opportunities you might have missed.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* ROI Calculator */}
-                  <div className="group relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-accent2/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-300 hover:border-accent2/30 hover:shadow-lg hover:shadow-accent2/10 hover:-translate-y-2">
-                      <div className="w-20 h-20 bg-gradient-to-br from-accent2/30 to-accent2/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-accent2">
-                          <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" fill="none"/>
-                        </svg>
-                      </div>
-                      <h3 className="text-2xl font-bold text-white mb-4">ROI Calculator</h3>
-                      <p className="text-gray-300 leading-relaxed text-lg">
-                        Get precise cost savings estimates and payback periods for each recommendation.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Implementation Roadmap */}
-                  <div className="group relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/10 hover:-translate-y-2">
-                      <div className="w-20 h-20 bg-gradient-to-br from-accent/30 to-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-accent">
-                          <path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V16.5C21 17.9001 21 18.6002 20.7275 19.135C20.4878 19.6054 20.1054 19.9878 19.635 20.2275C19.1002 20.5 18.4001 20.5 17 20.5H7C5.59987 20.5 4.8998 20.5 4.36502 20.2275C3.89462 19.9878 3.51217 19.6054 3.27248 19.135C3 18.6002 3 17.9001 3 16.5V8.5C3 7.09987 3 6.3998 3.27248 5.86502C3.51217 5.39462 3.89462 5.01217 4.36502 4.77248C4.8998 4.5 5.59987 4.5 7 4.5H17C18.4001 4.5 19.1002 4.5 19.635 4.77248C20.1054 5.01217 20.4878 5.39462 20.7275 5.86502C21 6.3998 21 7.09987 21 8.5Z" stroke="currentColor" strokeWidth="2" fill="none"/>
-                        </svg>
-                      </div>
-                      <h3 className="text-2xl font-bold text-white mb-4">Implementation Roadmap</h3>
-                      <p className="text-gray-300 leading-relaxed text-lg">
-                        Get a prioritized 30/60/90-day plan with specific tools and next steps for successful implementation.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section Separator */}
-      <div className="relative bg-brandNight">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-8xl">
-          <div className="relative py-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full">
-                <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-              </div>
-            </div>
-            <div className="relative flex justify-center">
-              <div className="bg-brandNight px-6">
-                <div className="w-1.5 h-1.5 rounded-full bg-white/40"></div>
-              </div>
-            </div>
-          </div>
+      {/* Enhanced AI Capabilities Section */}
+      <section className="relative py-24 bg-gradient-to-b from-transparent to-black/20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <EnhancedAICapabilities />
         </div>
-      </div>
+      </section>
 
-      {/* Inline AI Audit Section */}
+      {/* Inline AI Audit Section - Always visible at bottom */}
       <InlineAIAudit 
-        isVisible={showAIAudit}
+        isVisible={true}
         onClose={() => setShowAIAudit(false)}
+        initialCustomProblem=""
       />
     </div>
   )

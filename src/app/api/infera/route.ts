@@ -70,7 +70,10 @@ async function handleAssessment(aiService: any, data: any) {
   } catch (error) {
     console.error('❌ Assessment generation failed:', error)
     return NextResponse.json(
-      { error: 'Assessment generation failed', details: error.message },
+      { 
+        error: 'Assessment generation failed', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
       { status: 500 }
     )
   }
@@ -98,7 +101,10 @@ async function handleExport(aiService: any, data: any) {
   } catch (error) {
     console.error('❌ Export generation failed:', error)
     return NextResponse.json(
-      { error: 'Export generation failed', details: error.message },
+      { 
+        error: 'Export generation failed', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
       { status: 500 }
     )
   }

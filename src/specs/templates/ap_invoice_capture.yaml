@@ -1,0 +1,60 @@
+template: AP Invoice Capture + 3-way Match
+version: 1.1
+applies_when:
+  any:
+    - chip: "Needs 3-way match"
+    - chip: "Needs 2-way match"
+    - chip: "Manual review for every invoice"
+solution_pattern:
+  summary: Extract header + line items, validate, match to PO/receipt, route exceptions, post to ERP
+  components:
+    - name: Document AI / IDP
+      options: [Google DocAI, AWS Textract, Azure Document Intelligence, Rossum, Veryfi]
+    - name: Match engine + rules
+      details: 2-way/3-way match, duplicate detection, tolerance rules
+    - name: GL coding assistant
+      details: rules + learning from corrections
+    - name: Approval workflow
+      details: route exceptions, maintain audit trail
+    - name: ERP sync
+      options: [QuickBooks, NetSuite, Xero, SAP]
+cost_effort:
+  tool_saas: "$300–$1500/mo depending on volume"
+  build_estimate: "3–8 weeks (S–M)"
+  ttv: "2–6 weeks"
+risks:
+  - Low-quality scans / vendor variability
+  - Complex PO structures and partial receipts
+  - Change management for GL coding
+vendors:
+  - name: Rossum
+    fit: "Strong line-item capture; good for mid/high volume"
+  - name: Google DocAI
+    fit: "Great extraction; DIY-friendly with Vertex"
+  - name: Tipalti / Stampli / BILL
+    fit: "End-to-end AP; fastest time to value"
+roi:
+  labor_savings_formula: "invoices_per_month × minutes_saved × automation% × loaded_rate"
+  error_reduction: "Duplicate detection + validation reduce overpayments"
+roadmap:
+  - title: Pilot capture + match
+    priority: quick_win
+    timeline: 30_days
+    steps:
+      - Select IDP and configure fields
+      - Define match rules and tolerances
+      - Run pilot with 2 vendors
+  - title: Exceptions + GL rules
+    priority: high
+    timeline: 60_days
+    steps:
+      - Route exceptions to approvers
+      - Add GL rules; capture corrections
+  - title: Scale + audit trail
+    priority: medium
+    timeline: 90_days
+    steps:
+      - Expand to all vendors
+      - Add dashboards and KPIs
+
+

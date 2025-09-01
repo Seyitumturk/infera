@@ -1,0 +1,156 @@
+{
+  "pack": "AP Invoices (Accounts Payable)",
+  "version": "1.1",
+  "audience": ["SMB", "Mid-market"],
+  "sections": [
+    {
+      "id": "qualitative",
+      "title": "How you work today",
+      "questions": [
+        {
+          "id": "ap_invoice_arrival",
+          "label": "How do invoices arrive?",
+          "type": "single_select",
+          "options": ["Email inbox", "Supplier portal", "EDI", "Paper"],
+          "tooltip": "Main entry channel for vendor invoices",
+          "chips": [
+            { "label": "Invoices via email", "when_selected": "Email inbox" },
+            { "label": "Supplier portal in use", "when_selected": "Supplier portal" },
+            { "label": "EDI present", "when_selected": "EDI" },
+            { "label": "Paper invoices", "when_selected": "Paper" }
+          ]
+        },
+        {
+          "id": "ap_manual_review",
+          "label": "Do you manually review each invoice?",
+          "type": "boolean",
+          "tooltip": "Manual review suggests capture + rules engine opportunity",
+          "chips": [
+            { "label": "Manual review for every invoice", "when_true": true }
+          ]
+        },
+        {
+          "id": "ap_line_item_capture",
+          "label": "Do you extract line items today?",
+          "type": "single_select",
+          "options": ["Manually", "Excel formulas", "OCR/IDP tool", "Not needed"],
+          "chips": [
+            { "label": "Line items extracted manually", "when_selected": "Manually" },
+            { "label": "Line items via Excel", "when_selected": "Excel formulas" },
+            { "label": "Existing IDP present", "when_selected": "OCR/IDP tool" }
+          ]
+        },
+        {
+          "id": "ap_match_requirement",
+          "label": "Match requirement",
+          "type": "single_select",
+          "options": ["2-way (PO)", "3-way (PO + receipt)", "No match"],
+          "chips": [
+            { "label": "Needs 2-way match", "when_selected": "2-way (PO)" },
+            { "label": "Needs 3-way match", "when_selected": "3-way (PO + receipt)" }
+          ]
+        },
+        {
+          "id": "ap_gl_coding",
+          "label": "Who codes GL accounts?",
+          "type": "single_select",
+          "options": ["Manual", "Rules", "Mixed"],
+          "chips": [
+            { "label": "GL coding is manual", "when_selected": "Manual" },
+            { "label": "GL rules exist", "when_selected": "Rules" }
+          ]
+        },
+        {
+          "id": "ap_exceptions",
+          "label": "What causes exceptions and who approves them?",
+          "type": "text",
+          "placeholder": "e.g., Missing PO, mismatched totals → Dept head approves",
+          "chips": [
+            { "label": "Has approval chain", "when_answer_present": true }
+          ]
+        },
+        {
+          "id": "ap_systems",
+          "label": "Systems involved",
+          "type": "multi_select",
+          "options": ["QuickBooks", "Xero", "NetSuite", "SAP", "Odoo", "Other"],
+          "chips": [
+            { "label": "QuickBooks present", "when_includes": "QuickBooks" },
+            { "label": "Xero present", "when_includes": "Xero" },
+            { "label": "NetSuite present", "when_includes": "NetSuite" },
+            { "label": "SAP present", "when_includes": "SAP" }
+          ]
+        },
+        {
+          "id": "ap_compliance",
+          "label": "Compliance notes",
+          "type": "multi_select",
+          "options": ["Audit trail", "Segregation of duties", "Duplicate detection", "Vendor risk"],
+          "chips": [
+            { "label": "Needs audit trail", "when_includes": "Audit trail" },
+            { "label": "Segregation of duties", "when_includes": "Segregation of duties" },
+            { "label": "Duplicate detection required", "when_includes": "Duplicate detection" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Light metrics (ranges ok)",
+      "questions": [
+        {
+          "id": "ap_volume_band",
+          "label": "Invoices per month (band)",
+          "type": "single_select",
+          "options": ["<200", "200–500", "500–1000", "1000–2500", ">2500"],
+          "chips": [
+            { "label": "AP volume: <200", "when_selected": "<200" },
+            { "label": "AP volume: 200–500", "when_selected": "200–500" },
+            { "label": "AP volume: 500–1000", "when_selected": "500–1000" },
+            { "label": "AP volume: 1000–2500", "when_selected": "1000–2500" },
+            { "label": "AP volume: >2500", "when_selected": ">2500" }
+          ]
+        },
+        {
+          "id": "ap_aht_band",
+          "label": "Avg minutes per invoice",
+          "type": "single_select",
+          "options": ["<3", "3–6", "6–10", ">10"],
+          "chips": [
+            { "label": "AHT: <3 min", "when_selected": "<3" },
+            { "label": "AHT: 3–6 min", "when_selected": "3–6" },
+            { "label": "AHT: 6–10 min", "when_selected": "6–10" },
+            { "label": "AHT: >10 min", "when_selected": ">10" }
+          ]
+        },
+        {
+          "id": "ap_exception_rate",
+          "label": "Exception rate (rough %)",
+          "type": "single_select",
+          "options": ["<5%", "5–15%", "15–30%", ">30%"],
+          "chips": [
+            { "label": "Exceptions <5%", "when_selected": "<5%" },
+            { "label": "Exceptions 5–15%", "when_selected": "5–15%" },
+            { "label": "Exceptions 15–30%", "when_selected": "15–30%" },
+            { "label": "Exceptions >30%", "when_selected": ">30%" }
+          ]
+        },
+        {
+          "id": "ap_loaded_rate",
+          "label": "Loaded hourly cost (band)",
+          "type": "single_select",
+          "options": ["$20–$35", "$35–$50", "$50–$80", ">$80"],
+          "chips": [
+            { "label": "Loaded cost $20–$35", "when_selected": "$20–$35" },
+            { "label": "Loaded cost $35–$50", "when_selected": "$35–$50" },
+            { "label": "Loaded cost $50–$80", "when_selected": "$50–$80" },
+            { "label": "Loaded cost >$80", "when_selected": ">$80" }
+          ]
+        }
+      ]
+    }
+  ],
+  "mapping_notes": "Each question yields chips for the Real‑Time Pool. Templates can use chip presence + bands to compute ROI ranges and suggest tools vs. build."
+}
+
+

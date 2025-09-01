@@ -1,0 +1,52 @@
+template: Lead Triage + Instant Booking
+version: 1.1
+applies_when:
+  any:
+    - chip: "Lead routing manual"
+    - chip: "Slow speed‑to‑lead"
+solution_pattern:
+  summary: Score, route, and schedule inbound leads to the right rep instantly
+  components:
+    - name: Scoring rules
+      details: source, firmographics, behavior
+    - name: Router
+      details: territory, availability, SLAs
+    - name: Calendar integration
+      options: [Calendly, Chili Piper, HubSpot Meetings]
+    - name: CRM write‑back
+      options: [HubSpot, Salesforce]
+cost_effort:
+  tool_saas: "$100–$800/mo"
+  build_estimate: "1–4 weeks"
+  ttv: "<2 weeks"
+risks:
+  - Over‑aggressive scoring filters out good leads
+  - Poor calendar coverage reduces booking rate
+vendors:
+  - name: Chili Piper
+  - name: HubSpot + Workflows
+  - name: Calendly Routing
+roi:
+  revenue_uplift: "Higher speed‑to‑lead and show rates → more meetings → higher win rate"
+  labor_savings: "Reduced manual triage and back‑and‑forth scheduling"
+roadmap:
+  - title: Scoring + routing rules
+    priority: quick_win
+    timeline: 30_days
+    steps:
+      - Define ICP + scoring bands
+      - Set territory and load‑balancing rules
+  - title: Instant booking
+    priority: high
+    timeline: 60_days
+    steps:
+      - Connect calendars and buffers
+      - Add round‑robin for AEs
+  - title: CRM hygiene + analytics
+    priority: medium
+    timeline: 90_days
+    steps:
+      - Ensure write‑backs with attribution
+      - Track speed‑to‑lead and meeting conversion
+
+

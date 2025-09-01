@@ -6,7 +6,7 @@ import GitForkAIUseCases from './GitForkAIUseCases'
 import ToolPool from './ToolPool'
 import Navbar from './ui/Navbar'
 
-export default function Hero() {
+export default function Hero({ onStartAudit }: { onStartAudit?: () => void }) {
   const [navbarVisible, setNavbarVisible] = useState(false)
   const [lightIntensity, setLightIntensity] = useState(0)
   const [scrollY, setScrollY] = useState(0)
@@ -35,21 +35,19 @@ export default function Hero() {
   const fadeOpacity = Math.min(scrollY / 800, 0.85) // Max 85% opacity, fade over 800px
 
   return (
-    <div className="relative bg-brandNight overflow-hidden">
-      {/* Dark blur fade overlay for navbar area only */}
+    <div className="relative bg-gradient-to-b from-[#06080a] via-[#0a0c10] to-[#06080a] overflow-hidden">
+      {/* Modern blur fade overlay for navbar */}
       <div 
         className="fixed top-0 left-0 right-0 z-[100] pointer-events-none transition-opacity duration-300"
         style={{
-          height: '130px',
-          background: `radial-gradient(ellipse 120% 100% at center top, 
-            rgba(0, 0, 0, ${fadeOpacity * 0.85}) 0%, 
-            rgba(0, 0, 0, ${fadeOpacity * 0.7}) 20%, 
-            rgba(0, 0, 0, ${fadeOpacity * 0.5}) 40%, 
-            rgba(0, 0, 0, ${fadeOpacity * 0.3}) 60%, 
-            rgba(0, 0, 0, ${fadeOpacity * 0.1}) 80%, 
+          height: '120px',
+          background: `linear-gradient(to bottom, 
+            rgba(6, 8, 10, ${fadeOpacity * 0.95}) 0%, 
+            rgba(6, 8, 10, ${fadeOpacity * 0.8}) 30%, 
+            rgba(6, 8, 10, ${fadeOpacity * 0.4}) 60%, 
             transparent 100%
           )`,
-          backdropFilter: `blur(${fadeOpacity * 4}px)`,
+          backdropFilter: `blur(${fadeOpacity * 8}px) saturate(180%)`,
           opacity: fadeOpacity > 0.1 ? 1 : 0
         }}
       />
@@ -57,63 +55,68 @@ export default function Hero() {
       {/* Navbar - positioned absolutely to overlay everything */}
       <Navbar isVisible={navbarVisible} lightIntensity={lightIntensity} />
       
-      {/* Hero content - takes full screen starting from top */}
-      <main className="h-screen px-4">
-        <div className="w-full max-w-none h-full">
-          {/* Center the 3D animation as main hero - full height from top */}
-          <div className="flex flex-col items-center h-full">
-            {/* Main 3D Cone Animation - Full viewport height */}
-            <div className="w-full h-full max-w-none relative overflow-hidden">
-              <ConeAnimation onLightIntensityChange={handleLightIntensityChange} />
+      {/* Hero content - modern full-screen layout */}
+      <main className="relative h-screen">
+        {/* Background effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-accent/20 rounded-full blur-3xl opacity-60"></div>
+          <div className="absolute bottom-32 right-20 w-96 h-96 bg-accent2/20 rounded-full blur-3xl opacity-40"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-accent/5 to-transparent"></div>
+        </div>
+        
+        <div className="relative z-10 w-full h-full">
+          {/* Main 3D Cone Animation - Enhanced with modern frame */}
+          <div className="w-full h-full relative">
+            <ConeAnimation onLightIntensityChange={handleLightIntensityChange} onStartAudit={onStartAudit} />
+            
+            {/* Modern overlay frame */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm m-8"></div>
             </div>
           </div>
         </div>
       </main>
-      
-      {/* Section Separator */}
-      <div className="relative bg-brandNight">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-8xl">
-          <div className="relative py-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full">
-                <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-              </div>
-            </div>
-            <div className="relative flex justify-center">
-              <div className="bg-brandNight px-6">
-                <div className="w-1.5 h-1.5 rounded-full bg-white/40"></div>
-              </div>
-            </div>
+
+      {/* Modern section divider */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent h-px"></div>
+        <div className="flex justify-center py-16">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent/20 to-accent2/20 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+            <div className="w-2 h-2 bg-gradient-to-r from-accent to-accent2 rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>
 
-      {/* Second Section - Git Fork AI Use Cases */}
-      <section className="relative bg-brandNight">
-        <GitForkAIUseCases />
+      {/* Modern Use Cases Section */}
+      <section className="relative">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-accent2/10 rounded-full blur-3xl"></div>
+        </div>
+        <div className="relative z-10">
+          <GitForkAIUseCases />
+        </div>
       </section>
       
-      {/* Section Separator */}
-      <div className="relative bg-brandNight">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-8xl">
-          <div className="relative py-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full">
-                <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-              </div>
-            </div>
-            <div className="relative flex justify-center">
-              <div className="bg-brandNight px-6">
-                <div className="w-1.5 h-1.5 rounded-full bg-white/40"></div>
-              </div>
-            </div>
+      {/* Modern section divider */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent h-px"></div>
+        <div className="flex justify-center py-16">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent2/20 to-accent/20 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+            <div className="w-2 h-2 bg-gradient-to-r from-accent2 to-accent rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>
 
-      {/* Third Section - Tool Pool */}
-      <section className="relative bg-brandNight">
-        <ToolPool />
+      {/* Modern Tool Pool Section */}
+      <section className="relative">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/3 left-1/3 w-72 h-72 bg-accent/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-accent2/10 rounded-full blur-3xl"></div>
+        </div>
+        <div className="relative z-10">
+          <ToolPool />
+        </div>
       </section>
     </div>
   )

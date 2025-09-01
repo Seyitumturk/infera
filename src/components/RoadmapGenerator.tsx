@@ -111,9 +111,23 @@ export default function RoadmapGenerator({
     generateAIRoadmap()
   }, [processFlags, safeMetrics, companyProfile, answers])
 
-  const totalSavings = roadmap.reduce((sum, item) => sum + item.roi_calculation.net_roi.total_savings, 0)
-  const totalInvestment = roadmap.reduce((sum, item) => sum + item.roi_calculation.implementation_cost.total_year_one, 0)
-  const avgROI = roadmap.length > 0 ? roadmap.reduce((sum, item) => sum + item.roi_calculation.net_roi.roi_percentage, 0) / roadmap.length : 0
+  const totalSavings = roadmap.reduce((sum, item) => {
+    // Handle both old and new ROI structure
+    const savings = item.roi_calculation?.net_roi?.total_savings || item.roi?.annual_savings || 0
+    return sum + savings
+  }, 0)
+  
+  const totalInvestment = roadmap.reduce((sum, item) => {
+    // Handle both old and new ROI structure  
+    const investment = item.roi_calculation?.implementation_cost?.total_year_one || item.roi?.implementation_cost || 0
+    return sum + investment
+  }, 0)
+  
+  const avgROI = roadmap.length > 0 ? roadmap.reduce((sum, item) => {
+    // Handle both old and new ROI structure
+    const roi = item.roi_calculation?.net_roi?.roi_percentage || (item.roi?.annual_savings / item.roi?.implementation_cost * 100) || 0
+    return sum + roi
+  }, 0) / roadmap.length : 0
 
   const quickWins = roadmap.filter(item => item.priority === 'quick_win')
   const highPriority = roadmap.filter(item => item.priority === 'high')
@@ -343,19 +357,19 @@ export default function RoadmapGenerator({
                       <div className="flex justify-between text-sm">
                         <span className="text-muted">Annual Savings:</span>
                         <span className="font-medium text-accent2">
-                          {formatCurrency(selectedItem.roi_calculation.net_roi.total_savings)}
+                          {formatCurrency(selectedItem.roi_calculation?.net_roi?.total_savings || selectedItem.roi?.annual_savings || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted">Implementation:</span>
                         <span className="font-medium text-text">
-                          {formatCurrency(selectedItem.roi_calculation.implementation_cost.total_year_one)}
+                          {formatCurrency(selectedItem.roi_calculation?.implementation_cost?.total_year_one || selectedItem.roi?.implementation_cost || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted">ROI:</span>
                         <span className="font-medium text-accent">
-                          {formatPercentage(selectedItem.roi_calculation.net_roi.roi_percentage)}
+                          {formatPercentage(selectedItem.roi_calculation?.net_roi?.roi_percentage || (selectedItem.roi?.annual_savings / selectedItem.roi?.implementation_cost * 100) || 0)}
                         </span>
                       </div>
                     </div>
@@ -543,7 +557,12 @@ function RoadmapCard({
   onClick: () => void
   showROI?: boolean 
 }) {
-  const roi = item.roi_calculation
+  // Handle both old and new ROI structure
+  const roi = item.roi_calculation || item.roi
+  const annualSavings = roi?.net_roi?.total_savings || roi?.annual_savings || 0
+  const implementationCost = roi?.implementation_cost?.total_year_one || roi?.implementation_cost || 0
+  const roiPercentage = roi?.net_roi?.roi_percentage || (annualSavings / implementationCost * 100) || 0
+  const paybackMonths = roi?.net_roi?.payback_months || roi?.payback_months || Math.round(implementationCost / (annualSavings / 12)) || 0
   
   return (
     <Card interactive onClick={onClick} className="hover:scale-[1.02] transition-transform">
@@ -569,8 +588,8 @@ function RoadmapCard({
           <div className="text-right ml-4">
             {showROI && (
               <div className="mb-2">
-                <span className={`px-2 py-1 text-xs rounded border font-medium ${getROIBadgeColor(roi.net_roi.roi_percentage)}`}>
-                  {formatPercentage(roi.net_roi.roi_percentage)} ROI
+                <span className={`px-2 py-1 text-xs rounded border font-medium ${getROIBadgeColor(roiPercentage)}`}>
+                  {formatPercentage(roiPercentage)} ROI
                 </span>
               </div>
             )}
@@ -581,15 +600,15 @@ function RoadmapCard({
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <span className="text-muted">Annual Savings</span>
-            <p className="font-semibold text-accent2">{formatCurrency(roi.net_roi.total_savings)}</p>
+            <p className="font-semibold text-accent2">{formatCurrency(annualSavings)}</p>
           </div>
           <div>
             <span className="text-muted">Investment</span>
-            <p className="font-semibold text-text">{formatCurrency(roi.implementation_cost.total_year_one)}</p>
+            <p className="font-semibold text-text">{formatCurrency(implementationCost)}</p>
           </div>
           <div>
             <span className="text-muted">Payback</span>
-            <p className="font-semibold text-accent">{Math.round(roi.net_roi.payback_months)} months</p>
+            <p className="font-semibold text-accent">{Math.round(paybackMonths)} months</p>
           </div>
         </div>
 

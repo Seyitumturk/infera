@@ -1,0 +1,375 @@
+{
+  "niche_small_business_test_cases": [
+    {
+      "case_id": "veterinary_clinic_appointments",
+      "business_name": "Paws & Claws Animal Hospital",
+      "industry": "Healthcare", 
+      "size": "Small (11-50)",
+      "description": "A 3-vet practice struggling with appointment scheduling, reminder calls, and client communication",
+      "specific_scenario": "Appointment no-shows cost $180 per slot, manual reminder calls take 2 hours daily, paper records cause delays",
+      "test_inputs": {
+        "business_priorities": "Reduce no-shows, eliminate manual reminder calls, digitize patient records",
+        "most_urgent": "Reducing appointment no-shows - we lose $3,600 per month from empty slots",
+        "repetitive_tasks": "Making 40-60 reminder calls daily, manually checking insurance eligibility, updating paper charts after each visit",
+        "task_frequency": "60 reminder calls per day at 2 minutes each = 2 hours. Insurance checks: 25 per day at 3 minutes = 75 minutes",
+        "bottlenecks": "Phone tag with clients for confirmations, waiting for insurance pre-approvals, finding paper records during emergencies",
+        "bottleneck_impact": "15% no-show rate, delayed treatments while searching files, frustrated clients waiting for callbacks",
+        "data_types": ["Customer contact information", "Employee data", "Financial records", "Other business records"],
+        "data_storage": "Mix of digital and paper",
+        "data_accessibility": "Somewhat difficult to access",
+        "automation_experience": "Tried online scheduling but clients still prefer calling",
+        "automation_results": "Scheduling software helped but most clients (70%) still call instead of booking online",
+        "team_comfort": "Need moderate support",
+        "training_investment": "Yes, within reason"
+      },
+      "expected_ai_opportunities": [
+        "Automated appointment reminders via SMS/email",
+        "Insurance eligibility verification API integration", 
+        "Digital patient records with voice-to-text",
+        "No-show prediction and overbooking optimization"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 3600,
+        "staff_hours_saved": 45,
+        "expected_no_show_reduction": "8%",
+        "implementation_cost_range": "2000-4000"
+      }
+    },
+    {
+      "case_id": "food_truck_inventory_waste",
+      "business_name": "Seoul Kitchen Food Truck",
+      "industry": "Retail",
+      "size": "Startup (1-10)", 
+      "description": "Korean fusion food truck with high food waste and manual inventory tracking causing profit loss",
+      "specific_scenario": "20% food waste, manual inventory counts, no sales forecasting, cash flow issues from over-ordering",
+      "test_inputs": {
+        "business_priorities": "Reduce food waste, predict daily demand, automate inventory ordering",
+        "most_urgent": "Food waste is killing our margins - throwing away $800-1200 worth of ingredients monthly",
+        "repetitive_tasks": "Daily inventory counts, manual calculation of prep quantities, tracking sales by item on paper",
+        "task_frequency": "Inventory count: 45 minutes daily. Prep calculations: 30 minutes. Sales tracking: 20 minutes end of day",
+        "bottlenecks": "Guessing how much to prep, running out of popular items early, over-ordering perishables",
+        "bottleneck_impact": "Lost sales when popular items sell out, $1000+ monthly waste, stressed staff during rush",
+        "data_types": ["Inventory levels", "Sales transactions", "Financial records"],
+        "data_storage": "Spreadsheets and shared files",
+        "data_accessibility": "Mostly accessible but some gaps",
+        "automation_experience": "Use Square for payments but track everything else manually",
+        "automation_results": "Square helps with payments but we have no visibility into what's selling when",
+        "team_comfort": "Comfortable with training",
+        "training_investment": "Limited budget for training"
+      },
+      "expected_ai_opportunities": [
+        "Sales forecasting based on weather/events/historical data",
+        "Automated reorder points for ingredients",
+        "Waste tracking and optimization",
+        "Dynamic pricing for end-of-day items"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 1000,
+        "staff_hours_saved": 25,
+        "expected_waste_reduction": "12%",
+        "implementation_cost_range": "500-1500"
+      }
+    },
+    {
+      "case_id": "hvac_dispatch_chaos",
+      "business_name": "Arctic Air HVAC Services",
+      "industry": "Professional Services",
+      "size": "Small (11-50)",
+      "description": "HVAC repair company with inefficient technician dispatching and manual scheduling causing customer dissatisfaction",
+      "specific_scenario": "Technicians drive 2+ hours between jobs, emergency calls disrupt schedules, customers wait all day for service windows",
+      "test_inputs": {
+        "business_priorities": "Optimize technician routes, reduce emergency response time, improve customer communication",
+        "most_urgent": "Our technicians waste 3-4 hours daily driving between jobs - fuel and labor costs are crushing us",
+        "repetitive_tasks": "Manual route planning each morning, calling customers with arrival updates, rescheduling when emergencies arise",
+        "task_frequency": "Route planning: 1 hour daily for dispatcher. Customer update calls: 2 hours daily. Rescheduling: 45 minutes when emergencies hit",
+        "bottlenecks": "No real-time visibility of technician locations, customers angry about vague time windows, emergency calls chaos",
+        "bottleneck_impact": "High fuel costs, overtime pay, 1-star reviews about poor communication, lost repeat customers",
+        "data_types": ["Customer contact information", "Employee data", "Sales transactions"],
+        "data_storage": "Digital systems (CRM/ERP/databases)",
+        "data_accessibility": "Mostly accessible but some gaps",
+        "automation_experience": "Use basic CRM but dispatch is all manual phone calls and paper schedules",
+        "automation_results": "CRM helps track customers but scheduling is still chaos - no integration",
+        "team_comfort": "Need moderate support",
+        "training_investment": "Yes, within reason"
+      },
+      "expected_ai_opportunities": [
+        "AI-powered route optimization",
+        "Automated customer notifications with real-time updates",
+        "Predictive maintenance scheduling",
+        "Dynamic rescheduling for emergency calls"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 4200,
+        "staff_hours_saved": 60,
+        "fuel_savings": "25%",
+        "implementation_cost_range": "3000-6000"
+      }
+    },
+    {
+      "case_id": "boutique_inventory_guesswork",
+      "business_name": "Bloom Boutique",
+      "industry": "Retail",
+      "size": "Startup (1-10)",
+      "description": "Women's clothing boutique with poor inventory management, seasonal buying mistakes, and manual sales tracking",
+      "specific_scenario": "End up with 40% unsold inventory each season, manual sales tracking, no data on what sells when",
+      "test_inputs": {
+        "business_priorities": "Reduce end-of-season inventory, predict what will sell, automate reordering of basics",
+        "most_urgent": "We're stuck with $8000 worth of unsold clothes from last season - can't afford another buying mistake",
+        "repetitive_tasks": "Manual inventory counts, tracking what sizes sell out first, calculating reorder quantities for basics",
+        "task_frequency": "Full inventory: 4 hours weekly. Sales analysis: 2 hours weekly. Reorder calculations: 1 hour weekly",
+        "bottlenecks": "Don't know which styles will be popular, sizes sell unevenly, running out of bestsellers mid-season",
+        "bottleneck_impact": "Clearance sales at 60% off, lost sales from stockouts, cash tied up in dead inventory",
+        "data_types": ["Inventory levels", "Sales transactions", "Customer contact information"],
+        "data_storage": "Spreadsheets and shared files",
+        "data_accessibility": "Very difficult to access or incomplete",
+        "automation_experience": "Use Shopify for online sales but everything else is manual",
+        "automation_results": "Shopify tracks online sales but we have no insight into what's working in-store",
+        "team_comfort": "Comfortable with training",
+        "training_investment": "Limited budget for training"
+      },
+      "expected_ai_opportunities": [
+        "Seasonal demand forecasting by category/size",
+        "Automated reorder points for core items",
+        "Style performance prediction",
+        "Markdown optimization timing"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 2000,
+        "staff_hours_saved": 28,
+        "inventory_turn_improvement": "15%",
+        "implementation_cost_range": "1000-2500"
+      }
+    },
+    {
+      "case_id": "dental_practice_insurance_nightmare",
+      "business_name": "Bright Smiles Family Dentistry",
+      "industry": "Healthcare",
+      "size": "Small (11-50)",
+      "description": "Dental practice drowning in insurance verification, claim denials, and manual benefits checking",
+      "specific_scenario": "30% of claims get denied, spend 3 hours daily on insurance verification, patients surprised by out-of-pocket costs",
+      "test_inputs": {
+        "business_priorities": "Reduce insurance claim denials, automate benefits verification, improve patient cost estimates",
+        "most_urgent": "Insurance claim denials are costing us $4500 monthly in rejected payments and staff time to resubmit",
+        "repetitive_tasks": "Verifying insurance benefits before appointments, calling insurance companies for pre-approvals, resubmitting denied claims",
+        "task_frequency": "Benefits verification: 25 patients daily at 7 minutes each = 3 hours. Claim resubmissions: 1.5 hours daily",
+        "bottlenecks": "Insurance companies take 20+ minutes on hold, benefits change without notice, coding errors cause denials",
+        "bottleneck_impact": "Patients angry about surprise bills, cash flow delays from claim denials, staff burnout from insurance calls",
+        "data_types": ["Customer contact information", "Financial records", "Employee data"],
+        "data_storage": "Digital systems (CRM/ERP/databases)",
+        "data_accessibility": "Somewhat difficult to access",
+        "automation_experience": "Use dental practice software but insurance verification is still manual",
+        "automation_results": "Practice management software helps with scheduling but insurance is still a nightmare",
+        "team_comfort": "Need moderate support", 
+        "training_investment": "Yes, within reason"
+      },
+      "expected_ai_opportunities": [
+        "Real-time insurance eligibility verification",
+        "Automated pre-authorization requests",
+        "Claim denial prediction and prevention",
+        "Patient cost estimation before treatment"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 4500,
+        "staff_hours_saved": 75,
+        "claim_approval_rate_improvement": "15%",
+        "implementation_cost_range": "4000-8000"
+      }
+    },
+    {
+      "case_id": "landscaping_crew_inefficiency",
+      "business_name": "Green Thumb Landscaping",
+      "industry": "Professional Services",
+      "size": "Small (11-50)",
+      "description": "Landscaping company with inefficient crew scheduling, equipment tracking issues, and manual job costing",
+      "specific_scenario": "Crews sit idle waiting for equipment, manual time tracking leads to billing disputes, no visibility into job profitability",
+      "test_inputs": {
+        "business_priorities": "Optimize crew scheduling, track equipment location, automate job costing and billing",
+        "most_urgent": "We're losing money on jobs but don't know which ones - manual time tracking is completely unreliable",
+        "repetitive_tasks": "Creating daily crew schedules, tracking equipment between job sites, calculating actual job costs after completion",
+        "task_frequency": "Crew scheduling: 2 hours daily. Equipment tracking calls: 1 hour daily. Job costing: 3 hours weekly",
+        "bottlenecks": "Equipment goes missing between sites, crews show up without proper tools, billing disputes over hours worked",
+        "bottleneck_impact": "Crews idle 20% of time waiting for equipment, billing disputes delay payments, no idea which jobs are profitable",
+        "data_types": ["Employee data", "Sales transactions", "Financial records"],
+        "data_storage": "Spreadsheets and shared files",
+        "data_accessibility": "Very difficult to access or incomplete",
+        "automation_experience": "Tried GPS tracking on trucks but crews disable it",
+        "automation_results": "GPS tracking failed because crews saw it as micromanagement and found workarounds",
+        "team_comfort": "Resistant to change",
+        "training_investment": "Prefer minimal training needed"
+      },
+      "expected_ai_opportunities": [
+        "Automated crew and equipment scheduling",
+        "Real-time job costing and profitability tracking",
+        "Equipment utilization optimization",
+        "Predictive maintenance for equipment"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 3200,
+        "staff_hours_saved": 40,
+        "equipment_utilization_improvement": "18%",
+        "implementation_cost_range": "2500-5000"
+      }
+    },
+    {
+      "case_id": "bakery_production_waste",
+      "business_name": "Rise & Shine Artisan Bakery",
+      "industry": "Retail",
+      "size": "Startup (1-10)",
+      "description": "Artisan bakery with high waste from overproduction, manual production planning, and no demand forecasting",
+      "specific_scenario": "25% daily waste, baking quantities based on gut feeling, running out of popular items by noon",
+      "test_inputs": {
+        "business_priorities": "Reduce daily waste, predict demand by item, optimize production scheduling",
+        "most_urgent": "We throw away $200-300 worth of baked goods daily - it's heartbreaking and unsustainable",
+        "repetitive_tasks": "Planning daily production quantities, tracking what sells out when, calculating ingredient needs",
+        "task_frequency": "Production planning: 30 minutes daily. Sales tracking: 20 minutes. Ingredient calculations: 45 minutes",
+        "bottlenecks": "Don't know how weather affects sales, special events cause unpredictable demand, weekend vs weekday patterns unclear",
+        "bottleneck_impact": "High waste costs, disappointed customers when favorites sell out, inconsistent availability hurts reputation",
+        "data_types": ["Inventory levels", "Sales transactions", "Financial records"],
+        "data_storage": "Mainly paper/offline",
+        "data_accessibility": "Very difficult to access or incomplete",
+        "automation_experience": "Only use a basic POS system for payments",
+        "automation_results": "POS tracks sales totals but we have no insight into item-level patterns or timing",
+        "team_comfort": "Need moderate support",
+        "training_investment": "Limited budget for training"
+      },
+      "expected_ai_opportunities": [
+        "Daily demand forecasting by item",
+        "Weather-based sales prediction",
+        "Production optimization scheduling",
+        "Dynamic pricing for day-old items"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 7500,
+        "staff_hours_saved": 20,
+        "waste_reduction": "15%",
+        "implementation_cost_range": "800-2000"
+      }
+    },
+    {
+      "case_id": "auto_repair_parts_chaos",
+      "business_name": "Mike's Auto Repair",
+      "industry": "Professional Services", 
+      "size": "Small (11-50)",
+      "description": "Auto repair shop with parts inventory chaos, manual job estimates, and customer communication issues",
+      "specific_scenario": "Parts orders delayed by manual lookup, estimates take 2 hours to create, customers complain about lack of updates",
+      "test_inputs": {
+        "business_priorities": "Speed up parts ordering, automate repair estimates, improve customer communication",
+        "most_urgent": "Creating estimates takes forever and we lose customers who go elsewhere while waiting 2 days for a quote",
+        "repetitive_tasks": "Looking up part numbers across multiple catalogs, calling suppliers for availability, manually calculating labor hours",
+        "task_frequency": "Parts lookup: 3 hours daily across all estimates. Supplier calls: 1 hour daily. Estimate creation: 2 hours per estimate",
+        "bottlenecks": "Parts catalogs don't match, suppliers have different part numbers, labor time estimates are inconsistent",
+        "bottleneck_impact": "Slow estimates lose customers, wrong parts delay repairs, customers angry about lack of communication",
+        "data_types": ["Inventory levels", "Customer contact information", "Financial records"],
+        "data_storage": "Mix of digital and paper",
+        "data_accessibility": "Somewhat difficult to access",
+        "automation_experience": "Use basic shop management software but parts ordering is manual",
+        "automation_results": "Shop software tracks jobs but parts ordering and estimates still take forever",
+        "team_comfort": "Need moderate support",
+        "training_investment": "Yes, within reason"
+      },
+      "expected_ai_opportunities": [
+        "Automated parts lookup and cross-referencing",
+        "AI-powered repair time estimation",
+        "Automated customer status updates",
+        "Predictive parts inventory management"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 2800,
+        "staff_hours_saved": 50,
+        "estimate_turnaround_improvement": "70%",
+        "implementation_cost_range": "3000-5500"
+      }
+    },
+    {
+      "case_id": "law_firm_document_hell",
+      "business_name": "Johnson & Associates Family Law",
+      "industry": "Professional Services",
+      "size": "Small (11-50)",
+      "description": "Family law firm drowning in document review, manual case file organization, and billing inefficiencies",
+      "specific_scenario": "Attorneys spend 40% of time on document review, case files scattered across systems, billing disputes from poor time tracking",
+      "test_inputs": {
+        "business_priorities": "Automate document review and organization, improve time tracking accuracy, streamline case file management",
+        "most_urgent": "Our attorneys are spending 3-4 hours daily on document review that paralegals could handle with better tools",
+        "repetitive_tasks": "Reviewing discovery documents for relevance, organizing case files across multiple systems, manually tracking billable time",
+        "task_frequency": "Document review: 4 hours daily per attorney. File organization: 1 hour daily. Time entry corrections: 30 minutes daily",
+        "bottlenecks": "Documents stored in email, shared drives, and physical files. Time tracking is inconsistent and causes billing disputes",
+        "bottleneck_impact": "High attorney hourly costs on routine work, lost billable time from poor tracking, client disputes over bills",
+        "data_types": ["Customer contact information", "Financial records", "Other business records"],
+        "data_storage": "Mix of digital and paper",
+        "data_accessibility": "Somewhat difficult to access",
+        "automation_experience": "Use practice management software but document handling is still manual",
+        "automation_results": "Practice software helps with scheduling but we're drowning in documents and billing issues",
+        "team_comfort": "Need moderate support",
+        "training_investment": "Yes, within reason"
+      },
+      "expected_ai_opportunities": [
+        "AI-powered document review and categorization",
+        "Automated time tracking from calendar and documents",
+        "Case file organization and search",
+        "Billing accuracy and dispute prevention"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 8500,
+        "staff_hours_saved": 80,
+        "attorney_efficiency_improvement": "25%",
+        "implementation_cost_range": "5000-10000"
+      }
+    },
+    {
+      "case_id": "cleaning_service_routing_waste",
+      "business_name": "Sparkle Clean Services",
+      "industry": "Professional Services",
+      "size": "Small (11-50)", 
+      "description": "Commercial cleaning service with inefficient route planning, manual quality control, and supply waste",
+      "specific_scenario": "Cleaners drive 2+ hours between jobs daily, no systematic quality checks, 20% supply waste from overuse",
+      "test_inputs": {
+        "business_priorities": "Optimize cleaning routes, implement quality control system, reduce supply waste and costs",
+        "most_urgent": "Our cleaning teams waste 2-3 hours daily driving between jobs - fuel and labor costs are out of control",
+        "repetitive_tasks": "Manual route planning each day, calling clients about access issues, tracking supply usage across teams",
+        "task_frequency": "Route planning: 1.5 hours daily. Client coordination calls: 1 hour daily. Supply tracking: 2 hours weekly",
+        "bottlenecks": "No real-time communication with cleaning teams, quality complaints after teams have left, supply costs keep rising",
+        "bottleneck_impact": "High fuel and overtime costs, client complaints about missed spots, supply waste cutting into profits",
+        "data_types": ["Customer contact information", "Employee data", "Inventory levels"],
+        "data_storage": "Spreadsheets and shared files",
+        "data_accessibility": "Mostly accessible but some gaps",
+        "automation_experience": "Tried basic scheduling software but teams couldn't adapt to it",
+        "automation_results": "Scheduling software was too complex - teams went back to paper schedules and phone calls",
+        "team_comfort": "Resistant to change",
+        "training_investment": "Prefer minimal training needed"
+      },
+      "expected_ai_opportunities": [
+        "AI route optimization with real-time adjustments",
+        "Mobile quality control checklists with photo verification",
+        "Supply usage tracking and waste reduction",
+        "Automated client communication and access coordination"
+      ],
+      "realistic_roi_metrics": {
+        "current_monthly_loss": 3800,
+        "staff_hours_saved": 55,
+        "fuel_savings": "30%",
+        "supply_waste_reduction": "15%",
+        "implementation_cost_range": "2000-4500"
+      }
+    }
+  ],
+  "test_case_categories": {
+    "high_waste_scenarios": ["veterinary_clinic_appointments", "food_truck_inventory_waste", "bakery_production_waste"],
+    "routing_optimization": ["hvac_dispatch_chaos", "landscaping_crew_inefficiency", "cleaning_service_routing_waste"],
+    "inventory_management": ["food_truck_inventory_waste", "boutique_inventory_guesswork", "auto_repair_parts_chaos"],
+    "document_heavy": ["dental_practice_insurance_nightmare", "law_firm_document_hell"],
+    "customer_communication": ["veterinary_clinic_appointments", "hvac_dispatch_chaos", "auto_repair_parts_chaos"],
+    "manual_tracking_intensive": ["landscaping_crew_inefficiency", "bakery_production_waste", "cleaning_service_routing_waste"]
+  },
+  "testing_instructions": {
+    "how_to_use": "Each test case represents a real small business scenario with specific pain points and realistic metrics. Use these to test if your AI can identify the right automation opportunities and provide accurate ROI calculations.",
+    "validation_points": [
+      "Does the AI identify the specific pain points mentioned?",
+      "Are the recommended tools appropriate for the business size and budget?",
+      "Do the ROI calculations align with the realistic metrics provided?",
+      "Are the implementation timelines reasonable for small businesses?",
+      "Does the roadmap address the most urgent priority first?"
+    ],
+    "expected_ai_behavior": "The AI should recognize industry-specific challenges, recommend appropriately-sized solutions, and provide conservative ROI estimates that account for small business resource constraints."
+  }
+}
+

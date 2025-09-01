@@ -7,214 +7,163 @@ import Button from '@/components/ui/Button'
 interface InlineAIAuditProps {
   isVisible: boolean
   onClose: () => void
+  initialCustomProblem?: string
 }
 
-const PROCESS_QUESTIONS = [
-  // Part 1: Business Process Questions
+const CHAT_QUESTIONS = [
   {
-    id: 'workflow_description',
-    category: 'Business Process Questions',
-    question: 'What are the most time-consuming tasks your team handles daily?',
-    type: 'text' as const,
-    placeholder: 'e.g., Processing invoices, managing customer support tickets, data entry tasks'
+    id: 'intro',
+    type: 'ai_message' as const,
+    message: "Thank you for exploring AI opportunities with us. This questionnaire will identify key areas where AI-driven automation could benefit your business. Your responses will help us craft a tailored 30-60-90 day AI roadmap focusing on quick wins and sustainable solutions.",
+    followUp: 'business_priorities'
+  },
+  // Business Goals
+  {
+    id: 'business_priorities',
+    type: 'question' as const,
+    message: "What are the top business priorities for your company in the next 6–12 months?",
+    inputType: 'text',
+    placeholder: "e.g., Grow sales, reduce costs, improve customer satisfaction, expand operations...",
+    followUp: 'most_urgent'
   },
   {
-    id: 'process_owner',
-    category: 'Business Process Questions',
-    question: 'Who currently owns or manages this process? (Name, role)',
-    type: 'text' as const,
-    placeholder: 'e.g., Sarah Johnson, Accounts Payable Manager'
+    id: 'most_urgent',
+    type: 'question' as const,
+    message: "Of those priorities, which one is the most urgent or would you tackle first?",
+    inputType: 'text',
+    placeholder: "e.g., Reducing operational costs is our immediate focus...",
+    followUp: 'repetitive_tasks'
+  },
+  // Process Challenges
+  {
+    id: 'repetitive_tasks',
+    type: 'question' as const,
+    message: "Which routine or repetitive tasks currently take up a lot of your team's time or resources?",
+    inputType: 'text',
+    placeholder: "e.g., Manually handling customer support tickets, data entry, report generation...",
+    followUp: 'task_frequency'
   },
   {
-    id: 'urgency_value',
-    category: 'Business Process Questions',
-    question: 'Why is improving this workflow urgent or valuable? What happens if nothing changes?',
-    type: 'text' as const,
-    placeholder: 'e.g., We lose 2 hours daily to manual data entry, causing payment delays'
+    id: 'task_frequency',
+    type: 'question' as const,
+    message: "Can you estimate how often that task occurs and roughly how long each instance takes?",
+    inputType: 'text',
+    placeholder: "e.g., 500 tickets per day, 10 minutes each on average...",
+    followUp: 'bottlenecks'
   },
   {
-    id: 'time_cost',
-    category: 'Business Process Questions',
-    question: 'Roughly how many hours per week does your team spend on this process today?',
-    type: 'single_choice' as const,
+    id: 'bottlenecks',
+    type: 'question' as const,
+    message: "Where do you experience the biggest bottlenecks or delays in your operations?",
+    inputType: 'text',
+    placeholder: "e.g., Waiting for approvals, re-entering data in multiple places, fixing frequent errors...",
+    followUp: 'bottleneck_impact'
+  },
+  {
+    id: 'bottleneck_impact',
+    type: 'question' as const,
+    message: "What's the main cause of that bottleneck, and how is it impacting your business?",
+    inputType: 'text',
+    placeholder: "e.g., Manual approval process causes customer complaints and missed deadlines...",
+    followUp: 'data_types'
+  },
+  // Data & Technology
+  {
+    id: 'data_types',
+    type: 'question' as const,
+    message: "What types of data or records does your business generate or use regularly?",
+    inputType: 'multi_choice',
     options: [
-      'Less than 5 hours per week',
-      '5-15 hours per week',
-      '15-30 hours per week', 
-      '30-50 hours per week',
-      'More than 50 hours per week'
-    ]
+      "Customer contact information",
+      "Sales transactions",
+      "Inventory levels",
+      "Support request logs",
+      "Financial records",
+      "Employee data",
+      "Product/service data",
+      "Other business records"
+    ],
+    followUp: 'data_storage'
   },
   {
-    id: 'monetary_cost',
-    category: 'Business Process Questions',
-    question: 'Can you estimate monthly or yearly monetary costs (labor, errors, delays) of this process?',
-    type: 'single_choice' as const,
+    id: 'data_storage',
+    type: 'question' as const,
+    message: "How do you store and manage this data currently?",
+    inputType: 'choice',
     options: [
-      'Under $5,000 per month',
-      '$5,000-$15,000 per month',
-      '$15,000-$50,000 per month',
-      '$50,000-$100,000 per month',
-      'Over $100,000 per month',
-      'No idea, but it\'s significant'
-    ]
-  },
-
-  // Part 2: Contextual Workflow-Mapping Questions
-  {
-    id: 'workflow_start',
-    category: 'Contextual Workflow-Mapping',
-    question: 'Where does this workflow start, and what triggers it?',
-    type: 'text' as const,
-    placeholder: 'e.g., Receiving email from client, Incoming invoice via email'
+      "Digital systems (CRM/ERP/databases)",
+      "Spreadsheets and shared files",
+      "Mix of digital and paper",
+      "Mainly paper/offline",
+      "Cloud-based platforms",
+      "Custom software solutions"
+    ],
+    followUp: 'data_accessibility'
   },
   {
-    id: 'workflow_end',
-    category: 'Contextual Workflow-Mapping',
-    question: 'Where does this workflow end, or what\'s the final output/outcome?',
-    type: 'text' as const,
-    placeholder: 'e.g., Invoice paid, Customer onboarded, Report generated'
-  },
-  {
-    id: 'workflow_steps',
-    category: 'Contextual Workflow-Mapping',
-    question: 'List every major step involved in this workflow (brief bullet points)',
-    type: 'text' as const,
-    placeholder: 'e.g., • Receive invoice\n• Extract data\n• Verify against PO\n• Route for approval\n• Process payment'
-  },
-  {
-    id: 'workflow_roles',
-    category: 'Contextual Workflow-Mapping',
-    question: 'Who (roles/people) is involved at each step?',
-    type: 'text' as const,
-    placeholder: 'e.g., Admin assistant receives, AP clerk processes, Manager approves'
-  },
-  {
-    id: 'pain_points',
-    category: 'Contextual Workflow-Mapping',
-    question: 'Which step(s) currently cause the most delay, frustration, or errors?',
-    type: 'text' as const,
-    placeholder: 'e.g., Manual data extraction takes 30 mins per invoice and has 15% error rate'
-  },
-
-  // Part 3: Technical Context
-  {
-    id: 'current_software',
-    category: 'Technical Context',
-    question: 'What software or platforms do you currently use to manage this process?',
-    type: 'multiple_choice' as const,
+    id: 'data_accessibility',
+    type: 'question' as const,
+    message: "Is your data generally complete and easy to access when you need it for analysis or reporting?",
+    inputType: 'choice',
     options: [
-      'Microsoft Excel/Google Sheets',
-      'Email (Outlook, Gmail)',
-      'CRM (Salesforce, HubSpot, etc.)',
-      'Accounting software (QuickBooks, Xero, etc.)',
-      'ERP system (SAP, Oracle, etc.)',
-      'Document management (SharePoint, Google Drive)',
-      'Project management (Asana, Monday, etc.)',
-      'Custom database/software',
-      'Mostly manual/paper-based'
-    ]
+      "Yes, very accessible and complete",
+      "Mostly accessible but some gaps",
+      "Somewhat difficult to access",
+      "Very difficult to access or incomplete",
+      "Would need significant cleanup"
+    ],
+    followUp: 'automation_experience'
   },
   {
-    id: 'manual_tasks',
-    category: 'Technical Context',
-    question: 'Are there parts of the process done manually (e.g., copying data, spreadsheets, emails)? Describe briefly.',
-    type: 'text' as const,
-    placeholder: 'e.g., Manually copying invoice data from PDFs into Excel, then emailing for approval'
+    id: 'automation_experience',
+    type: 'question' as const,
+    message: "Have you already tried any automation or AI tools in your workflows?",
+    inputType: 'text',
+    placeholder: "e.g., Chatbots, RPA bots, predictive analytics, or 'No, haven't tried any yet'...",
+    followUp: 'automation_results'
   },
   {
-    id: 'existing_automation',
-    category: 'Technical Context',
-    question: 'Do you have existing automations or integrations in place for this process? If so, which ones?',
-    type: 'text' as const,
-    placeholder: 'e.g., Zapier integration between email and spreadsheet, or None currently'
+    id: 'automation_results',
+    type: 'question' as const,
+    message: "If yes, what was the biggest benefit or challenge? If no, what's held you back?",
+    inputType: 'text',
+    placeholder: "e.g., Saved time but hard to maintain, or 'Not sure where to start, budget concerns'...",
+    followUp: 'team_comfort'
   },
-
-  // Part 4: Pain-Quantification Questions
+  // Readiness
   {
-    id: 'people_count',
-    category: 'Pain-Quantification',
-    question: 'How many people perform this task regularly?',
-    type: 'single_choice' as const,
+    id: 'team_comfort',
+    type: 'question' as const,
+    message: "How comfortable is your team with adopting new technology?",
+    inputType: 'choice',
     options: [
-      '1 person',
-      '2-3 people',
-      '4-10 people',
-      '11-25 people',
-      'More than 25 people'
-    ]
+      "Very tech-savvy, quick to adopt",
+      "Comfortable with training",
+      "Need moderate support",
+      "Require significant training",
+      "Resistant to change"
+    ],
+    followUp: 'training_investment'
   },
   {
-    id: 'step_duration',
-    category: 'Pain-Quantification',
-    question: 'How long does each step roughly take per occurrence?',
-    type: 'text' as const,
-    placeholder: 'e.g., Data entry: 15 mins, Approval routing: 30 mins, Payment processing: 10 mins'
-  },
-  {
-    id: 'frequency',
-    category: 'Pain-Quantification',
-    question: 'How frequently does this workflow happen?',
-    type: 'single_choice' as const,
+    id: 'training_investment',
+    type: 'question' as const,
+    message: "Would you be willing to invest in training or support to help the team get up to speed with AI tools?",
+    inputType: 'choice',
     options: [
-      'Multiple times per day',
-      'Daily',
-      'Multiple times per week',
-      'Weekly',
-      'Monthly',
-      'Quarterly or less frequent'
-    ]
+      "Yes, whatever it takes",
+      "Yes, within reason",
+      "Limited budget for training",
+      "Prefer minimal training needed",
+      "No additional training budget"
+    ],
+    followUp: 'ready_analyze'
   },
   {
-    id: 'error_rate',
-    category: 'Pain-Quantification',
-    question: 'How often do mistakes/errors happen? (If applicable)',
-    type: 'single_choice' as const,
-    options: [
-      'Rarely (less than 1%)',
-      'Occasionally (1-5%)',
-      'Sometimes (5-15%)',
-      'Frequently (15-30%)',
-      'Very often (more than 30%)',
-      'Not applicable/No errors tracked'
-    ]
-  },
-  {
-    id: 'error_cost',
-    category: 'Pain-Quantification',
-    question: 'What\'s the direct or indirect cost per error?',
-    type: 'single_choice' as const,
-    options: [
-      'Under $50 per error',
-      '$50-$200 per error',
-      '$200-$1,000 per error',
-      '$1,000-$5,000 per error',
-      'Over $5,000 per error',
-      'Hard to quantify'
-    ]
-  },
-
-  // Part 5: Open-ended Insight Questions
-  {
-    id: 'why_not_solved',
-    category: 'Open-ended Insights',
-    question: 'In your own words, why hasn\'t this problem been solved yet?',
-    type: 'text' as const,
-    placeholder: 'e.g., Too complex, lack of technical expertise, budget constraints, other priorities'
-  },
-  {
-    id: 'successful_solution',
-    category: 'Open-ended Insights',
-    question: 'What would a successful solution look like to you?',
-    type: 'text' as const,
-    placeholder: 'e.g., Automated data extraction with 99% accuracy, 80% time savings, seamless integration'
-  },
-  {
-    id: 'previous_attempts',
-    category: 'Open-ended Insights',
-    question: 'Is there something you\'ve tried in the past that didn\'t work? Why?',
-    type: 'text' as const,
-    placeholder: 'e.g., Tried basic Excel macros but they broke frequently, evaluated software X but it was too expensive'
+    id: 'ready_analyze',
+    type: 'ai_message' as const,
+    message: "Perfect. I have everything needed to analyze your situation and create a tailored AI automation roadmap. This will take just a moment...",
+    followUp: null
   }
 ]
 
@@ -226,26 +175,94 @@ interface CompanyProfile {
   budget_range?: string
 }
 
-export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps) {
+export default function InlineAIAudit({ isVisible, onClose, initialCustomProblem }: InlineAIAuditProps) {
   const [appState, setAppState] = useState<AppState>('intake')
-  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [currentQuestionId, setCurrentQuestionId] = useState('intro')
+  const [chatHistory, setChatHistory] = useState<Array<{id: string, type: 'ai' | 'user', message: string, timestamp: Date}>>([])
   const [answers, setAnswers] = useState<Record<string, any>>({})
   const [companyProfile, setCompanyProfile] = useState<Partial<CompanyProfile>>({})
   const [assessment, setAssessment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [customProblem, setCustomProblem] = useState<string>(initialCustomProblem ?? '')
+  const [isTyping, setIsTyping] = useState(false)
+  const [currentInput, setCurrentInput] = useState('')
 
   const handleAnswer = (questionId: string, answer: any) => {
     setAnswers(prev => ({ ...prev, [questionId]: answer }))
-  }
-
-  const handleNext = () => {
-    if (currentQuestion < PROCESS_QUESTIONS.length - 1) {
-      setCurrentQuestion(prev => prev + 1)
+    
+    // Add user message to chat history
+    setChatHistory(prev => [...prev, {
+      id: questionId + '_answer',
+      type: 'user',
+      message: Array.isArray(answer) ? answer.join(', ') : answer,
+      timestamp: new Date()
+    }])
+    
+    // Find current question and move to next
+    const currentQuestion = CHAT_QUESTIONS.find(q => q.id === questionId)
+    if (currentQuestion?.followUp) {
+      // Simulate AI typing
+      setIsTyping(true)
+      setTimeout(() => {
+        const nextQuestion = CHAT_QUESTIONS.find(q => q.id === currentQuestion.followUp)
+        if (nextQuestion) {
+          setChatHistory(prev => [...prev, {
+            id: nextQuestion.id,
+            type: 'ai',
+            message: nextQuestion.message,
+            timestamp: new Date()
+          }])
+          setCurrentQuestionId(nextQuestion.id)
+          
+          // If this is the final ai_message (ready_analyze), auto-trigger analysis
+          if (nextQuestion.id === 'ready_analyze') {
+            setTimeout(() => {
+              console.log('🎯 Final AI message shown, starting analysis...')
+              startAnalysis()
+            }, 2000) // Give user time to read the message
+          }
+        }
+        setIsTyping(false)
+      }, 1000 + Math.random() * 1000) // Random delay between 1-2 seconds
     } else {
+      // End of questions, start analysis
+      console.log('🎯 Chat completed, starting analysis...')
       startAnalysis()
     }
+    
+    setCurrentInput('')
   }
+
+  // Initialize chat with first message
+  useEffect(() => {
+    if (chatHistory.length === 0) {
+      const firstQuestion = CHAT_QUESTIONS.find(q => q.id === 'intro')
+      if (firstQuestion) {
+        setTimeout(() => {
+          setChatHistory([{
+            id: firstQuestion.id,
+            type: 'ai',
+            message: firstQuestion.message,
+            timestamp: new Date()
+          }])
+          // Show the actual question immediately
+          setTimeout(() => {
+            const businessPrioritiesQuestion = CHAT_QUESTIONS.find(q => q.id === 'business_priorities')
+            if (businessPrioritiesQuestion) {
+              setChatHistory(prev => [...prev, {
+                id: businessPrioritiesQuestion.id,
+                type: 'ai',
+                message: businessPrioritiesQuestion.message,
+                timestamp: new Date()
+              }])
+              setCurrentQuestionId('business_priorities')
+            }
+          }, 1500)
+        }, 500)
+      }
+    }
+  }, [])
 
   const startAnalysis = async () => {
     setAppState('processing')
@@ -253,16 +270,26 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
     setError(null)
     
     try {
+      // Ensure company profile has required fields
+      const safeCompanyProfile = {
+        industry: companyProfile.industry || "Professional Services",
+        size: companyProfile.size || "Medium (51-500)",
+        budget_range: companyProfile.budget_range || "10K-50K"
+      }
+      
+      console.log('📊 Company Profile:', safeCompanyProfile)
+      console.log('📝 Answers:', Object.keys(answers))
+      
       const requestData = {
         action: 'assessment',
-        companyProfile: companyProfile as CompanyProfile,
+        companyProfile: safeCompanyProfile,
         answers: Object.entries(answers).map(([id, answer]) => ({
           id,
-          category: PROCESS_QUESTIONS.find(q => q.id === id)?.category || '',
-          question: PROCESS_QUESTIONS.find(q => q.id === id)?.question || '',
+          category: CHAT_QUESTIONS.find(q => q.id === id)?.type || '',
+          question: CHAT_QUESTIONS.find(q => q.id === id)?.message || '',
           answer
         })),
-        customProblem: ''
+        customProblem
       }
 
       console.log('🚀 Calling unified Infera API...')
@@ -351,96 +378,206 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
     setError(null)
   }
 
-  // Test data for different sectors
-  const TEST_CASES = {
-    'Invoice Processing (Professional Services)': {
-      companyProfile: { industry: 'Professional Services', size: 'Small (11-50)' },
-      answers: {
-        workflow_description: 'Client invoice processing from receipt to payment - we receive invoices via email, manually extract data, match against contracts, get approvals, and process payments',
-        process_owner: 'Maria Santos, Office Manager',
-        urgency_value: 'We\'re drowning in paperwork. Takes 3+ days to process each invoice, clients complain about late payments, and we\'re making mistakes that cost us credibility and late fees',
-        time_cost: '15-30 hours per week',
-        monetary_cost: '$5,000-$15,000 per month',
-        workflow_start: 'Client emails invoice as PDF attachment to our general inbox',
-        workflow_end: 'Payment processed and recorded in QuickBooks, client receives payment confirmation',
-        workflow_steps: '• Receive invoice email\n• Download PDF and print\n• Manually type data into Excel spreadsheet\n• Cross-check against original contract\n• Email to department head for approval\n• Wait for approval response\n• Enter approved invoices into QuickBooks\n• Generate and send payment\n• File paperwork',
-        workflow_roles: 'Admin assistant receives and prints, Office manager enters data and sends for approval, Department head approves, Bookkeeper processes payment',
-        pain_points: 'Manual data entry takes 20-30 minutes per invoice and has 10-15% error rate. Approval bottleneck when department head travels. Lost invoices, duplicate payments, missed early payment discounts',
-        current_software: ['Microsoft Excel/Google Sheets', 'Email (Outlook, Gmail)', 'Accounting software (QuickBooks, Xero, etc.)'],
-        manual_tasks: 'Manually typing all invoice data from PDFs into Excel, then re-entering into QuickBooks. Printing and filing physical copies. Chasing approvals via email and phone calls',
-        existing_automation: 'None currently',
-        people_count: '4-10 people',
-        step_duration: 'Data entry: 25 mins, Approval chase: 15 mins, QuickBooks entry: 10 mins, Payment processing: 5 mins',
-        frequency: 'Multiple times per day',
-        error_rate: 'Sometimes (5-15%)',
-        error_cost: '$200-$1,000 per error',
-        why_not_solved: 'Too busy putting out fires to focus on solutions. Tried some basic Excel macros but they kept breaking. Don\'t have technical expertise in-house and worried about cost',
-        successful_solution: 'Invoices automatically processed from email with 99% accuracy, approvals happen instantly via mobile, payments processed same day, zero manual data entry',
-        previous_attempts: 'Tried using Excel templates and formulas but they were fragile and broke when people made changes. Looked at some software but seemed too complex and expensive for our size'
-      }
-    },
-    'Customer Support (E-commerce)': {
-      companyProfile: { industry: 'Retail', size: 'Medium (51-500)' },
-      answers: {
-        workflow_description: 'Customer support ticket handling from inquiry to resolution - customers contact us via email, chat, and phone with questions about orders, returns, and product issues',
-        process_owner: 'Jennifer Kim, Customer Success Manager',
-        urgency_value: 'Response times are terrible (24+ hours), customers are frustrated, negative reviews piling up, support team is burned out handling repetitive questions',
-        time_cost: 'More than 50 hours per week',
-        monetary_cost: 'Over $100,000 per month',
-        workflow_start: 'Customer submits inquiry via email, chat widget, or phone call',
-        workflow_end: 'Customer issue resolved and satisfaction survey completed',
-        workflow_steps: '• Customer inquiry received\n• Ticket created in system\n• Agent reads and categorizes issue\n• Research customer order history\n• Craft personalized response\n• Send response to customer\n• Wait for customer reply\n• Continue back-and-forth until resolved\n• Close ticket and update records',
-        workflow_roles: 'Tier 1 agents handle basic inquiries, Tier 2 for complex issues, Manager escalation for complaints, Returns team for RMA processing',
-        pain_points: '70% of tickets are repetitive questions about order status, return policies, sizing. Average response time is 18 hours. Agents spend 40% of time looking up order info across 3 different systems',
-        current_software: ['Email (Outlook, Gmail)', 'CRM (Salesforce, HubSpot, etc.)', 'Custom database/software'],
-        manual_tasks: 'Manually copying order details from multiple systems, typing same responses over and over, categorizing tickets by hand, updating customer records in 3 places',
-        existing_automation: 'Basic email templates and auto-responders, but they\'re generic and customers complain they\'re not helpful',
-        people_count: '11-25 people',
-        step_duration: 'Ticket review: 5 mins, Research: 10 mins, Response writing: 8 mins, System updates: 3 mins',
-        frequency: 'Multiple times per day',
-        error_rate: 'Occasionally (1-5%)',
-        error_cost: '$50-$200 per error',
-        why_not_solved: 'Tried a few chatbots but they were terrible and made customers angrier. Management thinks good customer service requires human touch. Budget constraints and integration complexity with existing systems',
-        successful_solution: '80% of common questions auto-resolved instantly, complex issues routed to right specialist immediately, customers can track everything self-service, response time under 2 hours',
-        previous_attempts: 'Deployed a basic chatbot 2 years ago but it couldn\'t handle anything beyond FAQ lookups and customers hated it. Tried better email templates but still too generic'
-      }
-    },
-    'Hiring Process (Technology)': {
-      companyProfile: { industry: 'Technology', size: 'Startup (1-10)' },
-      answers: {
-        workflow_description: 'Software engineer hiring process from job posting to offer acceptance - screening resumes, conducting technical interviews, reference checks, and making offers',
-        process_owner: 'Alex Chen, Head of Engineering',
-        urgency_value: 'Hiring is our biggest bottleneck for growth. Takes 3+ months to fill roles, losing great candidates to competitors, founders spending 60% of time on hiring instead of product development',
-        time_cost: '30-50 hours per week',
-        monetary_cost: '$15,000-$50,000 per month',
-        workflow_start: 'Job posted on job boards and candidates apply via email or job portal',
-        workflow_end: 'Candidate accepts offer and starts onboarding process',
-        workflow_steps: '• Post job on multiple boards\n• Receive applications via email\n• Manually screen resumes\n• Send coding challenge to qualified candidates\n• Review code submissions\n• Schedule and conduct phone screens\n• Coordinate technical interviews with team\n• Check references manually\n• Prepare and send offer letters\n• Negotiate terms back and forth',
-        workflow_roles: 'Founder does initial screening, Engineering team conducts technical interviews, Founder handles offers and negotiations',
-        pain_points: 'Drowning in unqualified resumes (200+ per role), scheduling interviews is a nightmare across timezones, losing track of candidate status, great candidates drop out due to slow process',
-        current_software: ['Email (Outlook, Gmail)', 'Mostly manual/paper-based'],
-        manual_tasks: 'Reading every resume individually, copying candidate info into spreadsheets, manual email scheduling, tracking candidate status in various email threads and notes',
-        existing_automation: 'None currently',
-        people_count: '2-3 people',
-        step_duration: 'Resume screening: 3 mins each, Phone screen: 45 mins, Technical interview: 90 mins, Reference calls: 20 mins each',
-        frequency: 'Daily',
-        error_rate: 'Sometimes (5-15%)',
-        error_cost: '$1,000-$5,000 per error',
-        why_not_solved: 'Early stage startup, no HR person, founders focused on product and customers. Looked at ATS systems but they seem overkill and expensive for our size. Need something simple and fast',
-        successful_solution: 'Qualified candidates automatically identified and ranked, interviews scheduled seamlessly, candidate communication automated, hiring decision made within 2 weeks of application',
-        previous_attempts: 'Used a simple spreadsheet to track candidates but it quickly became unwieldy. Tried a basic ATS trial but it was too complex and required too much setup time'
-      }
-    }
-  }
-
   const handleTestCase = (caseName: string) => {
-    const testCase = TEST_CASES[caseName as keyof typeof TEST_CASES]
-    setCompanyProfile(testCase.companyProfile)
-    setAnswers(testCase.answers)
-    setCurrentQuestion(PROCESS_QUESTIONS.length - 1)
+    console.log('🧪 Loading test case and starting analysis...', caseName)
+    
+    let testAnswers: any = {}
+    let testProfile: any = {}
+    let testMessage = ""
+    
+    switch (caseName) {
+      case 'mckinsey':
+        // Original McKinsey-style test case
+        testAnswers = {
+          business_priorities: "Reduce operational costs, improve customer satisfaction, scale operations",
+          most_urgent: "Reducing operational costs is our immediate focus",
+          repetitive_tasks: "Manual data entry from customer emails, generating weekly reports, processing invoices",
+          task_frequency: "200 customer emails per day, 2 hours of manual data entry each",
+          bottlenecks: "Waiting for manager approvals, re-entering data across multiple systems",
+          bottleneck_impact: "Approval delays cause customer complaints and missed SLA deadlines",
+          data_types: ["Customer contact information", "Sales transactions", "Support request logs"],
+          data_storage: "Mix of digital and paper",
+          data_accessibility: "Somewhat difficult to access",
+          automation_experience: "Tried basic Excel macros but they kept breaking",
+          automation_results: "Saved some time initially but hard to maintain, broke frequently",
+          team_comfort: "Need moderate support",
+          training_investment: "Yes, within reason"
+        }
+        testProfile = {
+          industry: "Professional Services",
+          size: "Medium (51-500)",
+          budget_range: "10K-50K"
+        }
+        testMessage = "Test case loaded with McKinsey-style responses!"
+        break
+
+      case 'veterinary':
+        // Veterinary clinic with appointment no-shows
+        testAnswers = {
+          business_priorities: "Reduce no-shows, eliminate manual reminder calls, digitize patient records",
+          most_urgent: "Reducing appointment no-shows - we lose $3,600 per month from empty slots",
+          repetitive_tasks: "Making 40-60 reminder calls daily, manually checking insurance eligibility, updating paper charts after each visit",
+          task_frequency: "60 reminder calls per day at 2 minutes each = 2 hours. Insurance checks: 25 per day at 3 minutes = 75 minutes",
+          bottlenecks: "Phone tag with clients for confirmations, waiting for insurance pre-approvals, finding paper records during emergencies",
+          bottleneck_impact: "15% no-show rate, delayed treatments while searching files, frustrated clients waiting for callbacks",
+          data_types: ["Customer contact information", "Employee data", "Financial records", "Other business records"],
+          data_storage: "Mix of digital and paper",
+          data_accessibility: "Somewhat difficult to access",
+          automation_experience: "Tried online scheduling but clients still prefer calling",
+          automation_results: "Scheduling software helped but most clients (70%) still call instead of booking online",
+          team_comfort: "Need moderate support",
+          training_investment: "Yes, within reason"
+        }
+        testProfile = {
+          industry: "Healthcare", 
+          size: "Small (11-50)",
+          budget_range: "5K-25K"
+        }
+        testMessage = "Veterinary clinic test case loaded - high no-show rates and manual processes!"
+        break
+
+      case 'food_truck':
+        // Food truck with inventory waste
+        testAnswers = {
+          business_priorities: "Reduce food waste, predict daily demand, automate inventory ordering",
+          most_urgent: "Food waste is killing our margins - throwing away $800-1200 worth of ingredients monthly",
+          repetitive_tasks: "Daily inventory counts, manual calculation of prep quantities, tracking sales by item on paper",
+          task_frequency: "Inventory count: 45 minutes daily. Prep calculations: 30 minutes. Sales tracking: 20 minutes end of day",
+          bottlenecks: "Guessing how much to prep, running out of popular items early, over-ordering perishables",
+          bottleneck_impact: "Lost sales when popular items sell out, $1000+ monthly waste, stressed staff during rush",
+          data_types: ["Inventory levels", "Sales transactions", "Financial records"],
+          data_storage: "Spreadsheets and shared files",
+          data_accessibility: "Mostly accessible but some gaps",
+          automation_experience: "Use Square for payments but track everything else manually",
+          automation_results: "Square helps with payments but we have no visibility into what's selling when",
+          team_comfort: "Comfortable with training",
+          training_investment: "Limited budget for training"
+        }
+        testProfile = {
+          industry: "Retail",
+          size: "Startup (1-10)",
+          budget_range: "1K-10K"
+        }
+        testMessage = "Food truck test case loaded - high waste and manual inventory tracking!"
+        break
+
+      case 'hvac_dispatch':
+        // HVAC with inefficient dispatching
+        testAnswers = {
+          business_priorities: "Optimize technician routes, reduce emergency response time, improve customer communication",
+          most_urgent: "Our technicians waste 3-4 hours daily driving between jobs - fuel and labor costs are crushing us",
+          repetitive_tasks: "Manual route planning each morning, calling customers with arrival updates, rescheduling when emergencies arise",
+          task_frequency: "Route planning: 1 hour daily for dispatcher. Customer update calls: 2 hours daily. Rescheduling: 45 minutes when emergencies hit",
+          bottlenecks: "No real-time visibility of technician locations, customers angry about vague time windows, emergency calls chaos",
+          bottleneck_impact: "High fuel costs, overtime pay, 1-star reviews about poor communication, lost repeat customers",
+          data_types: ["Customer contact information", "Employee data", "Sales transactions"],
+          data_storage: "Digital systems (CRM/ERP/databases)",
+          data_accessibility: "Mostly accessible but some gaps",
+          automation_experience: "Use basic CRM but dispatch is all manual phone calls and paper schedules",
+          automation_results: "CRM helps track customers but scheduling is still chaos - no integration",
+          team_comfort: "Need moderate support",
+          training_investment: "Yes, within reason"
+        }
+        testProfile = {
+          industry: "Professional Services",
+          size: "Small (11-50)",
+          budget_range: "10K-50K"
+        }
+        testMessage = "HVAC dispatch test case loaded - route optimization and scheduling chaos!"
+        break
+
+      case 'wedding_photography':
+        // Wedding photographer with editing bottleneck
+        testAnswers = {
+          business_priorities: "Speed up photo editing workflow, automate client communication timelines, streamline contract and payment processes",
+          most_urgent: "I'm spending 40+ hours editing each wedding - I can only book 2 weddings per month because of editing bottleneck",
+          repetitive_tasks: "Culling and editing 3000+ photos per wedding, sending timeline updates to clients, chasing contract signatures and payments",
+          task_frequency: "Photo editing: 40 hours per wedding. Client updates: 2 hours per wedding. Contract follow-ups: 1 hour per client",
+          bottlenecks: "Manual photo culling takes forever, clients don't respond to emails, contracts get lost in email chains",
+          bottleneck_impact: "Can only book 24 weddings/year instead of 50+, clients frustrated by slow delivery, cash flow issues from late payments",
+          data_types: ["Customer contact information", "Financial records", "Other business records"],
+          data_storage: "Mix of digital and paper",
+          data_accessibility: "Mostly accessible but some gaps",
+          automation_experience: "Use Lightroom for editing but everything else is manual",
+          automation_results: "Lightroom helps with editing but client management and contracts are still a mess",
+          team_comfort: "Comfortable with training",
+          training_investment: "Limited budget for training"
+        }
+        testProfile = {
+          industry: "Professional Services",
+          size: "Startup (1-10)",
+          budget_range: "5K-25K"
+        }
+        testMessage = "Wedding photography test case loaded - editing bottleneck limiting bookings!"
+        break
+
+      case 'auto_repair':
+        // Auto repair with parts chaos
+        testAnswers = {
+          business_priorities: "Speed up parts ordering, automate repair estimates, improve customer communication",
+          most_urgent: "Creating estimates takes forever and we lose customers who go elsewhere while waiting 2 days for a quote",
+          repetitive_tasks: "Looking up part numbers across multiple catalogs, calling suppliers for availability, manually calculating labor hours",
+          task_frequency: "Parts lookup: 3 hours daily across all estimates. Supplier calls: 1 hour daily. Estimate creation: 2 hours per estimate",
+          bottlenecks: "Parts catalogs don't match, suppliers have different part numbers, labor time estimates are inconsistent",
+          bottleneck_impact: "Slow estimates lose customers, wrong parts delay repairs, customers angry about lack of communication",
+          data_types: ["Inventory levels", "Customer contact information", "Financial records"],
+          data_storage: "Mix of digital and paper",
+          data_accessibility: "Somewhat difficult to access",
+          automation_experience: "Use basic shop management software but parts ordering is manual",
+          automation_results: "Shop software tracks jobs but parts ordering and estimates still take forever",
+          team_comfort: "Need moderate support",
+          training_investment: "Yes, within reason"
+        }
+        testProfile = {
+          industry: "Professional Services", 
+          size: "Small (11-50)",
+          budget_range: "10K-50K"
+        }
+        testMessage = "Auto repair test case loaded - parts lookup chaos and slow estimates!"
+        break
+
+      default:
+        // Fallback to original McKinsey case
+        return handleTestCase('mckinsey')
+    }
+    
+    // Set test data
+    setAnswers(testAnswers)
+    setCompanyProfile(testProfile)
+    
+    // Simulate completed chat
+    setChatHistory([
+      {id: 'test', type: 'ai', message: testMessage, timestamp: new Date()},
+      {id: 'test2', type: 'user', message: testAnswers.business_priorities, timestamp: new Date()},
+      {id: 'ready_analyze', type: 'ai', message: "Perfect. I have everything needed to analyze your situation and create a tailored AI automation roadmap. This will take just a moment...", timestamp: new Date()}
+    ])
+    
+    // Immediately start analysis
+    setTimeout(() => {
+      console.log('🚀 Starting test case analysis...')
+      startAnalysis()
+    }, 1000)
   }
 
   if (!isVisible) return null
+
+  // Derive a lightweight Real-Time Pool from current answers
+  const pool = {
+    processFlags: [
+      answers.business_priorities ? 'Business priorities identified' : null,
+      answers.repetitive_tasks ? 'Repetitive tasks noted' : null,
+      answers.bottlenecks ? 'Bottlenecks identified' : null,
+      answers.automation_experience ? 'Automation experience captured' : null,
+    ].filter(Boolean) as string[],
+    safeMetrics: [
+      answers.most_urgent ? `Priority: ${answers.most_urgent}` : null,
+      answers.task_frequency ? `Frequency: ${answers.task_frequency}` : null,
+      answers.bottleneck_impact ? `Impact: ${answers.bottleneck_impact}` : null,
+      answers.team_comfort ? `Team readiness: ${answers.team_comfort}` : null,
+      answers.data_accessibility ? `Data quality: ${answers.data_accessibility}` : null,
+    ].filter(Boolean) as string[],
+    systems: (Array.isArray(answers.data_types) ? answers.data_types : []) as string[],
+  }
 
   return (
     <motion.section
@@ -462,30 +599,60 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
             </svg>
           </button>
           
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-8">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white" style={{marginBottom: '2rem'}}>
             AI Opportunity Assessment
           </h2>
           <div className="max-w-3xl mx-auto mt-6">
             <p className="text-xl text-gray-300 text-center">
-              Get a personalized AI roadmap with quantified ROI in minutes
+              Skip $1,500 agency audits — Infera is $99. Describe your problem or answer a few questions.
             </p>
           </div>
 
           {/* Test Cases - DEV ONLY */}
           {appState === 'intake' && (
-            <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-lg max-w-4xl mx-auto">
+            <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-lg max-w-6xl mx-auto">
               <h3 className="text-lg font-semibold text-red-300 mb-3">🧪 Test Cases (DEV ONLY - Remove in Production)</h3>
-              <div className="flex flex-wrap gap-3 justify-center">
-                {Object.keys(TEST_CASES).map((caseName) => (
-                  <button
-                    key={caseName}
-                    onClick={() => handleTestCase(caseName)}
-                    className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-200 rounded-lg text-sm transition-all"
-                  >
-                    Auto-fill: {caseName}
-                  </button>
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <button
+                  onClick={() => handleTestCase('mckinsey')}
+                  className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-200 rounded-lg text-sm transition-all"
+                >
+                  📊 McKinsey-style Business
+                </button>
+                <button
+                  onClick={() => handleTestCase('veterinary')}
+                  className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-200 rounded-lg text-sm transition-all"
+                >
+                  🐕 Veterinary Clinic (No-shows)
+                </button>
+                <button
+                  onClick={() => handleTestCase('food_truck')}
+                  className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-200 rounded-lg text-sm transition-all"
+                >
+                  🚚 Food Truck (Waste)
+                </button>
+                <button
+                  onClick={() => handleTestCase('hvac_dispatch')}
+                  className="px-4 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-200 rounded-lg text-sm transition-all"
+                >
+                  🔧 HVAC Dispatch (Routes)
+                </button>
+                <button
+                  onClick={() => handleTestCase('wedding_photography')}
+                  className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-200 rounded-lg text-sm transition-all"
+                >
+                  📸 Wedding Photo (Editing)
+                </button>
+                <button
+                  onClick={() => handleTestCase('auto_repair')}
+                  className="px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-200 rounded-lg text-sm transition-all"
+                >
+                  🔩 Auto Repair (Parts)
+                </button>
               </div>
+              <p className="text-red-300/70 text-xs mt-3 text-center">
+                Each test case represents a real small business with specific pain points and realistic metrics
+              </p>
             </div>
           )}
 
@@ -562,7 +729,9 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
 
         {/* Main Content */}
         <div className="relative">
-          <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12">
+          <div className={`${appState === 'results' ? 'flex justify-center' : 'grid lg:grid-cols-3 gap-8 items-start'}`}>
+            {/* Left: Intake/Results */}
+            <div className={`${appState === 'results' ? 'w-full max-w-6xl' : 'lg:col-span-2'} rounded-2xl bg-white/5 backdrop-blur-sm p-8 lg:p-12`}>
             <AnimatePresence mode="wait">
               {appState === 'intake' && (
                 <motion.div
@@ -571,25 +740,18 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="text-center"
+                  className="h-full"
                 >
-                  {currentQuestion === 0 && !companyProfile.industry && (
-                    <CompanyProfileForm 
-                      onSubmit={(profile) => setCompanyProfile(profile)}
-                    />
-                  )}
-                  
-                  {(currentQuestion > 0 || companyProfile.industry) && (
-                    <QuestionForm
-                      question={PROCESS_QUESTIONS[currentQuestion]}
-                      answer={answers[PROCESS_QUESTIONS[currentQuestion].id]}
-                      onAnswer={(answer) => handleAnswer(PROCESS_QUESTIONS[currentQuestion].id, answer)}
-                      onNext={handleNext}
-                      onBack={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
-                      questionNumber={currentQuestion + 1}
-                      totalQuestions={PROCESS_QUESTIONS.length}
-                    />
-                  )}
+                  <ChatInterface 
+                    chatHistory={chatHistory}
+                    currentQuestionId={currentQuestionId}
+                    isTyping={isTyping}
+                    currentInput={currentInput}
+                    setCurrentInput={setCurrentInput}
+                    onAnswer={handleAnswer}
+                    companyProfile={companyProfile}
+                    setCompanyProfile={setCompanyProfile}
+                  />
                 </motion.div>
               )}
 
@@ -622,6 +784,50 @@ export default function InlineAIAudit({ isVisible, onClose }: InlineAIAuditProps
                 </motion.div>
               )}
             </AnimatePresence>
+            </div>
+
+            {/* Right: Real-Time Pool */}
+            {appState === 'intake' && (
+              <div className="rounded-2xl bg-white/5 backdrop-blur-sm p-6 lg:p-8">
+                <h3 className="text-xl font-semibold text-white mb-4">Real‑Time Pool</h3>
+                <div className="space-y-5">
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-gray-400 mb-2">Process Flags</div>
+                    <div className="flex flex-wrap gap-2">
+                      {pool.processFlags.length === 0 && (
+                        <span className="tp-badge text-gray-400">Answer questions to see flags</span>
+                      )}
+                      {pool.processFlags.map((f, i) => (
+                        <span key={i} className="tp-badge">{f}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-gray-400 mb-2">Safe Metrics</div>
+                    <div className="flex flex-wrap gap-2">
+                      {pool.safeMetrics.length === 0 && (
+                        <span className="tp-badge text-gray-400">We’ll use benchmarks if you skip</span>
+                      )}
+                      {pool.safeMetrics.map((m, i) => (
+                        <span key={i} className="tp-badge">{m}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-gray-400 mb-2">Systems</div>
+                    <div className="flex flex-wrap gap-2">
+                      {pool.systems.length === 0 && (
+                        <span className="tp-badge text-gray-400">Add your tools (e.g., QuickBooks, Zendesk)</span>
+                      )}
+                      {pool.systems.map((s, i) => (
+                        <span key={i} className="tp-badge">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
@@ -665,7 +871,7 @@ function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: CompanyProfile) 
   return (
     <div className="max-w-lg mx-auto">
       <div className="text-center mb-8">
-        <h3 className="text-3xl font-bold text-white mb-3">Tell Us About Your Business</h3>
+        <h3 className="text-3xl font-bold text-white" style={{marginBottom: '0.75rem'}}>Tell Us About Your Business</h3>
         <p className="text-gray-400">Help us understand your company to provide better recommendations</p>
       </div>
       
@@ -750,140 +956,7 @@ function CompanyProfileForm({ onSubmit }: { onSubmit: (profile: CompanyProfile) 
   )
 }
 
-function QuestionForm({
-  question,
-  answer,
-  onAnswer,
-  onNext,
-  onBack,
-  questionNumber,
-  totalQuestions
-}: {
-  question: any
-  answer: any
-  onAnswer: (answer: any) => void
-  onNext: () => void
-  onBack?: () => void
-  questionNumber: number
-  totalQuestions: number
-}) {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Tab') {
-        event.preventDefault()
-        onNext()
-      }
-    }
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onNext])
-
-  return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
-        {/* Modern Step Tracker */}
-        <div className="mb-6">
-          <div className="text-center mb-3">
-            <span className="text-sm text-gray-400">Question {questionNumber} of {totalQuestions}</span>
-            <span className="text-xs text-gray-500 ml-2">• Approx. 3-5 minutes</span>
-          </div>
-          <div className="flex justify-center items-center gap-2">
-            {Array.from({ length: totalQuestions }).map((_, i) => (
-              <div
-                key={i}
-                className={`transition-all duration-300 ${
-                  i < questionNumber 
-                    ? 'w-8 h-2 bg-accent rounded-full' 
-                    : i === questionNumber - 1
-                    ? 'w-8 h-2 bg-accent rounded-full'
-                    : 'w-2 h-2 bg-white/20 rounded-full'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-        
-        {/* Question Content */}
-        <div className="text-center mb-6">
-          <p className="text-xl text-gray-200 leading-relaxed">{question.question}</p>
-        </div>
-      </div>
-
-      <div className="mb-8">
-        {question.type === 'text' ? (
-          <div className="relative">
-            <textarea
-              value={answer || ''}
-              onChange={(e) => onAnswer(e.target.value)}
-              placeholder={question.placeholder}
-              className="w-full p-6 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none transition-all duration-300 text-lg leading-relaxed"
-              rows={4}
-            />
-            <div className="absolute bottom-4 right-4 text-xs text-gray-500">
-              {(answer || '').length > 0 ? `${(answer || '').length} characters` : (
-                <span className="flex items-center gap-1">
-                  <span>Press</span>
-                  <kbd className="px-1.5 py-0.5 text-xs bg-white/10 rounded border-0 text-gray-400">Tab</kbd>
-                  <span>to skip</span>
-                </span>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {question.options.map((option: string) => (
-              <button
-                key={option}
-                onClick={() => onAnswer(question.type === 'multiple_choice' 
-                  ? (answer || []).includes(option) 
-                    ? (answer || []).filter((a: string) => a !== option)
-                    : [...(answer || []), option]
-                  : option
-                )}
-                className={`w-full p-4 text-left rounded-lg border transition-all hover:scale-[1.02] ${
-                  (question.type === 'multiple_choice' ? (answer || []).includes(option) : answer === option)
-                    ? 'bg-accent/20 border-accent text-accent shadow-lg shadow-accent/20'
-                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/30'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span>{option}</span>
-                  {(question.type === 'multiple_choice' ? (answer || []).includes(option) : answer === option) && (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-accent">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="flex items-center justify-center gap-4 w-full">
-        {questionNumber > 1 && onBack && (
-          <button
-            onClick={onBack}
-            className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium hover:scale-105"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="rotate-180">
-              <path d="M5 12H19M12 5L19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Back
-          </button>
-        )}
-        <button
-          onClick={onNext}
-          disabled={!answer || (Array.isArray(answer) && answer.length === 0) || (typeof answer === 'string' && answer.trim().length === 0)}
-          className="px-8 py-3 bg-gradient-to-r from-accent to-accent2 hover:from-accent/90 hover:to-accent2/90 text-white rounded-xl transition-all duration-300 font-medium hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
-        >
-          {questionNumber === totalQuestions ? 'Generate My AI Roadmap' : 'Continue'}
-        </button>
-      </div>
-    </div>
-  )
-}
 
 function ProcessingState() {
   const steps = [
@@ -905,7 +978,7 @@ function ProcessingState() {
         </div>
       </div>
 
-      <h3 className="text-2xl font-bold text-white mb-6">AI Analysis in Progress</h3>
+      <h3 className="text-2xl font-bold text-white" style={{marginBottom: '1.5rem'}}>AI Analysis in Progress</h3>
       
       <div className="space-y-4 max-w-md mx-auto">
         {steps.map((step, index) => (
@@ -925,6 +998,131 @@ function ProcessingState() {
   )
 }
 
+function ChatInterface({ 
+  chatHistory, 
+  currentQuestionId, 
+  isTyping, 
+  currentInput, 
+  setCurrentInput, 
+  onAnswer, 
+  companyProfile, 
+  setCompanyProfile 
+}: {
+  chatHistory: Array<{id: string, type: 'ai' | 'user', message: string, timestamp: Date}>
+  currentQuestionId: string
+  isTyping: boolean
+  currentInput: string
+  setCurrentInput: (input: string) => void
+  onAnswer: (questionId: string, answer: any) => void
+  companyProfile: Partial<CompanyProfile>
+  setCompanyProfile: (profile: Partial<CompanyProfile>) => void
+}) {
+  const chatEndRef = useRef<HTMLDivElement>(null)
+  const currentQuestion = CHAT_QUESTIONS.find(q => q.id === currentQuestionId)
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatHistory, isTyping])
+
+  const handleSubmit = (answer: any) => {
+    if (!answer || (typeof answer === 'string' && !answer.trim())) return
+    onAnswer(currentQuestionId, answer)
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit(currentInput)
+    }
+  }
+
+  return (
+    <div className="flex flex-col h-full min-h-[600px]">
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-y-auto space-y-4 mb-6 max-h-[400px]">
+        {chatHistory.map((message, index) => (
+          <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[80%] p-4 rounded-2xl ${
+              message.type === 'user' 
+                ? 'bg-accent text-white ml-4' 
+                : 'bg-white/10 text-white mr-4'
+            }`}>
+              {message.type === 'ai' && (
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 bg-accent/20 text-accent rounded-full text-xs flex items-center justify-center">
+                    AI
+                  </div>
+                  <span className="text-xs text-gray-400">Assistant</span>
+                </div>
+              )}
+              <p className="text-sm leading-relaxed">{message.message}</p>
+            </div>
+          </div>
+        ))}
+
+        {/* Typing Indicator */}
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="bg-white/10 text-white mr-4 p-4 rounded-2xl max-w-[80%]">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 bg-accent/20 text-accent rounded-full text-xs flex items-center justify-center">
+                  AI
+                </div>
+                <span className="text-xs text-gray-400">Assistant</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* Input Area - Show for any question type */}
+      {currentQuestion && currentQuestion.type === 'question' && (
+        <div className="border-t border-white/10 pt-4">
+          {currentQuestion.inputType === 'text' ? (
+            <div className="flex gap-3">
+              <textarea
+                value={currentInput}
+                onChange={(e) => setCurrentInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={currentQuestion.placeholder}
+                className="flex-1 p-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none"
+                rows={2}
+              />
+              <button
+                onClick={() => handleSubmit(currentInput)}
+                disabled={!currentInput.trim()}
+                className="px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Send
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentQuestion.options?.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSubmit(currentQuestion.inputType === 'multi_choice' ? [option] : option)}
+                  className="w-full p-4 text-left bg-white/5 hover:bg-white/10 border border-white/20 hover:border-accent/50 rounded-xl text-white transition-all duration-200 hover:scale-[1.02]"
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function AssessmentResults({ 
   assessment, 
   onExport, 
@@ -940,7 +1138,7 @@ function AssessmentResults({
     <div className="space-y-12">
       {/* Header */}
       <div className="text-center">
-        <h3 className="text-3xl font-bold text-white mb-4">Your AI Assessment Results</h3>
+        <h3 className="text-3xl font-bold text-white" style={{marginBottom: '1rem'}}>Your AI Assessment Results</h3>
         {error && (
           <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-4 max-w-2xl mx-auto">
             <p className="text-yellow-200 text-sm">{error}</p>
@@ -959,7 +1157,7 @@ function AssessmentResults({
       {/* Dashboard Summary */}
       <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12 mb-12">
         <div className="text-center mb-12">
-          <h3 className="text-3xl font-bold text-white mb-4">Assessment Overview</h3>
+          <h3 className="text-3xl font-bold text-white" style={{marginBottom: '1rem'}}>Assessment Overview</h3>
           <p className="text-gray-300 max-w-2xl mx-auto">
             Your personalized AI automation analysis with quantified impact and implementation roadmap
           </p>
@@ -1077,7 +1275,7 @@ function AssessmentResults({
       {assessment.executiveSummary && (
         <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12 text-center">
           <div className="text-center mb-8">
-            <h4 className="text-2xl font-bold text-white mb-3">Executive Summary</h4>
+            <h4 className="text-2xl font-bold text-white" style={{marginBottom: '0.75rem'}}>Executive Summary</h4>
             {assessment.executiveSummary.businessCase && (
               <div className="flex justify-center">
                 <p className="text-gray-300 max-w-3xl text-center leading-relaxed" style={{textAlign: 'center'}}>{assessment.executiveSummary.businessCase}</p>
@@ -1149,7 +1347,7 @@ function AssessmentResults({
       {assessment.processFlags?.length > 0 && (
         <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
           <div className="text-center mb-12">
-            <h4 className="text-2xl font-bold text-white mb-4">Deep Process Analysis</h4>
+            <h4 className="text-2xl font-bold text-white" style={{marginBottom: '1rem'}}>Deep Process Analysis</h4>
             <div className="mt-6 flex justify-center">
               <p className="text-gray-300 max-w-2xl text-center">Detailed breakdown of automation opportunities identified in your workflow</p>
             </div>
@@ -1163,7 +1361,7 @@ function AssessmentResults({
                   {/* Header Section */}
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8">
                     <div className="flex-1">
-                      <h5 className="text-2xl font-bold text-white mb-3">{flag.label}</h5>
+                      <h5 className="text-2xl font-bold text-white" style={{marginBottom: '0.75rem'}}>{flag.label}</h5>
                       <p className="text-lg text-gray-400 capitalize mb-4 lg:mb-0">{flag.category?.replace(/_/g, ' ')}</p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -1237,358 +1435,166 @@ function AssessmentResults({
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Recommended Tools */}
-      {assessment.recommendedTools?.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
-          <div className="text-center mb-12">
-            <h4 className="text-2xl font-bold text-white mb-4">Enterprise Solution Analysis</h4>
-            <div className="mt-6 flex justify-center">
-              <p className="text-gray-300 max-w-2xl text-center">Comprehensive vendor evaluation with pros, cons, and implementation guidance</p>
-            </div>
-          </div>
-          <div className="grid gap-8 max-w-6xl mx-auto">
-            {assessment.recommendedTools.map((tool: any, index: number) => (
-              <div key={tool.id} className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-accent2/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:border-accent/20 hover:shadow-lg hover:shadow-accent/10">
-                  
-                  {/* Header Section */}
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8">
-                    <div className="flex-1">
-                      <h5 className="text-2xl font-bold text-white mb-2">{tool.name}</h5>
-                      <p className="text-lg text-gray-400 mb-3">{tool.vendor}</p>
-                      {tool.industryFit && (
-                        <p className="text-blue-300 font-medium mb-4 lg:mb-0">{tool.industryFit}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="px-4 py-2 bg-gradient-to-r from-accent2/30 to-accent2/20 text-accent2 rounded-full font-semibold text-sm border border-accent2/30">
-                        Priority #{tool.priority}
-                      </div>
-                      {tool.integrationComplexity && (
-                        <div className={`px-3 py-2 rounded-lg font-medium text-sm ${
-                          tool.integrationComplexity === 'low' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
-                          tool.integrationComplexity === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
-                          'bg-red-500/20 text-red-300 border border-red-500/30'
-                        }`}>
-                          {tool.integrationComplexity} complexity
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="mb-10">
-                    <p className="text-gray-300 leading-relaxed text-lg">{tool.description}</p>
-                  </div>
-                  
-                  {/* Key Details - Modern Horizontal Layout */}
-                  <div className="space-y-3 mb-8">
-                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                      <span className="text-sm text-gray-400 font-medium">Monthly Cost</span>
-                      <span className="text-base font-semibold text-white">{tool.pricing}</span>
-                    </div>
-                    {tool.implementationCost && (
-                      <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                        <span className="text-sm text-gray-400 font-medium">Setup Cost</span>
-                        <span className="text-base font-semibold text-accent">{tool.implementationCost}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                      <span className="text-sm text-gray-400 font-medium">Time to Value</span>
-                      <span className="text-base font-semibold text-white">{tool.timeToValue}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                      <span className="text-sm text-gray-400 font-medium">Recommended Order</span>
-                      <span className="text-base font-semibold text-white">#{tool.priority}</span>
-                    </div>
-                  </div>
-
-                  {/* Use Case & Match Reason */}
-                  <div className="grid lg:grid-cols-2 gap-8 mb-8">
-                    <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                      <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                        Specific Use Case
-                      </h6>
-                      <p className="text-gray-300 leading-relaxed">{tool.useCase}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                  {/* Recommended Tools for this Process */}
+                  {assessment.recommendedTools && assessment.recommendedTools.length > 0 && (
+                    <div className="bg-accent/5 rounded-xl p-6 border border-accent/20">
                       <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-accent rounded-full"></div>
-                        Why This Fits Your Needs
+                        Recommended Solutions
                       </h6>
-                      <p className="text-accent leading-relaxed font-medium">{tool.matchReason}</p>
-                    </div>
-                  </div>
-
-                  {/* Pros & Cons */}
-                  {tool.prosAndCons && (
-                    <div className="grid lg:grid-cols-2 gap-6 mb-6">
-                      <div className="bg-green-500/5 rounded-xl p-5 border border-green-500/20">
-                        <h6 className="text-base font-semibold text-green-400 mb-3 flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                          Advantages
-                        </h6>
-                        <ul className="space-y-2">
-                          {tool.prosAndCons.pros.map((pro: string, i: number) => (
-                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                              <div className="w-1 h-1 bg-green-400 rounded-full flex-shrink-0 mt-2"></div>
-                              {pro}
-                            </li>
-                          ))}
-                        </ul>
+                      <div className="flex flex-wrap gap-4">
+                        {assessment.recommendedTools.slice(0, 4).map((tool: any, i: number) => {
+                          // Function to get company logo URL
+                          const getLogoUrl = (toolName: string, vendor?: string) => {
+                            const name = toolName.toLowerCase();
+                            const vendorName = vendor?.toLowerCase() || '';
+                            
+                            // Map common tools to their logo URLs
+                            const logoMap: Record<string, string> = {
+                              // AP/Finance Tools
+                              'stampli': 'https://logo.clearbit.com/stampli.com',
+                              'tipalti': 'https://logo.clearbit.com/tipalti.com',
+                              'bill.com': 'https://logo.clearbit.com/bill.com',
+                              'bill': 'https://logo.clearbit.com/bill.com',
+                              'quickbooks': 'https://logo.clearbit.com/intuit.com',
+                              'xero': 'https://logo.clearbit.com/xero.com',
+                              'netsuite': 'https://logo.clearbit.com/netsuite.com',
+                              'appzen': 'https://logo.clearbit.com/appzen.com',
+                              'vic.ai': 'https://logo.clearbit.com/vic.ai',
+                              'mindbridge': 'https://logo.clearbit.com/mindbridge.ai',
+                              
+                              // Customer Support Tools
+                              'zendesk': 'https://logo.clearbit.com/zendesk.com',
+                              'intercom': 'https://logo.clearbit.com/intercom.com',
+                              'freshdesk': 'https://logo.clearbit.com/freshworks.com',
+                              'helpscout': 'https://logo.clearbit.com/helpscout.com',
+                              'gorgias': 'https://logo.clearbit.com/gorgias.com',
+                              'ada': 'https://logo.clearbit.com/ada.cx',
+                              'ultimate.ai': 'https://logo.clearbit.com/ultimate.ai',
+                              'cresta': 'https://logo.clearbit.com/cresta.com',
+                              
+                              // HR/Recruiting Tools
+                              'greenhouse': 'https://logo.clearbit.com/greenhouse.io',
+                              'lever': 'https://logo.clearbit.com/lever.co',
+                              'workday': 'https://logo.clearbit.com/workday.com',
+                              'bamboohr': 'https://logo.clearbit.com/bamboohr.com',
+                              'hiretual': 'https://logo.clearbit.com/hiretual.com',
+                              'textio': 'https://logo.clearbit.com/textio.com',
+                              
+                              // Sales/CRM Tools
+                              'salesforce': 'https://logo.clearbit.com/salesforce.com',
+                              'hubspot': 'https://logo.clearbit.com/hubspot.com',
+                              'pipedrive': 'https://logo.clearbit.com/pipedrive.com',
+                              'outreach': 'https://logo.clearbit.com/outreach.io',
+                              'salesloft': 'https://logo.clearbit.com/salesloft.com',
+                              'gong': 'https://logo.clearbit.com/gong.io',
+                              'chorus': 'https://logo.clearbit.com/chorus.ai',
+                              
+                              // Workflow/Automation Tools
+                              'zapier': 'https://logo.clearbit.com/zapier.com',
+                              'microsoft power automate': 'https://logo.clearbit.com/microsoft.com',
+                              'power automate': 'https://logo.clearbit.com/microsoft.com',
+                              'uipath': 'https://logo.clearbit.com/uipath.com',
+                              'automation anywhere': 'https://logo.clearbit.com/automationanywhere.com',
+                              'blue prism': 'https://logo.clearbit.com/blueprism.com',
+                              
+                              // Document Processing
+                              'docusign': 'https://logo.clearbit.com/docusign.com',
+                              'adobe sign': 'https://logo.clearbit.com/adobe.com',
+                              'pandadoc': 'https://logo.clearbit.com/pandadoc.com',
+                              'rossum': 'https://logo.clearbit.com/rossum.ai',
+                              'nanonets': 'https://logo.clearbit.com/nanonets.com',
+                              
+                              // Generic fallbacks
+                              'microsoft': 'https://logo.clearbit.com/microsoft.com',
+                              'google': 'https://logo.clearbit.com/google.com',
+                              'amazon': 'https://logo.clearbit.com/amazon.com',
+                              'oracle': 'https://logo.clearbit.com/oracle.com',
+                              'sap': 'https://logo.clearbit.com/sap.com'
+                            };
+                            
+                            // Try exact match first
+                            if (logoMap[name]) return logoMap[name];
+                            
+                            // Try vendor name
+                            if (vendorName && logoMap[vendorName]) return logoMap[vendorName];
+                            
+                            // Try partial matches
+                            for (const [key, url] of Object.entries(logoMap)) {
+                              if (name.includes(key) || key.includes(name)) {
+                                return url;
+                              }
+                            }
+                            
+                            // Fallback to generic domain-based logo
+                            const cleanName = name.replace(/[^a-z0-9]/g, '');
+                            return `https://logo.clearbit.com/${cleanName}.com`;
+                          };
+                          
+                          const logoUrl = getLogoUrl(tool.name, tool.vendor);
+                          
+                          return (
+                            <div key={tool.id} className="group relative flex items-center gap-3 bg-white/5 rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-all duration-200">
+                              {/* Tool Logo */}
+                              <div className="w-10 h-10 bg-white rounded-lg border border-white/20 flex items-center justify-center flex-shrink-0 p-1.5 hover:scale-105 transition-transform duration-200">
+                                <img 
+                                  src={logoUrl}
+                                  alt={`${tool.name} logo`}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    // Fallback to initials if logo fails to load
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const fallback = target.nextElementSibling as HTMLDivElement;
+                                    if (fallback) fallback.style.display = 'flex';
+                                  }}
+                                />
+                                {/* Fallback initials (hidden by default) */}
+                                <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent2/20 rounded flex items-center justify-center text-white font-bold text-xs" style={{display: 'none'}}>
+                                  {tool.name.split(' ').map((word: string) => word[0]).join('').slice(0, 2)}
+                                </div>
+                              </div>
+                              {/* Tool Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="text-white font-medium text-sm">{tool.name}</div>
+                                <div className="text-gray-400 text-xs">{tool.pricing}</div>
+                              </div>
+                              {/* Priority Badge */}
+                              <div className="px-2 py-1 bg-accent/20 text-accent rounded text-xs font-medium">
+                                #{tool.priority}
+                              </div>
+                              {/* Tooltip on hover */}
+                              <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                                {tool.description?.slice(0, 80)}...
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className="bg-red-500/5 rounded-xl p-5 border border-red-500/20">
-                        <h6 className="text-base font-semibold text-red-400 mb-3 flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                          ⚠ Considerations
-                        </h6>
-                        <ul className="space-y-2">
-                          {tool.prosAndCons.cons.map((con: string, i: number) => (
-                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                              <div className="w-1 h-1 bg-red-400 rounded-full flex-shrink-0 mt-2"></div>
-                              {con}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Alternative Options */}
-                  {tool.alternativeOptions && tool.alternativeOptions.length > 0 && (
-                    <div className="bg-purple-500/5 rounded-xl p-6 border border-purple-500/20">
-                      <h6 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                        Alternative Options
-                      </h6>
-                      <div className="flex flex-wrap gap-3">
-                        {tool.alternativeOptions.map((alt: string, i: number) => (
-                          <span key={i} className="px-3 py-2 bg-purple-500/20 text-purple-300 rounded-lg border border-purple-500/30 text-sm font-medium">
-                            {alt.replace(/_/g, ' ')}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Implementation Roadmap */}
-      {assessment.roadmap?.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
-          <div className="text-center mb-12">
-            <h4 className="text-2xl font-bold text-white mb-4">Strategic Implementation Roadmap</h4>
-            <div className="mt-6 flex justify-center">
-              <p className="text-gray-300 max-w-2xl text-center">Detailed 30/60/90-day execution plan with ROI scenarios, risk analysis, and resource requirements</p>
-            </div>
-          </div>
-          <div className="grid gap-8 max-w-6xl mx-auto">
-            {assessment.roadmap.map((item: any, index: number) => (
-              <div key={item.id} className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-accent2/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:border-accent/20 hover:shadow-lg hover:shadow-accent/10">
-                  
-                  {/* Header Section */}
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8">
-                    <div className="flex-1">
-                      <h5 className="text-2xl font-bold text-white mb-3">{item.title}</h5>
-                      <div className="mb-4 lg:mb-0">
-                        <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col lg:items-end gap-3">
-                      <div className={`px-4 py-2 rounded-full font-semibold text-sm border ${
-                        item.priority === 'quick_win' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
-                        item.priority === 'high' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
-                        item.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
-                        'bg-gray-500/20 text-gray-300 border-gray-500/30'
-                      }`}>
-                        {item.priority === 'quick_win' ? 'Quick Win' : `${item.priority?.replace('_', ' ')} priority`}
-                      </div>
-                      <p className="text-gray-400 font-medium">{item.timeline?.replace(/_/g, ' ')}</p>
-                    </div>
-                  </div>
-
-                  {/* Key Metrics - Modern Horizontal Layout */}
-                  <div className="space-y-3 mb-8">
-                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                      <span className="text-sm text-gray-400 font-medium">Business Impact</span>
-                      <span className="text-base font-semibold text-white">{item.impact}/5</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                      <span className="text-sm text-gray-400 font-medium">Implementation Effort</span>
-                      <span className="text-base font-semibold text-white">{item.effort}/5</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                      <span className="text-sm text-gray-400 font-medium">Annual Savings</span>
-                      <span className="text-base font-semibold text-accent">${item.roi?.annual_savings?.toLocaleString() || '0'}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                      <span className="text-sm text-gray-400 font-medium">Implementation Cost</span>
-                      <span className="text-base font-semibold text-white">${item.roi?.implementation_cost?.toLocaleString() || '0'}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 px-5 bg-white/[0.02] border border-white/[0.05] rounded-full hover:bg-white/[0.04] transition-colors">
-                      <span className="text-sm text-gray-400 font-medium">Payback Period</span>
-                      <span className="text-base font-semibold text-white">{item.roi?.payback_months || 0} months</span>
-                    </div>
-                  </div>
-
-                  {/* ROI Scenarios */}
-                  {item.roi && (item.roi.low_scenario || item.roi.high_scenario) && (
-                    <div className="mb-8">
-                      <h6 className="font-medium text-white mb-4">ROI Scenarios</h6>
-                      <div className="space-y-2">
-                        {item.roi.low_scenario && (
-                          <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.01] border border-white/[0.03] rounded-full">
-                            <span className="text-sm text-gray-400 font-medium">Conservative Scenario</span>
-                            <span className="text-sm font-semibold text-white">${item.roi.low_scenario.toLocaleString()}</span>
-                          </div>
-                        )}
-                        {item.roi.base_scenario && (
-                          <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.01] border border-white/[0.03] rounded-full">
-                            <span className="text-sm text-gray-400 font-medium">Base Case</span>
-                            <span className="text-sm font-semibold text-accent">${item.roi.base_scenario.toLocaleString()}</span>
-                          </div>
-                        )}
-                        {item.roi.high_scenario && (
-                          <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.01] border border-white/[0.03] rounded-full">
-                            <span className="text-sm text-gray-400 font-medium">Optimistic Scenario</span>
-                            <span className="text-sm font-semibold text-white">${item.roi.high_scenario.toLocaleString()}</span>
-                          </div>
-                        )}
-                      </div>
-                      {item.roi.confidence_level && (
+                      {assessment.recommendedTools.length > 4 && (
                         <div className="mt-3 text-center">
-                          <span className="text-xs text-gray-500">Confidence: {Math.round(item.roi.confidence_level * 100)}%</span>
+                          <span className="text-xs text-gray-500">+{assessment.recommendedTools.length - 4} more tools recommended</span>
                         </div>
                       )}
                     </div>
                   )}
-
-                  {/* Resource Requirements */}
-                  {item.resourceRequirements && (
-                    <div className="grid md:grid-cols-3 gap-6 mb-6">
-                      <div>
-                        <h6 className="font-medium text-white mb-2">Human Resources</h6>
-                        <p className="text-sm text-gray-300">{item.resourceRequirements.human}</p>
-                      </div>
-                      <div>
-                        <h6 className="font-medium text-white mb-2">Technical Requirements</h6>
-                        <p className="text-sm text-gray-300">{item.resourceRequirements.technical}</p>
-                      </div>
-                      <div>
-                        <h6 className="font-medium text-white mb-2">Budget Allocation</h6>
-                        <p className="text-sm text-gray-300">{item.resourceRequirements.budget}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Risks & Dependencies */}
-                  <div className="grid md:grid-cols-2 gap-6 mb-6">
-                    {item.risks && item.risks.length > 0 && (
-                      <div>
-                        <h6 className="font-medium text-red-400 mb-2">Key Risks</h6>
-                        <ul className="space-y-1">
-                          {item.risks.map((risk: string, i: number) => (
-                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                              <div className="w-1 h-1 bg-red-400 rounded-full flex-shrink-0 mt-2"></div>
-                              {risk}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {item.dependencies && item.dependencies.length > 0 && (
-                      <div>
-                        <h6 className="font-medium text-yellow-400 mb-2">Dependencies</h6>
-                        <ul className="space-y-1">
-                          {item.dependencies.map((dep: string, i: number) => (
-                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                              <div className="w-1 h-1 bg-yellow-400 rounded-full flex-shrink-0 mt-2"></div>
-                              {dep}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Change Management */}
-                  {item.changeManagement && (
-                    <div className="mb-6">
-                      <h6 className="font-medium text-white mb-2">Change Management</h6>
-                      <p className="text-sm text-gray-300">{item.changeManagement}</p>
-                    </div>
-                  )}
-
-                  {/* Next Steps & Success Metrics */}
-                  <div className="grid lg:grid-cols-2 gap-6 mb-6">
-                    {item.next_steps?.length > 0 && (
-                      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-                        <h6 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
-                          Next Steps
-                        </h6>
-                        <ul className="space-y-2">
-                          {item.next_steps.map((step: string, i: number) => (
-                            <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
-                              <div className="w-5 h-5 bg-accent/20 text-accent rounded-lg text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
-                                {i + 1}
-                              </div>
-                              {step}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {item.kpis?.length > 0 && (
-                      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-                        <h6 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                          Success Metrics
-                        </h6>
-                        <ul className="space-y-2">
-                          {item.kpis.map((kpi: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                              <div className="w-1 h-1 bg-green-400 rounded-full flex-shrink-0 mt-2"></div>
-                              {kpi}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Project Owner */}
-                  <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-                    <p className="text-sm text-gray-300">
-                      <span className="font-semibold text-white">Project Owner:</span> {item.owner}
-                    </p>
-                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
       )}
+
+
+
+
 
       {/* Industry Benchmarks */}
       {assessment.industryBenchmarks && (
         <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
           <div className="text-center mb-12">
-            <h4 className="text-2xl font-bold text-white mb-4">Industry Benchmarks & Context</h4>
+            <h4 className="text-2xl font-bold text-white" style={{marginBottom: '1rem'}}>Industry Benchmarks & Context</h4>
             <div className="mt-6 flex justify-center">
               <p className="text-gray-300 max-w-2xl text-center">How your automation maturity compares to industry standards</p>
             </div>
@@ -1636,7 +1642,7 @@ function AssessmentResults({
       {assessment.implementationStrategy && (
         <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
           <div className="text-center mb-12">
-            <h4 className="text-2xl font-bold text-white mb-4">30/60/90-Day Implementation Strategy</h4>
+            <h4 className="text-2xl font-bold text-white" style={{marginBottom: '1rem'}}>Phased Implementation Strategy</h4>
             <div className="mt-6 flex justify-center">
               <p className="text-gray-300 max-w-2xl text-center">Phased approach to ensure successful deployment and adoption</p>
             </div>
@@ -1695,7 +1701,7 @@ function AssessmentResults({
       {assessment.aiInsights?.length > 0 && (
         <div className="rounded-2xl border border-white/10 bg-transparent p-8 lg:p-12">
           <div className="text-center mb-12">
-            <h4 className="text-2xl font-bold text-white mb-4">Strategic AI Insights</h4>
+            <h4 className="text-2xl font-bold text-white" style={{marginBottom: '1rem'}}>Strategic AI Insights</h4>
             <div className="mt-6 flex justify-center">
               <p className="text-gray-300 max-w-2xl text-center">Deep analysis and strategic recommendations from our AI consultant</p>
             </div>
@@ -1715,7 +1721,7 @@ function AssessmentResults({
 
       {/* Export Actions */}
       <div className="text-center">
-        <h4 className="text-xl font-bold text-white mb-4">Ready to Implement?</h4>
+        <h4 className="text-xl font-bold text-white" style={{marginBottom: '1rem'}}>Ready to Implement?</h4>
         <p className="text-gray-300 mb-6">
           Export your detailed assessment report or schedule a consultation.
         </p>

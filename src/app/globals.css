@@ -95,8 +95,33 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #06080a !important;
+  background: linear-gradient(to bottom, #06080a, #0a0c10, #06080a) !important;
   color: white !important;
+  overflow-x: hidden;
+}
+
+/* Modern scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--accent), var(--accent-2));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, rgba(110, 89, 255, 0.8), rgba(36, 208, 124, 0.8));
+}
+
+/* Modern selection */
+::selection {
+  background: var(--accent);
+  color: white;
 }
 
 /* Reduced motion support */
@@ -110,43 +135,59 @@ body {
 /* ToolPool 3D Icon Styles   */
 /* ========================= */
 
-/* Glossy circular icon with depth; color driven by --icon-color */
+/* Clean minimal icon - focus on logo only */
 .tp-icon {
-  --icon-size: 72px;
-  --ring: color-mix(in oklab, var(--icon-color), white 20%);
-  --glow: color-mix(in oklab, var(--icon-color), transparent 70%);
+  --icon-size: 96px;
   position: relative;
   width: var(--icon-size);
   height: var(--icon-size);
-  border-radius: 9999px;
+  border-radius: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
-  border: 1px solid color-mix(in oklab, var(--ring), transparent 70%);
-  transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth);
-  will-change: transform, box-shadow;
+  /* No background or border - just the logo */
+  background: transparent;
+  border: none;
+  transition: all 0.3s ease;
+  will-change: transform, opacity;
+  overflow: hidden;
 }
 
 .tp-icon::before,
-.tp-icon::after { display: none; }
+.tp-icon::after {
+  content: none;
+}
 
 .tp-icon:hover {
-  box-shadow: 0 10px 24px rgba(0,0,0,0.45);
-  border-color: color-mix(in oklab, var(--ring), white 6%);
+  /* No hover background or border */
 }
 
-.tp-icon:hover::after {
-  opacity: 1;
-  transform: rotate(25deg) translateX(220%);
-}
+
 
 .tp-icon__abbr {
   color: white;
   font-weight: 700;
   letter-spacing: .4px;
   text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+}
+
+/* Active variant - no outline */
+.tp-icon--active {
+  /* No background or border even when active */
+}
+
+/* Clean logo display */
+.logo-glass {
+  border-radius: 12px;
+  /* Perfect centering with clean presentation */
+  display: block;
+  margin: auto;
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+.tp-icon--muted {
+  outline: 0;
 }
 
 /* Entry fall-in animation with gentle bounce */
@@ -222,4 +263,12 @@ body {
   font-size: 12px;
   line-height: 1;
   white-space: nowrap;
+}
+
+/* Hide native scrollbar for carousel track */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }

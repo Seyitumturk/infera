@@ -1,0 +1,52 @@
+template: Customer Support Tier‑1 Auto‑reply + Routing
+version: 1.1
+applies_when:
+  all:
+    - chip: "Has FAQ"
+    - chip: "Tier‑1 is templated"
+  any:
+    - chip: "Zendesk present"
+    - chip: "Intercom present"
+solution_pattern:
+  summary: Answer common questions instantly, fetch account/order data, route edge cases with clean handoff
+  components:
+    - name: Knowledge base ingestion
+    - name: FAQ / policy extraction
+    - name: Runtime tools
+      details: order lookup, refund limits, returns policy
+    - name: Router + escalation
+cost_effort:
+  tool_saas: "$200–$1500/mo"
+  build_estimate: "2–6 weeks"
+  ttv: "1–3 weeks"
+risks:
+  - Hallucinations if KB is stale
+  - Poor handoff UX if context is not attached
+vendors:
+  - name: Zendesk AI
+  - name: Intercom Fin
+  - name: Ada / Ultimate.ai
+roi:
+  labor_savings_formula: "tickets/mo × min_saved × deflection% × loaded_rate"
+  revenue_protection: "FCR and CSAT improvements reduce churn risk"
+roadmap:
+  - title: KB cleanup + ingestion
+    priority: quick_win
+    timeline: 30_days
+    steps:
+      - Audit KB freshness and coverage
+      - Ingest articles and map intents
+  - title: Runtime actions
+    priority: high
+    timeline: 60_days
+    steps:
+      - Add order lookup and status update
+      - Configure refund/return guardrails
+  - title: Routing + analytics
+    priority: medium
+    timeline: 90_days
+    steps:
+      - Escalation with context bundle
+      - Track deflection, FCR, CSAT
+
+

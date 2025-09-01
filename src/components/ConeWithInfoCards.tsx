@@ -394,9 +394,11 @@ function EnhancedLoadingFallback() {
 
 // Main component
 export default function ConeWithInfoCards({ 
-  onLightIntensityChange 
+  onLightIntensityChange,
+  onStartAudit
 }: { 
   onLightIntensityChange?: (intensity: number) => void 
+  onStartAudit?: () => void
 }) {
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -518,6 +520,7 @@ export default function ConeWithInfoCards({
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <button 
+              onClick={onStartAudit}
               className="px-8 py-4 bg-brandInk hover:bg-ink80 text-white font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brandInk focus:ring-offset-2 focus:ring-offset-brandNight shadow-lg"
               aria-label="Start an AI audit"
             >

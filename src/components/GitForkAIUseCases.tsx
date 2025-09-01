@@ -1,6 +1,8 @@
-'use client'
+"use client"
 
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+const MDiv = (motion as any).div
 
 // AI Use Case data structure
 interface AIUseCase {
@@ -106,296 +108,298 @@ const aiUseCases: AIUseCase[] = [
   }
 ]
 
-interface GitForkAIUseCasesProps {
-  className?: string
-}
+interface GitForkAIUseCasesProps { className?: string }
 
 export default function GitForkAIUseCases({ className = "" }: GitForkAIUseCasesProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [animationPhase, setAnimationPhase] = useState<'growing' | 'highlight' | 'fading'>('growing')
+  const [index, setIndex] = useState(0)
+  const current = aiUseCases[index]
 
-  const currentUseCase = aiUseCases[currentIndex]
-  const branchCount = aiUseCases.length
+  // Clarified detail chips: Solution, How (Outcome removed per request)
+  const detailChips = useMemo(
+    () => [
+      { key: 'solution', label: 'Solution', text: current.solution },
+      { key: 'how', label: 'How it works', text: current.how },
+    ],
+    [current]
+  )
 
-  // Cycle through use cases
+  // Tools list
+  const tools = useMemo(
+    () => current.tools.split('/').map((t) => t.trim()).filter(Boolean),
+    [current]
+  )
+  const branchColors = ['#2563eb', '#ef4444', '#f59e0b', '#10b981']
+  const [outgoingPaths, setOutgoingPaths] = useState<string[]>([])
+  const [incomingPath, setIncomingPath] = useState<string | null>(null)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const sourceRef = useRef<HTMLDivElement>(null)
+  const hubRef = useRef<HTMLDivElement>(null)
+  const chipRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  // Map a tool name to a logo domain for a modern brand icon (Clearbit)
+  const getDomainForTool = (name: string): string | undefined => {
+    const n = name.toLowerCase()
+    if (n.includes('stripe')) return 'stripe.com'
+    if (n.includes('chargebee')) return 'chargebee.com'
+    if (n.includes('google')) return 'google.com'
+    if (n.includes('docai')) return 'cloud.google.com'
+    if (n.includes('rossum')) return 'rossum.ai'
+    if (n.includes('hubspot')) return 'hubspot.com'
+    if (n.includes('chili piper')) return 'chilipiper.com'
+    if (n.includes('zendesk')) return 'zendesk.com'
+    if (n.includes('intercom')) return 'intercom.com'
+    if (n.includes('gainsight')) return 'gainsight.com'
+    if (n.includes('amplitude')) return 'amplitude.com'
+    if (n.includes('segment')) return 'segment.com'
+    if (n.includes('hightouch')) return 'hightouch.com'
+    if (n.includes('loopio')) return 'loopio.com'
+    if (n.includes('evisort')) return 'evisort.com'
+    if (n.includes('ironclad')) return 'ironcladapp.com'
+    if (n.includes('rekognition') || n.includes('aws')) return 'aws.amazon.com'
+    if (n.includes('shopify')) return 'shopify.com'
+    if (n.includes('okta')) return 'okta.com'
+    if (n.includes('bettercloud')) return 'bettercloud.com'
+    return undefined
+  }
+
+  // Optional auto-advance (pause if user interacts later if needed)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimationPhase('fading')
-      
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % branchCount)
-        setAnimationPhase('growing')
-        
-        setTimeout(() => {
-          setAnimationPhase('highlight')
-        }, 800)
-      }, 400)
-    }, 4000)
+    const id = setInterval(() => setIndex((i) => (i + 1) % aiUseCases.length), 7000)
+    return () => clearInterval(id)
+  }, [])
 
-    // Initial highlight phase
-    setTimeout(() => {
-      setAnimationPhase('highlight')
-    }, 800)
+  // Compute connector paths from source -> hub and hub -> chip
+  useEffect(() => {
+    const compute = () => {
+      const container = containerRef.current
+      const source = sourceRef.current
+      const hub = hubRef.current
+      if (!container || !source || !hub) return
+      const c = container.getBoundingClientRect()
+      const s = source.getBoundingClientRect()
+      const h = hub.getBoundingClientRect()
 
-    return () => clearInterval(interval)
-  }, [branchCount])
+      // Helper: build an orthogonal path with slightly rounded corners
+      const buildOrthogonalPath = (
+        startX: number,
+        startY: number,
+        endX: number,
+        endY: number,
+        options?: { cornerRadius?: number; startOffset?: number; endOffset?: number }
+      ): string => {
+        const cornerRadiusBase = options?.cornerRadius ?? 10
+        const startOffset = options?.startOffset ?? 12
+        const endOffset = options?.endOffset ?? 12
 
-  // Generate branch data for the 3 main categories with tree-like positioning
-  const branchData = useMemo(() => {
-    const currentCase = aiUseCases[currentIndex]
-    return [
-      {
-        id: 'how',
-        title: 'How it works',
-        content: currentCase.how,
-        y: 180,
-        direction: 'right',
-        branchEndX: 600,
-        textX: 620,
-        textY: 180
-      },
-      {
-        id: 'outcome', 
-        title: 'Outcome',
-        content: currentCase.outcome,
-        y: 250,
-        direction: 'left',
-        branchEndX: 400,
-        textX: 380,
-        textY: 250
-      },
-      {
-        id: 'tools',
-        title: 'Tools', 
-        content: currentCase.tools,
-        y: 320,
-        direction: 'right',
-        branchEndX: 600,
-        textX: 620,
-        textY: 320
+        // Apply small offsets so lines do not overlap node borders
+        const sx = startX + startOffset
+        const ex = endX - endOffset
+        const sy = startY
+        const ey = endY
+
+        const midX = sx + (ex - sx) / 2
+        const verticalDistance = Math.abs(ey - sy)
+        const r = Math.min(cornerRadiusBase, Math.max(2, verticalDistance / 2))
+        const dirY = ey >= sy ? 1 : -1
+
+        // Two elbows: at (midX, sy) and (midX, ey)
+        // H to midX - r, quarter curve to V segment, V to ey - r, quarter curve, then H to end
+        return [
+          `M ${sx} ${sy}`,
+          `H ${midX - r}`,
+          `Q ${midX} ${sy} ${midX} ${sy + dirY * r}`,
+          `V ${ey - dirY * r}`,
+          `Q ${midX} ${ey} ${midX + r} ${ey}`,
+          `H ${ex}`
+        ].join(' ')
       }
-    ]
-  }, [currentIndex])
+
+      // Incoming (source -> hub) — rigid orthogonal with rounded corners
+      const inStartX = s.right - c.left
+      const inStartY = s.top - c.top + s.height / 2
+      const inEndX = h.left - c.left
+      const inEndY = h.top - c.top + h.height / 2
+      setIncomingPath(
+        buildOrthogonalPath(inStartX, inStartY, inEndX, inEndY, {
+          cornerRadius: 12,
+          startOffset: 14,
+          endOffset: 10
+        })
+      )
+
+      // Outgoing (hub -> chips)
+      const startX = h.right - c.left
+      const startTop = h.top - c.top
+      const height = h.height
+      const newPaths: string[] = []
+      const chipCount = chipRefs.current.filter(Boolean).length || 0
+      chipRefs.current.forEach((chip, i) => {
+        if (!chip) return
+        const r = chip.getBoundingClientRect()
+        const endX = r.left - c.left
+        const endY = r.top - c.top + r.height / 2
+        const startY = startTop + ((i + 0.5) * height) / Math.max(chipCount, 1)
+        newPaths.push(
+          buildOrthogonalPath(startX, startY, endX, endY, {
+            cornerRadius: 12,
+            startOffset: 10,
+            endOffset: 14
+          })
+        )
+      })
+      setOutgoingPaths(newPaths)
+    }
+    compute()
+    const ro = new ResizeObserver(compute)
+    if (containerRef.current) ro.observe(containerRef.current)
+    window.addEventListener('resize', compute)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', compute)
+    }
+  }, [index, detailChips.length])
 
   return (
-    <div className={`py-24 lg:py-40 ${className}`} style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8" style={{ textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        {/* Section Header */}
-        <div className="text-center" style={{ textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '6rem' }}>
-          <h2 
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white"
-            style={{ textAlign: 'center', width: '100%', display: 'block', margin: '0 auto', marginBottom: '2.5rem' }}
-          >
-            Use Case Suitecase
+    <div className={`relative pt-16 pb-24 lg:pt-28 lg:pb-40 ${className}`}>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-28 lg:mb-36 text-center max-w-4xl mx-auto">
+          <h2 className="tw-balance text-[40px] sm:text-[54px] lg:text-[64px] leading-[1.05] font-extrabold text-white" style={{marginBottom: '2rem'}}>
+            Mizar is trained on industry automation playbooks
           </h2>
-          <p 
-            className="text-xl text-gray-300 max-w-3xl mx-auto"
-            style={{ textAlign: 'center', width: '100%', display: 'block', margin: '0 auto' }}
-          >
-            Real AI solutions for the problems that keep SMBs up at night. 
-            Each branch represents a proven automation pathway.
+          <p className="text-[18px] lg:text-[20px] text-gray-300 leading-relaxed">
+            Mizar analyzes your operations against proven automation frameworks, delivering strategic recommendations with quantified business impact and phased implementation roadmaps.
           </p>
         </div>
+        {/* Single Use Case – node graph with center hub */}
+        <div className="relative">
+          <div className="flex justify-center">
+            {/* Node graph */}
+            <div ref={containerRef} className="relative w-full max-w-[1120px] mx-auto">
+              <div className="relative flex items-center justify-between gap-14">
+                {/* Source/browser */}
+                <div ref={sourceRef} className="shrink-0 w-[420px] h-[240px] rounded-2xl border border-white/12 bg-white/[0.03] shadow-ambient p-9 flex items-center justify-center text-center">
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wide text-gray-400/80 mb-2">Business Pain</div>
+                    <div className="text-white font-semibold leading-snug text-xl sm:text-2xl">
+                      {current.title}
+                    </div>
+                  </div>
+                </div>
 
-        {/* Current Use Case Title */}
-        <div className="text-center" style={{ textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '5rem' }}>
-          <div className="flex items-center justify-center gap-3" style={{ justifyContent: 'center', textAlign: 'center', display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
-            <div 
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: currentUseCase.color }}
-            />
-            <span className="text-sm font-medium text-gray-400">
-              Use Case #{currentUseCase.id}
-            </span>
-          </div>
-          <h3 
-            className="text-3xl lg:text-4xl font-bold text-white"
-            style={{ textAlign: 'center', width: '100%', display: 'block', margin: '0 auto', marginBottom: '2rem' }}
-          >
-            {currentUseCase.title}
-          </h3>
-          <p 
-            className="text-xl text-gray-300 max-w-2xl mx-auto"
-            style={{ textAlign: 'center', width: '100%', display: 'block', margin: '0 auto' }}
-          >
-            {currentUseCase.solution}
-          </p>
-        </div>
+                {/* Hub */}
+                <div ref={hubRef} className="shrink-0 w-[72px] h-[72px] rounded-2xl border border-white/12 bg-white/5 backdrop-blur-sm flex items-center justify-center">
+                  {/* Triangle icon */}
+                  <svg width="22" height="20" viewBox="0 0 28 24" aria-hidden="true">
+                    <path d="M14 2l12 20H2L14 2z" fill="#fff" opacity="0.9"/>
+                  </svg>
+                </div>
 
-        {/* Main Git Fork Visualization - Centered */}
-        <div className="flex justify-center" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', marginBottom: '5rem' }}>
-          <div className="relative" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <svg 
-              width="1000" 
-              height="500" 
-              viewBox="0 0 1000 500" 
-              className="w-full max-w-5xl"
-              style={{ display: 'block', margin: '0 auto' }}
-            >
-                {/* Glow effects */}
-                <defs>
-                  <filter id="glow">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                    <feMerge> 
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                  
-                  <filter id="activeGlow">
-                    <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                    <feMerge> 
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-
-                {/* Main trunk - vertical centered */}
-                <line 
-                  x1="500" 
-                  y1="100" 
-                  x2="500" 
-                  y2="400" 
-                  stroke="#4b5563" 
-                  strokeWidth="4"
-                  className="transition-all duration-1000"
-                />
-
-                {/* Main trunk nodes */}
-                <circle cx="500" cy="100" r="6" fill="#6b7280" />
-                <circle cx="500" cy="400" r="6" fill="#6b7280" />
-
-                {/* Branch lines and nodes */}
-                {branchData.map((branch, index) => {
-                  const isLeft = branch.direction === 'left'
-                  
-                  return (
-                    <g key={branch.id}>
-                      {/* Horizontal branch line */}
-                      <line
-                        x1="500"
-                        y1={branch.y}
-                        x2={branch.branchEndX}
-                        y2={branch.y}
-                        stroke="#6b7280"
-                        strokeWidth="3"
-                        className="transition-all duration-1000"
-                        style={{
-                          opacity: 1,
-                          strokeDasharray: animationPhase === 'growing' ? '100' : 'none',
-                          strokeDashoffset: animationPhase === 'growing' ? '100' : '0',
-                          animation: animationPhase === 'growing' ? 'drawLine 0.6s ease-out forwards' : 'none'
-                        }}
-                      />
-                      
-
-                      
-                      {/* Branch connection node */}
-                      <circle 
-                        cx="500" 
-                        cy={branch.y}
-                        r="4"
-                        fill="#9ca3af"
-                        className="transition-all duration-1000"
-                      />
-                      
-                      {/* Branch endpoint node */}
-                      <circle
-                        cx={branch.branchEndX}
-                        cy={branch.y}
-                        r="5"
-                        fill="#9ca3af"
-                        className="transition-all duration-1000"
-                        style={{
-                          opacity: animationPhase === 'highlight' ? 1 : 0.8
-                        }}
-                      />
-                      
-                      {/* Branch title */}
-                      <text
-                        x={branch.textX}
-                        y={branch.textY - 10}
-                        className="text-white font-semibold text-lg fill-current"
-                        textAnchor={isLeft ? 'end' : 'start'}
+                {/* Destinations */}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[11px] uppercase tracking-wide text-gray-400/80">Custom AI Solutions</div>
+                    </div>
+                    <AnimatePresence mode="wait">
+                      <MDiv
+                        key={current.id}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.35, ease: 'easeInOut' }}
+                        className="flex flex-col gap-4"
                       >
-                        {branch.title}
-                      </text>
-                      
-                      {/* Branch content */}
-                      <foreignObject
-                        x={isLeft ? branch.textX - 300 : branch.textX}
-                        y={branch.textY + 5}
-                        width="300"
-                        height="50"
-                      >
-                        <div className={`text-gray-300 text-sm leading-relaxed ${isLeft ? 'text-right' : 'text-left'}`}>
-                          {branch.content}
+                        {detailChips.map((chip, i) => (
+                          <div key={chip.key} className="relative" ref={(el) => { chipRefs.current[i] = el }}>
+                           <div className="inline-flex items-start gap-4 rounded-xl bg-white/[0.06] border border-white/12 px-6 py-5 text-gray-200/95 shadow-ambient min-w-[380px] h-[128px]">
+                              <span className="mt-1 w-3 h-3 rounded-full" style={{ backgroundColor: branchColors[i % branchColors.length] }} />
+                              <div>
+                                <div className="text-[12px] uppercase tracking-wide text-gray-400/80">{chip.label}</div>
+                                <div className="font-medium text-lg leading-snug text-gray-100 line-clamp-3">{chip.text}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {/* Tools row (logos only) */}
+                        <div className="relative" ref={(el) => { chipRefs.current[detailChips.length] = el }}>
+                          <div className="inline-flex items-start gap-4 rounded-xl bg-white/[0.06] border border-white/12 px-6 py-5 text-gray-200/95 shadow-ambient min-w-[380px] h-[128px]">
+                            <span className="mt-1 w-3 h-3 rounded-full" style={{ backgroundColor: branchColors[detailChips.length % branchColors.length] }} />
+                            <div className="w-full">
+                              <div className="text-[12px] uppercase tracking-wide text-gray-400/80">Tools</div>
+                              <div className="flex items-center gap-3 pt-2 flex-wrap">
+                                {tools.map((t) => {
+                                  const domain = getDomainForTool(t)
+                                  return (
+                                    <div
+                                      key={t}
+                                      className="group inline-flex items-center gap-2 rounded-lg bg-white/[0.06] border border-white/10 px-3 py-2 hover:bg-white/[0.1] transition-colors"
+                                      title={t}
+                                    >
+                                      {domain ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                          src={`https://logo.clearbit.com/${domain}?size=128`}
+                                          alt={t}
+                                          className="w-6 h-6 object-contain opacity-90 rounded-md"
+                                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+                                        />
+                                      ) : (
+                                        <span className="inline-block w-6 h-6 rounded-md bg-white/30" />
+                                      )}
+                                      <span className="text-sm text-gray-100/90 font-medium tracking-tight whitespace-nowrap">
+                                        {t}
+                                      </span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </foreignObject>
-                    </g>
-                  )
-                })}
+                      </MDiv>
+                    </AnimatePresence>
+                    
+                  </div>
+              </div>
 
-                {/* DNA double helix - two intertwining strands */}
-                <g>
-                  {/* Left DNA strand */}
+              {/* Dynamic connectors */}
+              <svg className="pointer-events-none absolute inset-0" width="100%" height="100%">
+                {incomingPath && (
                   <path
-                    d="M 450,150 C 470,170 490,190 450,210 C 410,230 430,250 470,270 C 510,290 490,310 450,330 C 410,350 430,370 450,390"
-                    stroke="#6b7280"
-                    strokeWidth="2.5"
+                    d={incomingPath}
+                    stroke="rgba(255,255,255,0.45)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    vectorEffect="non-scaling-stroke"
                     fill="none"
-                    className="transition-all duration-1000"
-                    style={{
-                      opacity: 0.6,
-                      strokeDasharray: animationPhase === 'growing' ? '400' : 'none',
-                      strokeDashoffset: animationPhase === 'growing' ? '400' : '0',
-                      animation: animationPhase === 'growing' ? 'drawLine 1.5s ease-out 0.4s forwards' : 'none'
-                    }}
                   />
-                  
-                  {/* Right DNA strand - mirrors the left strand */}
+                )}
+                {outgoingPaths.map((d, i) => (
                   <path
-                    d="M 550,150 C 530,170 510,190 550,210 C 590,230 570,250 530,270 C 490,290 510,310 550,330 C 590,350 570,370 550,390"
-                    stroke="#6b7280"
-                    strokeWidth="2.5"
+                    key={i}
+                    d={d}
+                    stroke={branchColors[i % branchColors.length]}
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    vectorEffect="non-scaling-stroke"
                     fill="none"
-                    className="transition-all duration-1000"
-                    style={{
-                      opacity: 0.6,
-                      strokeDasharray: animationPhase === 'growing' ? '400' : 'none',
-                      strokeDashoffset: animationPhase === 'growing' ? '400' : '0',
-                      animation: animationPhase === 'growing' ? 'drawLine 1.5s ease-out 0.6s forwards' : 'none'
-                    }}
                   />
-                  
-                  {/* DNA base pair connections */}
-                  <g className="opacity-30">
-                    <line x1="450" y1="210" x2="550" y2="210" stroke="#6b7280" strokeWidth="1" />
-                    <line x1="470" y1="270" x2="530" y2="270" stroke="#6b7280" strokeWidth="1" />
-                    <line x1="450" y1="330" x2="550" y2="330" stroke="#6b7280" strokeWidth="1" />
-                  </g>
-                </g>
-
-                {/* Commit indicators along main trunk */}
-                <g className="opacity-40">
-                  <circle cx="500" cy="130" r="2" fill="#6b7280" />
-                  <circle cx="500" cy="200" r="2" fill="#6b7280" />
-                  <circle cx="500" cy="280" r="2" fill="#6b7280" />
-                  <circle cx="500" cy="350" r="2" fill="#6b7280" />
-                  <circle cx="500" cy="380" r="2" fill="#6b7280" />
-                </g>
+                ))}
               </svg>
-
-              {/* CSS for line drawing animation */}
-              <style jsx>{`
-                @keyframes drawLine {
-                  to {
-                    stroke-dashoffset: 0;
-                  }
-                }
-              `}</style>
             </div>
+          </div>
+
+          {/* Dots only */}
+          <div className="mt-10 flex items-center justify-center">
+            <div className="flex gap-2">
+              {aiUseCases.map((_, i) => (
+                <div key={i} className={`w-2 h-2 rounded-full ${i === index ? 'bg-white' : 'bg-white/30'}`} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
