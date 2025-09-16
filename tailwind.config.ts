@@ -65,6 +65,9 @@ const config: Config = {
         smooth: 'var(--transition-smooth)',
         slow: 'var(--transition-slow)',
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
     },
   },
   plugins: [],

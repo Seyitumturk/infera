@@ -592,18 +592,21 @@ export default function InlineAIAudit({ isVisible, onClose, initialCustomProblem
         <div className="text-center mb-16 lg:mb-24 relative">
           <button
             onClick={onClose}
-            className="absolute right-0 top-0 p-2 text-gray-400 hover:text-white transition-colors"
+            className="absolute right-0 top-0 p-2 transition-colors"
+            style={{ color: 'var(--muted)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--muted)' }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </button>
           
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white" style={{marginBottom: '2rem'}}>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold" style={{marginBottom: '2rem', color: 'var(--text)'}}>
             AI Opportunity Assessment
           </h2>
           <div className="max-w-3xl mx-auto mt-6">
-            <p className="text-xl text-gray-300 text-center">
+            <p className="text-xl text-center" style={{ color: 'var(--muted)' }}>
               Skip $1,500 agency audits — Infera is $99. Describe your problem or answer a few questions.
             </p>
           </div>
@@ -783,6 +786,7 @@ export default function InlineAIAudit({ isVisible, onClose, initialCustomProblem
                   />
                 </motion.div>
               )}
+              
             </AnimatePresence>
             </div>
 
@@ -1144,6 +1148,7 @@ function AssessmentResults({
             <p className="text-yellow-200 text-sm">{error}</p>
           </div>
         )}
+        
         <div className="mt-8 mb-6 flex justify-center">
           <p className="text-gray-300 max-w-2xl text-center">
             Our AI has analyzed your business and identified specific automation opportunities.

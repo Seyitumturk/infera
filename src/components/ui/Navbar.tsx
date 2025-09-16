@@ -61,15 +61,18 @@ export default function Navbar({ isVisible, lightIntensity }: NavbarProps) {
              <li key={item.name} className="flex-1 text-center">
                                <a
                   href={item.href}
-                  className={`
-                    relative text-sm font-semibold tracking-wide transition-all duration-300 
-                    hover:text-white group cursor-pointer inline-block py-1 px-4
-                    ${lightIntensity > 0.2 ? 'text-white/95' : 'text-white/85'}
-                  `}
-                 style={{
-                   textShadow: lightIntensity > 0.2 ? `0 0 12px rgba(255, 255, 255, ${lightIntensity * 0.5})` : 'none',
-                   boxSizing: 'border-box',
-                 }}
+                  className="relative text-sm font-semibold tracking-wide transition-all duration-300 group cursor-pointer inline-block py-1 px-4"
+                  style={{
+                    color: lightIntensity > 0.2 ? 'var(--text)' : 'var(--muted)',
+                    textShadow: lightIntensity > 0.2 ? `0 0 12px rgba(255, 255, 255, ${lightIntensity * 0.5})` : 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'var(--text)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = lightIntensity > 0.2 ? 'var(--text)' : 'var(--muted)'
+                  }}
                >
                 {item.name}
                 

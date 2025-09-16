@@ -52,15 +52,35 @@
   --transition-slow: 500ms cubic-bezier(0.4,0,0.2,1);
 }
 
+/* Light theme styles */
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f8f9fa;
+  --text: #000000;
+  --muted: #4a4a4a;
+  --accent: #6e59ff;
+  --accent-2: #24d07c;
+  --danger: #ef4444;
+  --border: rgba(0,0,0,.15);
+  --glass-bg: rgba(248,249,250,.85);
+  --glass-border: rgba(0,0,0,.15);
+  
+  /* Light mode shadows */
+  --shadow-ambient: 0 2px 8px rgba(0,0,0,.08);
+  --shadow-elevation-1: 0 4px 16px rgba(0,0,0,.1), 0 1px 4px rgba(0,0,0,.06);
+  --shadow-elevation-2: 0 8px 30px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.08);
+  --shadow-elevation-3: 0 16px 60px rgba(0,0,0,.15), 0 4px 16px rgba(0,0,0,.1);
+}
+
 @media (prefers-color-scheme: light) {
   :root {
-    --bg: #fff;
-    --surface: #f7f7fb;
-    --text: #0b0c0f;
-    --muted: #5c6370;
-    --border: rgba(0,0,0,.08);
-    --glass-bg: rgba(247,247,251,.85);
-    --glass-border: rgba(0,0,0,.08);
+    --bg: #ffffff;
+    --surface: #f8f9fa;
+    --text: #000000;
+    --muted: #4a4a4a;
+    --border: rgba(0,0,0,.15);
+    --glass-bg: rgba(248,249,250,.85);
+    --glass-border: rgba(0,0,0,.15);
   }
 }
 
@@ -95,9 +115,20 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(to bottom, #06080a, #0a0c10, #06080a) !important;
-  color: white !important;
+  background: var(--bg);
+  color: var(--text);
   overflow-x: hidden;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
+}
+
+/* Dark mode specific background gradient */
+[data-theme="dark"] body {
+  background: linear-gradient(to bottom, #06080a, #0a0c10, #06080a);
+}
+
+/* Light mode specific background */
+[data-theme="light"] body {
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa, #ffffff);
 }
 
 /* Modern scrollbar */
@@ -106,7 +137,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--border);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -120,6 +151,12 @@ body {
 
 /* Modern selection */
 ::selection {
+  background: var(--accent);
+  color: white;
+}
+
+/* Light mode selection */
+[data-theme="light"] ::selection {
   background: var(--accent);
   color: white;
 }
@@ -271,4 +308,178 @@ body {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome/Safari */
+}
+
+/* ========================= */
+/* 3D Stack Optimizations   */
+/* ========================= */
+
+/* Performance optimizations for 3D transforms */
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Crisp text rendering in 3D context */
+.crisp-text {
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+}
+
+/* Prevent text blur during transforms */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.preserve-3d * {
+  backface-visibility: hidden;
+}
+
+/* Optimized shadows for 3D stacks */
+.stack-shadow-ambient {
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.stack-shadow-contact {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+}
+
+.stack-shadow-layered {
+  box-shadow: 
+    0 20px 40px rgba(0,0,0,0.15),
+    0 4px 8px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* ========================= */
+/* Linear-style 3D Effects   */
+/* ========================= */
+
+/* Enhanced 3D perspective for Linear-style cards */
+.linear-perspective {
+  perspective: 1400px;
+  perspective-origin: 50% -20%;
+}
+
+/* Linear-style transform presets */
+.linear-card-tilt {
+  transform: rotateX(-25deg) rotateY(-12deg);
+  transform-origin: center center;
+}
+
+/* Enhanced depth shadows for Linear aesthetic */
+.linear-shadow-primary {
+  box-shadow: 
+    0 50px 100px -20px rgba(0,0,0,0.5),
+    0 30px 60px -30px rgba(0,0,0,0.6),
+    0 10px 20px -10px rgba(0,0,0,0.4);
+}
+
+.linear-shadow-secondary {
+  box-shadow: 
+    0 60px 100px -15px rgba(0,0,0,0.7),
+    0 40px 70px -25px rgba(0,0,0,0.6);
+}
+
+.linear-shadow-tertiary {
+  box-shadow: 
+    0 80px 120px -20px rgba(0,0,0,0.8),
+    0 50px 80px -30px rgba(0,0,0,0.7);
+}
+
+/* Gloss overlay for Linear cards */
+.linear-gloss::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, 
+    rgba(255,255,255,0.15) 0%, 
+    transparent 20%,
+    transparent 80%,
+    rgba(255,255,255,0.08) 100%);
+}
+
+/* Improved hover states for 3D cards */
+.linear-hover-lift {
+  transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.linear-hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+/* Ambient lighting effects */
+.linear-ambient-light {
+  position: relative;
+}
+
+.linear-ambient-light::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  left: -25%;
+  top: -25%;
+  background: radial-gradient(circle at 30% 20%, 
+    rgba(59, 130, 246, 0.08) 0%, 
+    transparent 40%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Floor reflection effect */
+.linear-floor-shadow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 100%;
+  left: 0;
+  background: radial-gradient(ellipse 50% 30% at center top, 
+    rgba(0,0,0,0.3) 0%, 
+    transparent 60%);
+  transform: scaleY(0.5) translateZ(-100px);
+  filter: blur(20px);
+  opacity: 0.7;
+}
+
+/* Crisp rendering for rotated text */
+.linear-crisp-3d {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Smooth 3D animations */
+@keyframes linear-float {
+  0%, 100% { transform: translateY(0) rotateX(-25deg) rotateY(-12deg); }
+  50% { transform: translateY(-10px) rotateX(-24deg) rotateY(-11deg); }
+}
+
+.linear-float-animation {
+  animation: linear-float 6s ease-in-out infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .linear-perspective {
+    perspective: none;
+  }
+  
+  .linear-card-tilt {
+    transform: none;
+  }
+  
+  .linear-float-animation {
+    animation: none;
+  }
+  
+  .linear-hover-lift:hover {
+    transform: none;
+  }
 }

@@ -6,6 +6,7 @@ import { useGLTF, Environment, PerspectiveCamera, AdaptiveDpr, AdaptiveEvents } 
 import { useSpring, animated } from '@react-spring/three'
 import * as THREE from 'three'
 import ErrorBoundary from './ErrorBoundary'
+import { useTheme } from '@/lib/theme-context'
 
 // Ring colors matching cone sections
 const ringColors = [
@@ -17,17 +18,17 @@ const ringColors = [
 
 // Info card data positioned in horizontal rows aligned with cone sections
 // Cone 3D positions: tek.glb=0.4, tek2.glb=0.15, tek3.glb=-0.15, tek4.glb=-0.4
-// Equal positioning system for all cards
+// Equal positioning system for all cards - positioned further from cone
 const getCardData = (isMobile: boolean) => {
-  const distance = isMobile ? 240 : 400; // Equal distance for all cards
-  const verticalSpacing = isMobile ? 80 : 100; // Equal vertical spacing
+  const distance = isMobile ? 320 : 480; // Increased distance to avoid cone overlap
+  const verticalSpacing = isMobile ? 100 : 120; // Increased vertical spacing
   
   return [
     {
       id: 1,
       title: "Tell Us How You Work",
       description: "Fast intake that understands your workflows, not just your software. Forms, CSVs, or links—zero fluff, no setup.",
-      position: { x: -distance, y: -verticalSpacing * 1.5 }, // Top left
+      position: { x: -distance, y: -verticalSpacing * 1.8 }, // Top left - moved further
       ringIndex: 0,
       bgColor: ringColors[0]
     },
@@ -35,7 +36,7 @@ const getCardData = (isMobile: boolean) => {
       id: 2,
       title: "We Audit Your Ops", 
       description: "Get mapped to high-impact AI use cases—rooted in real agency builds, not guesswork. Our engine knows what works and where.",
-      position: { x: distance, y: -verticalSpacing * 0.5 }, // Top right
+      position: { x: distance, y: -verticalSpacing * 0.6 }, // Top right
       ringIndex: 1,
       bgColor: ringColors[1]
     },
@@ -43,7 +44,7 @@ const getCardData = (isMobile: boolean) => {
       id: 3,
       title: "Curated AI Stack",
       description: "Get tool picks or build plans tailored to your exact needs. From 100+ vetted solutions across top automation agencies.",
-      position: { x: -distance, y: verticalSpacing * 0.5 }, // Bottom left
+      position: { x: -distance, y: verticalSpacing * 0.6 }, // Bottom left
       ringIndex: 2,
       bgColor: ringColors[2]
     },
@@ -51,7 +52,7 @@ const getCardData = (isMobile: boolean) => {
       id: 4,
       title: "Your AI Roadmap",
       description: "Clear priorities, timelines, and ROI ranges—ready to share. No noise. Just a confident path forward.",
-      position: { x: distance, y: verticalSpacing * 1.5 }, // Bottom right
+      position: { x: distance, y: verticalSpacing * 1.8 }, // Bottom right - moved further
       ringIndex: 3,
       bgColor: ringColors[3]
     }
@@ -65,7 +66,8 @@ function ConeSegment({
   delay = 0, 
   index,
   isVisible = true,
-  onRingComplete
+  onRingComplete,
+  theme = 'dark'
 }: { 
   url: string
   position: [number, number, number]
@@ -73,6 +75,7 @@ function ConeSegment({
   index: number
   isVisible?: boolean
   onRingComplete?: (ringIndex: number) => void
+  theme?: 'light' | 'dark'
 }) {
   const { scene } = useGLTF(url)
   const meshRef = useRef<THREE.Group>(null)
@@ -92,21 +95,31 @@ function ConeSegment({
     return () => clearTimeout(timer)
   }, [delay, isVisible, onRingComplete, index])
 
-  // Memoized scene setup with original materials
+  // Memoized scene setup with theme-aware materials
   const enhancedScene = useMemo(() => {
     const clonedScene = scene.clone()
+    const isLightMode = theme === 'light'
+    
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         if (child.material) {
-          child.material.envMapIntensity = 1.5
+          // Make materials much brighter in light mode
+          child.material.envMapIntensity = isLightMode ? 2.5 : 1.5
           child.material.transparent = true
+          
+          // Add more brightness and contrast in light mode
+          if (isLightMode && child.material instanceof THREE.MeshStandardMaterial) {
+            child.material.emissive = new THREE.Color(0x222222) // Add slight glow
+            child.material.roughness = 0.3  // Make it more reflective
+            child.material.metalness = 0.8  // More metallic for better light reflection
+          }
         }
         child.castShadow = true
         child.receiveShadow = true
       }
     })
     return clonedScene
-  }, [scene, index])
+  }, [scene, index, theme])
 
   // Gravity-like falling animation
   const { position: animatedPosition, rotation, scale, opacity } = useSpring({
@@ -221,12 +234,22 @@ function DynamicCameraController() {
 // Optimized cone scene
 function OptimizedConeScene({ 
   onRingComplete,
-  lightIntensity = 0
+  lightIntensity = 0,
+  theme = 'dark'
 }: { 
   onRingComplete: (ringIndex: number) => void
   lightIntensity?: number
+  theme?: 'light' | 'dark'
 }) {
   const { viewport } = useThree()
+
+  // Adjust lighting based on theme
+  const isLightMode = theme === 'light'
+  const ambientIntensity = isLightMode ? 0.8 : 0.35  // Much brighter ambient in light mode
+  const directionalIntensity = isLightMode 
+    ? (viewport.width < 768 ? 1.5 : 2.0)  // Much brighter directional in light mode
+    : (viewport.width < 768 ? 0.8 : 1.2)
+  const pointLightIntensity = isLightMode ? 0.6 : 0.4  // Slightly brighter point lights
 
   const coneFiles = [
     { url: '/cone/tek.glb', position: [0, 0.4, 0] as [number, number, number], delay: 1500 },    // Top ring (last to fall)
@@ -237,16 +260,16 @@ function OptimizedConeScene({
 
   return (
     <>
-      <ambientLight intensity={0.35} />
+      <ambientLight intensity={ambientIntensity} />
       <directionalLight
         position={[8, 8, 4]}
-        intensity={viewport.width < 768 ? 0.8 : 1.2}
+        intensity={directionalIntensity}
         castShadow={viewport.width >= 768}
         shadow-mapSize-width={viewport.width < 768 ? 1024 : 2048}
         shadow-mapSize-height={viewport.width < 768 ? 1024 : 2048}
       />
-      <pointLight position={[-8, 0, -15]} intensity={0.4} color="#4A90E2" />
-      <pointLight position={[8, 0, -15]} intensity={0.4} color="#E24A90" />
+      <pointLight position={[-8, 0, -15]} intensity={pointLightIntensity} color="#4A90E2" />
+      <pointLight position={[8, 0, -15]} intensity={pointLightIntensity} color="#E24A90" />
 
       {/* Flashlight beam from cone top */}
       {lightIntensity > 0 && (
@@ -275,6 +298,7 @@ function OptimizedConeScene({
             index={index}
             isVisible={true}
             onRingComplete={onRingComplete}
+            theme={theme}
           />
         ))}
       </group>
@@ -321,55 +345,39 @@ function InfoCard({
   const coneY = card.position.y * 0.1 // Approximate cone section Y position
   
   return (
-    <>
-      {/* Modern connection line - appears when card is revealed */}
-      <div 
-        className={`absolute z-10 transition-all duration-[1500ms] ease-in-out ${isRevealed ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}`}
-        style={{
-          left: `calc(50% + ${isLeftSide ? card.position.x + (isMobile ? 120 : 150) : coneX}px)`,
-          top: `calc(50% + ${card.position.y}px)`,
-          width: `${Math.abs(card.position.x) - (isMobile ? 120 : 150)}px`,
-          height: '1px',
-          background: `linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.1) 80%, rgba(255,255,255,0) 100%)`,
-          transformOrigin: isLeftSide ? 'left center' : 'right center',
-          transitionDelay: '500ms', // Appear 500ms after card reveals
-          filter: 'blur(0.5px)',
-        }}
-      />
-      
-      {/* Subtle glow effect */}
-      <div 
-        className={`absolute z-5 transition-all duration-[2000ms] ease-in-out ${isRevealed ? 'opacity-30 scale-x-100' : 'opacity-0 scale-x-0'}`}
-        style={{
-          left: `calc(50% + ${isLeftSide ? card.position.x + (isMobile ? 120 : 150) : coneX}px)`,
-          top: `calc(50% + ${card.position.y - 1}px)`,
-          width: `${Math.abs(card.position.x) - (isMobile ? 120 : 150)}px`,
-          height: '3px',
-          background: `linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%, rgba(255,255,255,0) 100%)`,
-          transformOrigin: isLeftSide ? 'left center' : 'right center',
-          transitionDelay: '700ms', // Glow appears 200ms after main line
-          filter: 'blur(2px)',
-        }}
-      />
-      
-      {/* Plain text */}
-      <div 
-        className="absolute z-20 transition-all duration-1000 ease-out"
-        style={{
-          ...getCardStyles(),
-          transitionDelay: `${index * 300}ms`
-        }}
-      >
-        <div className={`${isMobile ? 'w-64' : 'w-80'} space-y-3`}>
-          <h3 className="text-sm font-semibold text-white tracking-wide">
-            {card.title}
-          </h3>
-          <p className="text-xs text-white/80 leading-relaxed">
-            {card.description}
-          </p>
+    <div 
+      className="absolute z-20 transition-all duration-700 ease-out"
+      style={{
+        ...getCardStyles(),
+        transitionDelay: `${index * 200}ms`
+      }}
+    >
+      <div className={`${isMobile ? 'w-72' : 'w-80'} rounded-lg backdrop-blur-sm`} 
+           style={{ 
+             backgroundColor: 'var(--surface)', 
+             border: `1px solid var(--border)` 
+           }}>
+        <div className="p-8">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center" 
+                   style={{ backgroundColor: 'var(--accent)', opacity: 0.2 }}>
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent)' }}></div>
+              </div>
+              <div className="h-px flex-1" style={{ backgroundColor: 'var(--border)' }}></div>
+            </div>
+            
+            <h3 className="text-xl font-medium leading-tight" style={{ color: 'var(--text)' }}>
+              {card.title}
+            </h3>
+            
+            <p className="text-sm leading-relaxed font-normal" style={{ color: 'var(--muted)' }}>
+              {card.description}
+            </p>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
@@ -400,6 +408,7 @@ export default function ConeWithInfoCards({
   onLightIntensityChange?: (intensity: number) => void 
   onStartAudit?: () => void
 }) {
+  const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [revealedCards, setRevealedCards] = useState<number[]>([]) // Track which cards are revealed
@@ -499,39 +508,46 @@ export default function ConeWithInfoCards({
             <OptimizedConeScene 
               onRingComplete={handleRingComplete}
               lightIntensity={lightIntensity}
+              theme={theme}
             />
           </Suspense>
         </Canvas>
         
-                 {/* Hero text within the light beam area - positioned lower */}
-         <div className={`absolute top-[15%] left-1/2 transform -translate-x-1/2 text-center space-y-6 max-w-2xl px-4 transition-all duration-1000 ease-out z-30 ${
-           textVisible 
-             ? 'opacity-100 translate-y-0' 
-             : 'opacity-0 translate-y-8'
-         }`}>
-          <h1 className="text-3xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
+        {/* Clean hero text */}
+        <div className={`absolute top-[8%] left-1/2 transform -translate-x-1/2 text-center space-y-6 max-w-2xl px-4 transition-all duration-1000 ease-out z-30 ${
+          textVisible 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-8'
+        }`}>
+          <h1 className="text-4xl lg:text-5xl font-light leading-[1.1] tracking-[-0.02em]" 
+              style={{ color: 'var(--text)' }}>
             AI opportunities, quantified.
           </h1>
           
-          <p className="text-base lg:text-lg text-gray-200 leading-relaxed">
+          <p className="text-lg leading-relaxed font-light max-w-xl mx-auto" 
+             style={{ color: 'var(--muted)' }}>
             Mizar analyzes your business and delivers a clear, prioritized AI roadmap.
           </p>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          <div className="flex justify-center pt-8">
             <button 
               onClick={onStartAudit}
-              className="px-8 py-4 bg-brandInk hover:bg-ink80 text-white font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brandInk focus:ring-offset-2 focus:ring-offset-brandNight shadow-lg"
+              className="px-8 py-3 font-medium rounded transition-all duration-200"
+              style={{ 
+                backgroundColor: 'var(--accent)', 
+                color: 'white' 
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent)'
+                e.currentTarget.style.opacity = '0.9'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent)'
+                e.currentTarget.style.opacity = '1'
+              }}
               aria-label="Start an AI audit"
             >
               Start an AI audit
-            </button>
-            
-            <button 
-              className="px-8 py-4 border border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-brandNight shadow-lg backdrop-blur-sm"
-              aria-label="See sample roadmap"
-            >
-              See sample roadmap
             </button>
           </div>
         </div>
